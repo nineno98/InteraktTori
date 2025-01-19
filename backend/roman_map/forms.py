@@ -7,7 +7,7 @@ from .static.files import schema as ValidationsSchema
 
 class TerritoriesJSONForm(forms.Form):
 
-    file = forms.FileField( required=True)
+    file = forms.FileField(required=True, label="Válasz egy geojson fájlt!")
 
     def clean_file(self):
 
@@ -34,24 +34,21 @@ class TerritoriesJSONForm(forms.Form):
             raise forms.ValidationError('Hibás a JSON formátum!')
         except JsonSchemaValidationError as e:
             raise forms.ValidationError(f'Json validációs hiba: {e.message}')
+        except Exception as e:
+            raise forms.ValidationError(str(e))
         
         return file
     
     def save(self):
         uploaded_file = self.cleaned_data.get('file')
-        print('form:save indul')
         try:
-            print('form:try_ban')
             file_data = uploaded_file.read().decode('utf-8')
             json_data = json.loads(file_data)
             feature_type = json_data.get('type')
-            print('form: get type')
             if feature_type == "FeatureCollection":
-                print('form:If: feature collection')
                 if "features" in json_data:
                     features = json_data.get('features')
                     for item in features:
-                        print(item["geometry"])
                         Territorie.objects.create(
                             name=item["properties"]["name"],
                             start_date=int(item["properties"]["start_date"]),
@@ -60,7 +57,7 @@ class TerritoriesJSONForm(forms.Form):
                             coordinates=item["geometry"]["coordinates"]
                         )
                 else:
-                    raise KeyError("A 'features' kulcs hiányzik az objektumból.")
+                    raise forms.ValidationError("A 'features' kulcs hiányzik az objektumból.")
             elif feature_type == "Feature":
 
                 Territorie.objects.create(
@@ -70,13 +67,14 @@ class TerritoriesJSONForm(forms.Form):
                     color=json_data["properties"]["color"],
                     coordinates=json_data["geometry"]["coordinates"]
                 )
-            
             else:
-                raise KeyError("Menteni kívánt fájl formátuma nem megfelelő.")
+                raise forms.ValidationError("Menteni kívánt fájl formátuma nem megfelelő.")
         except Exception as e:
             raise forms.ValidationError("Hiba lépett fel a fájl feldolgozása és mentése közben: "+str(e))
 
-        
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length = 30, label="Felhasználónév", required=True)
+    password = forms.CharField(max_length = 30, label="Jelszó", widget= forms.PasswordInput, required=True)       
 
         
         

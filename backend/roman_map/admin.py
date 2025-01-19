@@ -5,7 +5,8 @@ from .forms import TerritoriesJSONForm
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import path
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 
 # Register your models here.
 
@@ -71,13 +72,23 @@ class TerritorieAdmin(admin.ModelAdmin):
     def upload_file(self, request):
         if request.method == 'POST':
             if "json_file" in request.POST:
-                try:
-                    form = TerritoriesJSONForm(request.POST, request.FILES)
-                    if form.is_valid():
+                form = TerritoriesJSONForm(request.POST, request.FILES)
+                
+                    
+                if form.is_valid():
+                    try:
+                        self.message_user(request, "A feltöltött fájl formátuma megfelelő", level=messages.SUCCESS)
                         form.save()
-                        self.message_user(request, "Sikeres importálás", level=messages.SUCCESS)
-                except Exception as e:
-                    print("hiba:"+str(e))
+                        self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+                        return redirect(reverse('admin:roman_map_territorie_changelist'))
+                    except Exception as e:
+                        self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
+                else:
+                    self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
+                    return redirect(reverse('admin:roman_map_territorie_changelist'))
+            else:
+                self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
+
         
         form = TerritoriesJSONForm()
         data = {'form':form}
