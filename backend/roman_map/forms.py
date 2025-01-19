@@ -6,7 +6,8 @@ from .models import Territorie
 from .static.files import schema as ValidationsSchema
 
 class TerritoriesJSONForm(forms.Form):
-    file = forms.FileField()
+
+    file = forms.FileField( required=True)
 
     def clean_file(self):
 
@@ -22,6 +23,7 @@ class TerritoriesJSONForm(forms.Form):
         
         try:
             file_data = file.read().decode('utf-8')
+            file.seek(0)
             json_data = json.loads(file_data)
             validate(instance=json_data, schema=ValidationsSchema)
         except OSError:
@@ -37,29 +39,36 @@ class TerritoriesJSONForm(forms.Form):
     
     def save(self):
         uploaded_file = self.cleaned_data.get('file')
+        print('form:save indul')
         try:
-            json_data = json.loads(uploaded_file)
+            print('form:try_ban')
+            file_data = uploaded_file.read().decode('utf-8')
+            json_data = json.loads(file_data)
             feature_type = json_data.get('type')
+            print('form: get type')
             if feature_type == "FeatureCollection":
+                print('form:If: feature collection')
                 if "features" in json_data:
                     features = json_data.get('features')
                     for item in features:
+                        print(item["geometry"])
                         Territorie.objects.create(
                             name=item["properties"]["name"],
                             start_date=int(item["properties"]["start_date"]),
                             end_date=int(item["properties"]["end_date"]),
                             color=item["properties"]["color"],
-                            geometry=item["geometry"]["coordinates"]
+                            coordinates=item["geometry"]["coordinates"]
                         )
                 else:
                     raise KeyError("A 'features' kulcs hiányzik az objektumból.")
             elif feature_type == "Feature":
+
                 Territorie.objects.create(
-                    name=item["properties"]["name"],
-                    start_date=int(item["properties"]["start_date"]),
-                    end_date=int(item["properties"]["end_date"]),
-                    color=item["properties"]["color"],
-                    geometry=item["geometry"]["coordinates"]
+                    name=json_data["properties"]["name"],
+                    start_date=int(json_data["properties"]["start_date"]),
+                    end_date=int(json_data["properties"]["end_date"]),
+                    color=json_data["properties"]["color"],
+                    coordinates=json_data["geometry"]["coordinates"]
                 )
             
             else:

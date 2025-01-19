@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer
+from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Territorie, Historie, CustomPolygon, CustomPoint
