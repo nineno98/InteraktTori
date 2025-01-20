@@ -1,8 +1,24 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+    <style>
+        #map {
+        width: 100%;
+        height: 500px; /* vagy bármilyen megfelelő magasság */
+        border: 1px solid #ccc; /* Csak hogy lásd a konténert */
+        }
+    </style>
+
     <title>Térkép</title>
 </head>
 <body>
@@ -10,5 +26,11 @@
     <p>Ez a térkép oldal</p>
     {% include 'pages/messages.html' %}
     <a href="{% url 'kijelentkezes' %}">Kilépés</a>
+    <div>
+        <div id="map">
+
+        </div>
+    </div>
+    <script src="{% static 'scripts/leaflet_map.js' %}"></script>
 </body>
 </html>
