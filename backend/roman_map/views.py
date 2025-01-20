@@ -11,30 +11,44 @@ from django.contrib import messages
 
 # Templates
 
-def getMap(request):
+def terkep(request):
     return render(request, 'pages/map.html')
 
-def getLogin(request):
+def kijelentkezes(request):
+    try:
+        logout(request)
+        return redirect('fooldal')
+    except Exception as e:
+        print(str(e))
+
+
+def bejelentkezes(request):
+
     if request.method == 'POST':
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            messages.add_message(request, messages.SUCCESS, "Sikeres bejelentkezés!")
-            return redirect('map')
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, "Sikeres bejelentkezés")
+                return redirect('terkep')
         
+            else:
+                form = LoginForm()
+                messages.warning(request, "Sikertelen bejelentkezés. Hibás felhsználónév vagy jelszó")
+                return render(request, 'pages/login.html', {'form':form, 'message':'Sikertelen bejelentkezés. Hibás felhasználónév vagy jelszó!'})
         else:
-            form = LoginForm()
-            messages.add_message(request, messages.WARNING, "Hibás felhasználónév vagy jelszó!")
-            return render(request, 'pages/login.html', {'form':form})
-            
+            messages.error(request, "Hiba a belépés során! Ellenőrizze a felhasználónevet és jelszót!")
+            return render(request, 'pages/login.html', {'form':form}) 
 
 
 
     form = LoginForm()
     return render(request, 'pages/login.html', {'form':form })
 
-def getHome(request):
+def fooldal(request):
     return render(request,'pages/home.html')
 
 # Rest framework

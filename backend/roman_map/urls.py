@@ -6,7 +6,8 @@ urlpatterns = [
     path('histories/', view=views.getHistories, name='getHistories'),
     path('custompolygons/', view=views.getCustomPolygons, name='custompolygons'),
     path('custompoints/', view=views.getCustompoints, name='custompoints'),
-    path('', view=views.getHome, name='getHome'),
-    path('login/', view=views.getLogin, name='login'),
-    path('map/', view=views.getMap, name='map'),
+    path('', view=views.fooldal, name='fooldal'),
+    path('login/', view=views.bejelentkezes, name='bejelentkezes'),
+    path('map/', view=views.terkep, name='terkep'),
+    path('logout/', view=views.kijelentkezes, name='kijelentkezes'),
 ]

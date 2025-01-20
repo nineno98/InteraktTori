@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'bootstrap5',
     'roman_map',
 ]
 
@@ -128,3 +130,13 @@ AUTH_USER_MODEL = 'roman_map.CustomUser'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT=os.path.join(BASE_DIR,"roman_map/media/images/")
+
+
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+        messages.DEBUG: 'alert-secondary',
+        messages.INFO: 'alert-info',
+        messages.SUCCESS: 'alert-success',
+        messages.WARNING: 'alert-warning',
+        messages.ERROR: 'alert-danger',
+}

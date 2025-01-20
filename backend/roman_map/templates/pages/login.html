@@ -7,13 +7,26 @@
 </head>
 <body>
     <p>loginform helye</p>
+
     <div>
         <div>
-            <form action="." method="post">
-                {{ form.as_p }}
-                {% csrf_token %}
-                <button type="submit">Belépés</button>
-            </form>
+            {% include 'pages/messages.html' %}
+        </div>
+        <div>
+            {% if not user.is_authenticated %}
+                <form action="." method="post">
+                    {{ form.as_p }}
+                    {% csrf_token %}
+                    <button type="submit">Belépés</button>
+                </form>
+            {% else %}
+            <a href="{% url 'kijelentkezes' %}">Kilépés</a>
+                
+            {% endif %}
+            
+        </div>
+        <div>
+            
         </div>
     </div>
 </body>
