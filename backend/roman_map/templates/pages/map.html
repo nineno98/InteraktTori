@@ -11,6 +11,9 @@
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
 
+     <script src="https://cdn.jsdelivr.net/npm/ol@v10.3.1/dist/ol.js"></script>
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.3.1/ol.css">
+     
     <style>
         #map {
         width: 100%;
@@ -26,11 +29,13 @@
     <p>Ez a térkép oldal</p>
     {% include 'pages/messages.html' %}
     <a href="{% url 'kijelentkezes' %}">Kilépés</a>
+    <a href= "{% url 'jelszovaltas' %}" >Jelszó módosítás</a>
     <div>
         <div id="map">
 
         </div>
     </div>
-    <script src="{% static 'scripts/leaflet_map.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+    <script type="module" src="{% static 'scripts/leaflet_map.js' %}"></script>
 </body>
 </html>

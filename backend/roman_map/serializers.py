@@ -2,39 +2,88 @@ from rest_framework.serializers import ModelSerializer
 from .models import Territorie, Historie, CustomPolygon, CustomPoint
 from rest_framework import serializers
 import json
-
-class CoordinatesConvert(serializers.Field):
-    def to_representation(self, value):
-        try:
-            return json.loads(value)
-        except:
-            raise serializers.ValidationError("Serializer hiba: A JSON formátum nem valid.")
-    
-    def to_internal_value(self, data):
-        try:
-            return json.dump(data)
-        except:
-            raise serializers.ValidationError("Serializer hiba: A JSON formátum nem valid.")
+import geojson
 
 
 class TerritorieSerializer(serializers.ModelSerializer):
-    coordinates = CoordinatesConvert()
-    class Meta:
-        model = Territorie
-        fields = ['id', 'name', 'start_date', 'end_date', 'color', 'coordinates']
+    def to_representation(self, instance):
+        
+        try:
+            geometry = json.loads(instance.coordinates)
+            multipolygon = geojson.MultiPolygon(geometry)
+            properties = {
+                "id": instance.id,
+                "name": instance.name,
+                "start_date": instance.start_date,
+                "end_date": instance.end_date,
+                "color": instance.color
+            }
+            feature = geojson.Feature(properties=properties, geometry=multipolygon)
+        
+        except json.JSONDecodeError as e:
+            raise serializers.ValidationError("Hibás JSON formátum. "+str(e))
+        except Exception as e:
+            raise serializers.ValidationError("Hiba. "+str(e))
+        return feature
 
 class HistorieSerializer(serializers.ModelSerializer):
     
-    class Meta:
-        model = Historie
-        fields = '__all__'
+    def to_representation(self, instance):
+        try:
+            geometry = json.loads(instance.coordinates)
+            point = geojson.Point(geometry)
+            properties = {
+                "id": instance.id,
+                "name": instance.name,
+                "description": instance.description,
+                "historie_type":instance.historie_type,
+                "image": instance.image
+            }
+            feature = geojson.Feature(properties=properties, geometry=point)
+
+        except json.JSONDecodeError as e:
+            raise serializers.ValidationError("Hibás JSON formátum. "+str(e))
+        except Exception as e:
+            raise serializers.ValidationError("Hiba. "+str(e))
+        return feature
+      
 
 class CustomPolygonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomPolygon
-        fields = '__all__'
+    def to_representation(self, instance):
+        
+        try:
+            geometry = json.loads(instance.coordinates)
+            multipolygon = geojson.MultiPolygon(geometry)
+            properties = {
+                "id": instance.id,
+                "name": instance.name,
+                "description": instance.description,
+                "created_by": instance.created_by
+                
+            }
+            feature = geojson.Feature(properties=properties, geometry=multipolygon)
+        
+        except json.JSONDecodeError as e:
+            raise serializers.ValidationError("Hibás JSON formátum. "+str(e))
+        except Exception as e:
+            raise serializers.ValidationError("Hiba. "+str(e))
+        return feature
 
 class CustomPointSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomPoint
-        fields = '__all__'
+    def to_representation(self, instance):
+        try:
+            geometry = json.loads(instance.coordinates)
+            point = geojson.Point(geometry)
+            properties = {
+                "id": instance.id,
+                "name": instance.name,
+                "description": instance.description,
+                "created_by": instance.created_by
+            }
+            feature = geojson.Feature(properties=properties, geometry=point)
+
+        except json.JSONDecodeError as e:
+            raise serializers.ValidationError("Hibás JSON formátum. "+str(e))
+        except Exception as e:
+            raise serializers.ValidationError("Hiba. "+str(e))
+        return feature

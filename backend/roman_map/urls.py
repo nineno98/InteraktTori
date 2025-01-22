@@ -10,4 +10,5 @@ urlpatterns = [
     path('login/', view=views.bejelentkezes, name='bejelentkezes'),
     path('map/', view=views.terkep, name='terkep'),
     path('logout/', view=views.kijelentkezes, name='kijelentkezes'),
+    path('password/', view=views.jelszovaltas, name='jelszovaltas'),
 ]

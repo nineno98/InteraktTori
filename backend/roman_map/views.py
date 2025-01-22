@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer
+from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer, RegionGeoJSONSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Territorie, Historie, CustomPolygon, CustomPoint
@@ -7,9 +7,30 @@ from rest_framework.views import status
 from .forms import LoginForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+import geojson
+from django.http import JsonResponse
 # Create your views here.
 
 # Templates
+
+def jelszovaltas(request):
+    try:
+        if request.method == 'POST':
+            form = PasswordChangeForm(request.user, request.POST)
+            if form.is_valid():
+                form.save()
+                update_session_auth_hash(request, form.user)
+                messages.success(request, "A jelszó sikeresen módosítva! ")
+                return redirect('fooldal')
+            else:
+                print(form.errors)
+        else:
+            form = PasswordChangeForm(request.user)
+        return render(request, 'accounts/change_password.html', {'form':form})
+    except Exception as e:
+        pass
 
 def terkep(request):
     return render(request, 'pages/map.html')
@@ -57,21 +78,15 @@ def fooldal(request):
 def getTerritories(request):
     territories = Territorie.objects.all()
     serializer = TerritorieSerializer(territories, many = True)
-    return Response({
-           "success": True,
-           "message": "successful get",
-           "data": serializer.data
-       }, status=status.HTTP_200_OK)
+    geojson_data = geojson.FeatureCollection(features=serializer.data)
+    return JsonResponse(geojson_data)
 
 @api_view(['GET'])
 def getHistories(request):
     histories = Historie.objects.all()
-    serializer = HistorieSerializer(histories, many = True)
-    return Response({
-           "success": True,
-           "message": "successful get",
-           "data": serializer.data
-       }, status=status.HTTP_200_OK)
+    serializer = HistorieSerializer(histories, many=True)
+    geojson_data = geojson.FeatureCollection(features=serializer.data)
+    return JsonResponse(geojson_data)
 
 @api_view(['GET'])
 def getCustomPolygons(request):
