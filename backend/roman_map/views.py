@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer, RegionGeoJSONSerializer
+from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Territorie, Historie, CustomPolygon, CustomPoint
@@ -54,7 +54,7 @@ def bejelentkezes(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, "Sikeres bejelentkezés")
-                return redirect('terkep')
+                return redirect('fooldal')
         
             else:
                 form = LoginForm()
