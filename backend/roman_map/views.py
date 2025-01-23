@@ -15,22 +15,27 @@ from django.http import JsonResponse
 
 # Templates
 
+def sajatadatok(request):
+    return render(request, 'pages/user_informations.html')
+
 def jelszovaltas(request):
     try:
         if request.method == 'POST':
             form = PasswordChangeForm(request.user, request.POST)
             if form.is_valid():
+                
                 form.save()
                 update_session_auth_hash(request, form.user)
                 messages.success(request, "A jelszó sikeresen módosítva! ")
                 return redirect('fooldal')
             else:
-                print(form.errors)
+                messages.error(request, "Hiba: A jelszó módosítása sikertelen!")
         else:
             form = PasswordChangeForm(request.user)
+            print(form.errors)
         return render(request, 'accounts/change_password.html', {'form':form})
     except Exception as e:
-        pass
+        print(str(e))
 
 def terkep(request):
     return render(request, 'pages/map.html')
@@ -44,30 +49,29 @@ def kijelentkezes(request):
 
 
 def bejelentkezes(request):
-
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, "Sikeres bejelentkezés")
-                return redirect('fooldal')
-        
+    try:
+        if request.method == 'POST':
+            form = LoginForm(request.POST)
+            if form.is_valid():
+                username = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                user = authenticate(request, username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    messages.success(request, "Sikeres bejelentkezés")
+                    return redirect('fooldal')
+            
+                else:
+                    form = LoginForm()
+                    messages.warning(request, "Sikertelen bejelentkezés. Hibás felhsználónév vagy jelszó")
+                    return render(request, 'pages/login.html', {'form':form, 'message':'Sikertelen bejelentkezés. Hibás felhasználónév vagy jelszó!'})
             else:
-                form = LoginForm()
-                messages.warning(request, "Sikertelen bejelentkezés. Hibás felhsználónév vagy jelszó")
-                return render(request, 'pages/login.html', {'form':form, 'message':'Sikertelen bejelentkezés. Hibás felhasználónév vagy jelszó!'})
-        else:
-            messages.error(request, "Hiba a belépés során! Ellenőrizze a felhasználónevet és jelszót!")
-            return render(request, 'pages/login.html', {'form':form}) 
-
-
-
-    form = LoginForm()
-    return render(request, 'pages/login.html', {'form':form })
+                messages.error(request, "Hiba a belépés során! Ellenőrizze a felhasználónevet és jelszót!")
+                return render(request, 'pages/login.html', {'form':form})
+        form = LoginForm()
+        return render(request, 'pages/login.html', {'form':form })
+    except Exception as e:
+        pass
 
 def fooldal(request):
     return render(request,'pages/home.html')

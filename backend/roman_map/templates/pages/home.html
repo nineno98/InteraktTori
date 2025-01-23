@@ -6,13 +6,20 @@
     <title>Ancient Interactive - Home</title>
 </head>
 <body>
-    <h1>Kezdőlap</h1>
-    {% if user.is_authenticated %}
-        <a href="{% url 'terkep' %}">Térkép</a>
-        <a href="">Teszt</a>
-        <a href="{% url 'kijelentkezes' %}">Kilépés</a>
-    {% else %}
-    <a href="{% url 'bejelentkezes' %}">Belépés</a>
-    {% endif %}
+    <div class="content">
+        <h1>Kezdőlap</h1>
+
+        {% include "pages/messages.html" %}
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'terkep' %}">Térkép</a>
+            <a href="">Teszt</a>
+            <a href="{% url 'sajatadatok' %}">Saját adatok</a>
+            <a href="{% url 'kijelentkezes' %}">Kilépés</a>
+        {% else %}
+            <a href="{% url 'bejelentkezes' %}">Belépés</a>
+        {% endif %}
+    </div>
+    
 </body>
 </html>

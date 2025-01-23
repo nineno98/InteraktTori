@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Saját adatok {% endblock title %}</title>
+</head>
+<body>
+    {% block content %}
+        <div class="content">
+        
+            <p>Saját adatok</p>
+            {{ user.first_name }}
+            {{ user.last_name }}
+            {{ user.username }}
+            <p>Státusz</p>
+            {% if user.tanar %}
+                <p>Tanár</p>
+            {% else %}
+                <p>Tanuló</p>
+            {% endif %}
+
+            <a href="{% url 'jelszovaltas' %}">Jelszó megváltoztatása</a>
+        </div>
+    {% endblock content %}
+    
+</body>
+</html>
