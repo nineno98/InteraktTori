@@ -27,5 +27,19 @@ function init() {
 
     
 }
+console.log('töltes')
+var csokkentes = document.getElementById('csokkentes')
+var noveles = document.getElementById('noveles')
 
-console.log(feature)
+var ertek = 0
+csokkentes.addEventListener('click', () => {
+    ertek--;
+    logertek();
+});
+noveles.addEventListener('click', () =>{
+    ertek++;
+    logertek();
+});
+function logertek(){
+    console.log(ertek);
+};
