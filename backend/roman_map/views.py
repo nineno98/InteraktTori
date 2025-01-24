@@ -94,13 +94,10 @@ def getHistories(request):
 
 @api_view(['GET'])
 def getCustomPolygons(request):
-    custompol = CustomPolygon.objects.all(filter)
-    serializer = CustomPolygonSerializer(custompol, many = True)
-    return Response({
-           "success": True,
-           "message": "successful get",
-           "data": serializer.data
-       }, status=status.HTTP_200_OK)
+    custompolygons = CustomPolygon.objects.all()
+    serializer = CustomPolygonSerializer(custompolygons, many=True)
+    geojson_data = geojson.FeatureCollection(features=serializer.data)
+    return JsonResponse(geojson_data)
 
 @api_view(['GET'])
 def getCustompoints(request):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Territorie, Historie
+from .models import CustomUser, Territorie, Historie, CustomPolygon
 from .forms import TerritoriesJSONForm
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -97,7 +97,7 @@ class TerritorieAdmin(admin.ModelAdmin):
 
 #admin.site.register(Territorie, TerritorieAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
-#admin.site.register(Territorie)
+admin.site.register(CustomPolygon)
 admin.site.register(Historie)
 #admin.site.index_template = 'admin/admin_import_section.html'
 

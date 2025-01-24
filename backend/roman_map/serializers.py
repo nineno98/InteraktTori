@@ -1,8 +1,14 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Territorie, Historie, CustomPolygon, CustomPoint
+from .models import Territorie, Historie, CustomPolygon, CustomPoint, CustomUser
 from rest_framework import serializers
 import json
 import geojson
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username','first_name','last_name']
 
 
 class TerritorieSerializer(serializers.ModelSerializer):
@@ -49,16 +55,18 @@ class HistorieSerializer(serializers.ModelSerializer):
       
 
 class CustomPolygonSerializer(serializers.ModelSerializer):
+    
     def to_representation(self, instance):
         
         try:
             geometry = json.loads(instance.coordinates)
             multipolygon = geojson.MultiPolygon(geometry)
+            user_data = CustomUserSerializer(instance.created_by).data
             properties = {
                 "id": instance.id,
                 "name": instance.name,
                 "description": instance.description,
-                "created_by": instance.created_by
+                "created_by": user_data
                 
             }
             feature = geojson.Feature(properties=properties, geometry=multipolygon)
@@ -74,11 +82,12 @@ class CustomPointSerializer(serializers.ModelSerializer):
         try:
             geometry = json.loads(instance.coordinates)
             point = geojson.Point(geometry)
+            user_data = CustomUserSerializer(instance.created_by).data
             properties = {
                 "id": instance.id,
                 "name": instance.name,
                 "description": instance.description,
-                "created_by": instance.created_by
+                "created_by": user_data
             }
             feature = geojson.Feature(properties=properties, geometry=point)
 

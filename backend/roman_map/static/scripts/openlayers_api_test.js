@@ -1,5 +1,48 @@
 
+class RotateNorthControl extends ol.control.Control {
+    /**
+     * @param {Object} [opt_options] Control options.
+     */
+    
+    constructor(opt_options) {
+    const options = opt_options || {};
+    const element = document.createElement('div');
+    element.className = 'rotate-north ol-unselectable ol-control';
+    super({
+        element: element,
+        target: options.target,
+    });
+        this.state = 0;
+        this.button = document.createElement('button');
+        this.button.innerHTML = 'N';
+        element.appendChild(this.button);
+
+        this.button.addEventListener('click', this.showOrHiddePolygons ,false );
+    }
+    testFunc = () => {
+        console.log('testing');
+    }
+    showOrHiddePolygons = () => {
+        if(this.state == 1){ // 0 rejtés, 1 mutat
+            this.button.style.background = 'white';
+            this.state = 0;
+            //console.log(this.state)
+            customPolygonsVectorLayer.setVisible(false);
+        }else{
+            this.button.style.background = 'lightgrey';
+            this.state = 1;
+            //console.log(this.state)
+            customPolygonsVectorLayer.setVisible(true);
+        }
+    }
+};
+
+
+
 const map = new ol.Map({
+    controls: ol.control.defaults.defaults({
+        zoom : true,
+    }).extend([new RotateNorthControl()]),
     target: 'map',
     layers: [
         new ol.layer.Tile({
@@ -75,8 +118,7 @@ function capitalizeFirstCharacters(value){
 
 function handleDates(value){
     let number = parseInt(value);
-    if(!isNaN(number)){
-        
+    if(!isNaN(number)){     
         if(number <= 0){
             return 'Kr. e. '+String(Math.abs(number));
         }
@@ -133,8 +175,25 @@ function changeInteraction() {
     select = selectSingleClick;
     map.addInteraction(select);
 }
-
 changeInteraction();
+
+// Custom polygons //
+
+const customPolygonsVectorSource = new ol.source.Vector({
+    format: new ol.format.GeoJSON(),
+    url: 'http://127.0.0.1:8000/custompolygons/',
+});
+
+const customPolygonsVectorLayer = new ol.layer.Vector({
+    source:customPolygonsVectorSource,
+    style: new ol.style.Style({
+        fill: new ol.style.Fill({ color: 'rgba(255, 2, 2, 0.93)' }),
+        stroke: new ol.style.Stroke({ color: '#0096ff', width: 2 }),
+    }),
+    visible: false,
+    
+});
+map.addLayer(customPolygonsVectorLayer);
 
 
 
