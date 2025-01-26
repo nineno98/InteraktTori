@@ -53,10 +53,21 @@
     <div>
         <div id="map"></div>
     </div>
-    <input type="range" id="date-slider" min="-700" max="700" value="-690">
+    <span class="input-group">
+          <label class="input-group-text" for="type">Geometry type:</label>
+          <select class="form-select" id="type">
+            <option value="Point">Point</option>
+            <option value="LineString">LineString</option>
+            <option value="Polygon">Polygon</option>
+            <option value="Circle">Circle</option>
+            <option value="None">None</option>
+          </select>
+          <input class="form-control" type="button" value="Undo" id="undo">
+        </span>
+    <input type="range" id="date-slider" min="-700" max="700" value="-700">
         <span id="slider-value"></span>
         
-    <script src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
-    <script type="module" src="{% static 'scripts/openlayers_api_test.js' %}"></script>
+    
+    <script type="module" src="{% static 'scripts/openlayers_map.js' %}"></script>
 </body>
 </html>

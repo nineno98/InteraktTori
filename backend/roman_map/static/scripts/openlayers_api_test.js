@@ -121,7 +121,7 @@ class ShowCustomPolygonsControl extends ol.control.Control {
             //map.addInteraction(customPolygonSelect);
             map.removeInteraction(customPolygonSelect);
             map.removeInteraction(modify);
-            map.removeInteraction(draw);
+           // map.removeInteraction(draw);
             drawbutton.style.display = 'none';
             drawtype.style.display = 'none';
             DrawState = 0;
@@ -175,13 +175,13 @@ class DrawPointsAndPolygonsControl extends ol.control.Control{
             DrawState = 0;
             //console.log(CustomPolygonsState+" "+DrawState)
             this.button.style.background = 'white';
-            map.removeInteraction(draw);
+            //map.removeInteraction(draw);
             drawtype.style.display = 'none';
         }else{
             DrawState = 1;
             //console.log(CustomPolygonsState+" "+DrawState)
             this.button.style.background = 'lightgrey';
-            map.addInteraction(draw)
+            //map.addInteraction(draw)
             drawtype.style.display = 'block';
         }
     }
@@ -218,12 +218,13 @@ class DrawTypeControl extends ol.control.Control{
 
 const map = new ol.Map({
     controls: ol.control.defaults.defaults({
-        zoom : true,
+        zoom : false,
     }).extend([
-        new ShowCustomPolygonsControl(),
-        new DrawPointsAndPolygonsControl(),
-        new DrawTypeControl(),
+        //new ShowCustomPolygonsControl(),
+        //new DrawPointsAndPolygonsControl(),
+        //new DrawTypeControl(),
     ]),
+    
     target: 'map',
     layers: [
         new ol.layer.Tile({
@@ -395,6 +396,69 @@ const customPolygonSelect = new ol.interaction.Select({
 const modify = new ol.interaction.Modify({ source: customPolygonsVectorSource });
 //map.addInteraction(modify);
 
+
+
+
+let draw; // global so we can remove it later
+
+function addInteraction() {
+    map.removeInteraction(draw);
+  const value = "Point"
+  if (value !== 'None') {
+    draw = new ol.interaction.Draw({
+      source: customPolygonsVectorSource,
+      type: "Point",
+      
+      
+    });
+    map.addInteraction(draw);
+    
+    
+
+    
+  }
+  draw.on('drawend', function (event) {
+    const feature = event.feature; // Az újonnan rajzolt feature (pont)
+    const coordinates = feature.getGeometry().getCoordinates(); // A pont koordinátái
+  
+    // Log funkció, amely a pont koordinátáit írja ki
+    console.log('Pont koordinátái:', coordinates);
+  });
+}
+
+drawType.addEventListener('change', function () {
+    if (draw) {
+        map.removeInteraction(draw);
+    }
+    addInteraction();
+});
+addInteraction();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 const drawType = document.getElementById('geom-type');
 let draw = new ol.interaction.Draw({
     source: customPolygonsVectorSource,
@@ -413,12 +477,21 @@ function addInteraction() {
         draw = new ol.interaction.Draw({
             source: customPolygonsVectorSource,
             type: value,
+            
+            
+            
+            
         });
+        
         
 
         map.addInteraction(draw);
     }
 }
+
+draw.addEventListener('drawend', (feature) => {
+    console.log(feature);
+});
 
 /*
 console.log(drawType.value);

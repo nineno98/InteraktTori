@@ -1,69 +1,185 @@
-window.onload = init;
+const hatter = new ol.layer.Tile({
+    source: new ol.source.OSM(),
+  });
+  
+const drawingSource = new ol.source.Vector({wrapX: false});
+  
+const drawingLayer = new ol.layer.Vector({
+    source: drawingSource,
+  });
 
-function init() {
-    let map = new ol.Map({
-        target: "map",
-        view: new ol.View({
-            center: ol.proj.fromLonLat([72.88, 19.12]),  // Mumbai középpontja
-            zoom: 11,
-            maxZoom: 20,
-            minZoom: 5
-        })
-    });
 
-    const openStreetMapStandard = new ol.layer.Tile({
-        source: new ol.source.OSM(),
-        visible: true,
-        title: "OSM_Standard"
-    });
+class TerritoriesVectorLayer{
+    constructor(apiUrl){
+        this.apiUrl = apiUrl;
+        this.vectorSource = new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: this.apiUrl,
+        });
+        this.vectorLayer = new ol.layer.Vector({
+            source: this.vectorSource,
+            style: this.SetStyleFunction.bind(this),
+        });
 
-    map.addLayer(openStreetMapStandard);
+        this.vectorSource.once('addfeature', (event) => {    
+            this.filterByDate({ target: { value: -700 } });
+        });
 
-    // Mumbai MultiPolygon koordináták (EPSG:4326-ból EPSG:3857-be konvertálva)
-    const multiPolygonCoords = [
-        [
-            [72.775, 19.260],
-            [72.995, 19.260],
-            [72.995, 19.100],
-            [72.775, 19.100],
-            [72.775, 19.260]
-        ],
-        [
-            [72.830, 19.230],
-            [73.050, 19.230],
-            [73.050, 19.070],
-            [72.830, 19.070],
-            [72.830, 19.230]
-        ]
-    ];
+        this.dateSlider = document.getElementById('date-slider');
+        this.dateSlider.addEventListener('input', this.filterByDate.bind(this), false);
+    }
 
-    // A koordináták konvertálása EPSG:4326-ról EPSG:3857-re
-    const multiPolygon = new ol.Feature({
-        geometry: new ol.geom.MultiPolygon(
-            multiPolygonCoords.map(polygon => 
-                polygon.map(coord => ol.proj.fromLonLat(coord))
-            )
-        )
-    });
+    SetStyleFunction(feature){
+        //let color = ol.color.asArray(feature.get('color')).slice();
+        //let color = feature.get('color');
+        //console.log(color);
+        //color[3] = 0.7;
+        
 
-    // Stílus beállítása
-    multiPolygon.setStyle(new ol.style.Style({
-        stroke: new ol.style.Stroke({
-            color: 'blue',
-            width: 3
-        }),
-        fill: new ol.style.Fill({
-            color: 'rgba(0, 0, 255, 0.3)'
-        })
-    }));
+        var hexColor = feature.get('color');
+        var color = ol.color.asArray(hexColor);
+        color = color.slice();
+        color[3] = 0.7;
+        console.log(color);
+        let strokeColor = this.rgbaColorDarker(color.slice(), 0.1);
+        //console.log(strokeColor);
 
-    const vectorSource = new ol.source.Vector({
-        features: [multiPolygon]
-    });
+        if(feature.get('hidden')){
+            return null;
+        }
+        return new ol.style.Style({
+            fill: new ol.style.Fill({
+              color: color,
+            }),
+            stroke: new ol.style.Stroke({
+              color: strokeColor,
+              width: 2,
+            }),
+        });
+    }
 
-    const vectorLayer = new ol.layer.Vector({
-        source: vectorSource
-    });
+    filterByDate(event){
+        let selectedDate = parseInt(event.target.value);
+        document.getElementById('slider-value').textContent = selectedDate;
+        console.log('filtering')
+        this.vectorSource.forEachFeature((feature) => {
+            let stard_date = feature.get('start_date')
+            let end_date = feature.get('end_date')
+            if(selectedDate < stard_date || selectedDate >= end_date){
+                feature.set('hidden', true);
+            }else{
+                feature.set('hidden', false);
+            }
+    
+            feature.changed()
+        });
+    }
 
-    map.addLayer(vectorLayer);
+    getLayer(){
+        return this.vectorLayer;
+    }
+
+    rgbaColorDarker(colorArray, darkerFaktor){
+        try{
+            if(colorArray.length == 4){
+                colorArray[0] = Math.round(Math.max(0, colorArray[0] * darkerFaktor)); // R
+                colorArray[1] = Math.round(Math.max(0, colorArray[1] * darkerFaktor)); // G
+                colorArray[2] = Math.round(Math.max(0, colorArray[2] * darkerFaktor)); // B
+
+                colorArray[3] = Math.max(0, Math.min(1, colorArray[3])); // Átlátszóság
+
+                return colorArray;
+            }else{
+                throw new Error("Nem megfelelő a megadott tömb alakja. csak rgba-t tároló megfelelő.");
+            }
+        }
+        catch (error) {
+            console.error('Hiba történt a szín sötétítésekor: ', error.message);
+        }
+        
+    }
+
 }
+
+const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/territories/');
+
+
+  const map = new ol.Map({
+    layers: [
+        hatter,
+        territories.getLayer(),
+        drawingLayer,
+        
+
+    ],
+    target: 'map',
+    view: new ol.View({
+      center: ol.proj.fromLonLat([12.496366, 41.902782]),
+      zoom: 4,
+      projection: 'EPSG:3857',
+    }),
+  });
+  
+  class HandleDraw {
+    constructor(){
+        this.undoButton = document.getElementById('undo');
+        this.undoButton.addEventListener('click', this.undoHandling.bind(this), false);
+        this.typeSelect = document.getElementById('type');
+        this.typeSelect.addEventListener('change', this.changeHandle.bind(this), false);
+        this.draw = null;
+    }
+    addInteraction() {
+        const value = this.typeSelect.value;
+        if (value !== 'None') {
+          this.draw = new ol.interaction.Draw({
+            source: drawingSource,
+            type: this.typeSelect.value,
+          });
+          map.addInteraction(this.draw);
+        }
+    }
+    changeHandle(){
+        map.removeInteraction(this.draw);
+        this.addInteraction();
+    }
+
+    undoHandling(){
+        this.draw.removeLastPoint();
+    }
+
+    turnOffDaw(){
+        map.removeInteraction(this.draw);
+    }
+  }
+
+  const handledraw = new HandleDraw();
+  handledraw.addInteraction();
+
+  /*const typeSelect = document.getElementById('type');
+  
+  let draw; // global so we can remove it later
+  function addInteraction() {
+    const value = typeSelect.value;
+    if (value !== 'None') {
+      draw = new ol.interaction.Draw({
+        source: source,
+        type: typeSelect.value,
+      });
+      map.addInteraction(draw);
+    }
+  }
+  
+  
+  /**
+   * Handle change event.
+   
+  typeSelect.onchange = function () {
+    map.removeInteraction(draw);
+    addInteraction();
+  };
+  
+  document.getElementById('undo').addEventListener('click', function () {
+    draw.removeLastPoint();
+  });
+  
+  addInteraction();*/
