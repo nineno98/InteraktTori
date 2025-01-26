@@ -2,11 +2,6 @@ const hatter = new ol.layer.Tile({
     source: new ol.source.OSM(),
   });
   
-//const drawingSource = new ol.source.Vector({wrapX: false});
-  
-/*const drawingLayer = new ol.layer.Vector({
-    source: drawingSource,
-  });*/
 
 
 class TerritoriesVectorLayer{
@@ -193,6 +188,56 @@ class TerritoriesVectorLayer{
             features: this.select.getFeatures()
         });
         map.addInteraction(this.modify);
+
+        let originalGeometry = null;
+        const selectedFeatures = this.select.getFeatures();
+
+        this.modify.on('modifystart', function (event) {
+            console.log('módosítás elkezdődött');
+            if (selectedFeatures.getLength() > 0) {
+                const feature = selectedFeatures.item(0);
+                originalGeometry = feature.getGeometry().clone(); // Eredeti geometria mentése
+            }
+        });
+        this.modify.on('modifyend', (event) => {
+            console.log('modositas vege');
+            if (selectedFeatures.getLength() > 0) {
+                const feature = selectedFeatures.item(0);
+                this.modifyPopup(feature, originalGeometry); // Popup megjelenítése
+            }
+        });
+
+    }
+
+    modifyPopup(feature, originalGeometry){
+        const popupContainer = document.getElementById('modify-popup');
+        const saveButton = document.getElementById('modifiFeature');
+        const closeButton = document.getElementById('closeModifyPopup');
+
+        popupContainer.style.display = 'block';
+
+        closeButton.addEventListener('click', () => {
+            popupContainer.style.display = 'none';
+            feature.setGeometry(originalGeometry);
+            map.removeInteraction(this.select);
+            map.removeInteraction(this.modify);
+            this.selectenabled = false;
+            
+        });
+
+        saveButton.addEventListener('click', () => {
+            console.log('mentes');
+            popupContainer.style.display = 'none';
+            map.removeInteraction(this.select);
+            map.removeInteraction(this.modify);
+            this.selectenabled = false;
+
+            const format = new ol.format.GeoJSON();
+            const geojson = format.writeFeatureObject(feature);
+            //geojson.geometry.coordinates = ol.proj.transform(geojson.geometry.coordinates, 'EPSG:3857', 'EPSG:4326');
+            console.log(geojson);
+        });
+
     }
 
     addInteraction() {
@@ -204,7 +249,61 @@ class TerritoriesVectorLayer{
           });
           map.addInteraction(this.draw);
         }
+        this.draw.on('drawend', (event) => {
+            this.savePopUp(event.feature);
+        });
+
     }
+
+    savePopUp(feature){
+        const popupContainer = document.getElementById('draw-popup');
+        
+        const saveButton = document.getElementById('saveFeature');
+        const closeButton = document.getElementById('closePopup');
+
+        //const description = descriptionInput.value.trim();
+        const errorLabel = document.getElementById('nameError');
+
+        popupContainer.style.display = 'block';
+
+        closeButton.addEventListener('click', () => {
+            popupContainer.style.display = 'none';
+            this.drawingSource.removeFeature(feature);
+            alert("A rajz megőrzéséhez előbb mentened kell azt!")
+        });
+        saveButton.addEventListener('click', () => {
+            const nameInput = document.getElementById('name').value;
+            const descriptionInput = document.getElementById('description').value;
+            
+
+            if (!nameInput) {
+                errorLabel.textContent = "A név megadása kötelező!";
+                errorLabel.style.display = "block";
+                
+                return;
+            } else {
+                console.log(nameInput)
+                errorLabel.style.display = "none";
+            }
+            feature.setProperties({ nameInput, descriptionInput });
+
+            
+            const format = new ol.format.GeoJSON();
+            const geojson = format.writeFeatureObject(feature);
+            //geojson.geometry.coordinates = ol.proj.transform(geojson.geometry.coordinates, 'EPSG:3857', 'EPSG:4326');
+            console.log(feature.getGeometry());
+            console.log(geojson);
+
+            popupContainer.style.display = 'none';
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+            //this.drawenabled = false;
+            //this.turnOffDaw();
+
+            
+        });
+    }
+
     changeHandle(){
         map.removeInteraction(this.draw);
         this.addInteraction();
