@@ -207,6 +207,47 @@ class TerritoriesVectorLayer{
             }
         });
 
+        const deletingBundle = () =>{
+            if(selectedFeatures.getLength() > 0){
+                const feature = selectedFeatures.item(0);
+                this.deletePopup(feature);
+            }
+            else{
+                alert('A törléshez előbb ki kell jelölnöd egy elemet!')
+            }
+        }
+
+        const deleteButton = document.getElementById('delete-selected-feature');
+        deleteButton.removeEventListener('click', deletingBundle);
+        deleteButton.addEventListener('click',  deletingBundle);
+
+    }
+
+    deletePopup(feature){
+        const popupContainer = document.getElementById('delete-popup');
+        const saveButton = document.getElementById('deleteFeatureButton');
+        const closeButton = document.getElementById('closeDeletingPopup');
+
+        popupContainer.style.display = 'block';
+        closeButton.removeEventListener('click', this.closeDeleting);
+        saveButton.removeEventListener('click', this.acceptDeleting);
+
+        this.closeDeleting = () => {
+            popupContainer.style.display = 'none';
+        }
+        closeButton.addEventListener('click', this.closeDeleting);
+
+        this.acceptDeleting = () => {
+            console.log('accept deleting');
+            this.drawingLayer.getSource().removeFeature(feature);
+            popupContainer.style.display = 'none';
+            console.log("Feature törölve:", feature);
+            map.removeInteraction(this.select);
+            map.removeInteraction(this.modify);
+            this.addSelect();
+        }
+        saveButton.addEventListener('click', this.acceptDeleting);
+
     }
 
     modifyPopup(feature, originalGeometry){
@@ -215,28 +256,38 @@ class TerritoriesVectorLayer{
         const closeButton = document.getElementById('closeModifyPopup');
 
         popupContainer.style.display = 'block';
+        closeButton.removeEventListener('click', this.closeModify);
+        saveButton.removeEventListener('click', this.saveModify);
 
-        closeButton.addEventListener('click', () => {
+        this.closeModify = () =>{
             popupContainer.style.display = 'none';
             feature.setGeometry(originalGeometry);
             map.removeInteraction(this.select);
             map.removeInteraction(this.modify);
-            this.selectenabled = false;
-            
-        });
 
-        saveButton.addEventListener('click', () => {
+            
+            this.addSelect();
+        };
+        closeButton.addEventListener('click', this.closeModify);
+
+        this.saveModify = () => {
             console.log('mentes');
             popupContainer.style.display = 'none';
+            console.log(feature.getGeometry().getCoordinates());
+            console.log(originalGeometry.getCoordinates());
+            //this.selectenabled = false;
             map.removeInteraction(this.select);
             map.removeInteraction(this.modify);
-            this.selectenabled = false;
 
-            const format = new ol.format.GeoJSON();
-            const geojson = format.writeFeatureObject(feature);
-            //geojson.geometry.coordinates = ol.proj.transform(geojson.geometry.coordinates, 'EPSG:3857', 'EPSG:4326');
-            console.log(geojson);
-        });
+            //this.selectenabled = true;
+            this.addSelect();
+
+
+            
+        };
+        saveButton.addEventListener('click', this.saveModify);
+
+        
 
     }
 
@@ -250,58 +301,63 @@ class TerritoriesVectorLayer{
           map.addInteraction(this.draw);
         }
         this.draw.on('drawend', (event) => {
-            this.savePopUp(event.feature);
+            this.saveDrawPopUp(event.feature);
         });
 
     }
 
-    savePopUp(feature){
+    saveDrawPopUp(feature){
         const popupContainer = document.getElementById('draw-popup');
         
         const saveButton = document.getElementById('saveFeature');
         const closeButton = document.getElementById('closePopup');
-
+        
         //const description = descriptionInput.value.trim();
         const errorLabel = document.getElementById('nameError');
 
         popupContainer.style.display = 'block';
 
-        closeButton.addEventListener('click', () => {
+        closeButton.removeEventListener('click', this.closePopupHandler);
+        saveButton.removeEventListener('click', this.saveFeatureHandler);
+
+        this.closePopupHandler = () => {
             popupContainer.style.display = 'none';
             this.drawingSource.removeFeature(feature);
-            alert("A rajz megőrzéséhez előbb mentened kell azt!")
-        });
-        saveButton.addEventListener('click', () => {
-            const nameInput = document.getElementById('name').value;
-            const descriptionInput = document.getElementById('description').value;
-            
+            alert("A rajz megőrzéséhez előbb mentened kell azt!");
+        };
+        closeButton.addEventListener('click', this.closePopupHandler);
 
-            if (!nameInput) {
+        this.saveFeatureHandler = () => {
+            console.log(feature.getGeometry().getCoordinates());
+            //popupContainer.style.display = 'none';
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            if(!name){
                 errorLabel.textContent = "A név megadása kötelező!";
                 errorLabel.style.display = "block";
-                
                 return;
-            } else {
-                console.log(nameInput)
-                errorLabel.style.display = "none";
             }
-            feature.setProperties({ nameInput, descriptionInput });
-
+            else{
+                popupContainer.style.display = 'none';
+                document.getElementById('name').value = '';
+                document.getElementById('description').value = '';
+                feature.setProperties({ name, description });
+                const format = new ol.format.GeoJSON({
+                    dataProjection: 'EPSG:4326',
+                    featureProjection: 'EPSG:3857'
+                });
+                const geojson = format.writeFeatureObject(feature);
+                console.log(geojson);
+                this.turnOffDaw();
+                //this.drawenabled = false;
+                //this.drawenabled = true;
+                this.turnOnDraw();
+                
+            }
             
-            const format = new ol.format.GeoJSON();
-            const geojson = format.writeFeatureObject(feature);
-            //geojson.geometry.coordinates = ol.proj.transform(geojson.geometry.coordinates, 'EPSG:3857', 'EPSG:4326');
-            console.log(feature.getGeometry());
-            console.log(geojson);
+        };
+        saveButton.addEventListener('click', this.saveFeatureHandler);
 
-            popupContainer.style.display = 'none';
-            document.getElementById('name').value = '';
-            document.getElementById('description').value = '';
-            //this.drawenabled = false;
-            //this.turnOffDaw();
-
-            
-        });
     }
 
     changeHandle(){

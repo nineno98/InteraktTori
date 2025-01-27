@@ -125,6 +125,7 @@
         <span id="slider-value"></span>
         <input class="form-control" type="button" value="Rajz" id="draw-enable">
         <input class="form-control" type="button" value="Kijelölés" id="select-enable">
+        <input class="form-control" type="button" value="Kijelölt elem törlése" id="delete-selected-feature">
 
         <div id="draw-popup" class="popup-overlay">
           <div class="popup-content">
@@ -140,6 +141,7 @@
               </div>
           </div>
         </div>
+
         <div id="modify-popup" class="popup-overlay">
           <div class="popup-content">
             <h3>Objektum módosítása</h3>
@@ -148,6 +150,18 @@
               <button type="button" id="closeModifyPopup" class="close-button">Mégse</button>
             </div>
 
+          </div>
+
+        </div>
+
+        <div id="delete-popup" class="popup-overlay">
+          <div class="popup-content">
+            <h3>Objektum törlése</h3>
+            <label for="">Biztosan törli az objektumot?</label>
+            <div class="popup-buttons">
+              <button type="button" id="deleteFeatureButton" class="apply-button">Törlés</button>
+              <button type="button" id="closeDeletingPopup">Mégse</button>
+            </div>
           </div>
 
         </div>
