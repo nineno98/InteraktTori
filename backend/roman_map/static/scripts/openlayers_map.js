@@ -147,6 +147,11 @@ class TerritoriesVectorLayer{
                 color: 'blue',
                 width: 2,
             }),
+            image: new ol.style.Circle({
+                radius: 8,
+                fill: new ol.style.Fill({ color: 'yellow' }),
+                stroke: new ol.style.Stroke({ color: 'red', width: 2 })
+            })
         })
 
         this.drawingSource = new ol.source.Vector({
@@ -188,7 +193,7 @@ class TerritoriesVectorLayer{
             features: this.select.getFeatures()
         });
         map.addInteraction(this.modify);
-
+        
         let originalGeometry = null;
         const selectedFeatures = this.select.getFeatures();
 
@@ -196,14 +201,14 @@ class TerritoriesVectorLayer{
             console.log('módosítás elkezdődött');
             if (selectedFeatures.getLength() > 0) {
                 const feature = selectedFeatures.item(0);
-                originalGeometry = feature.getGeometry().clone(); // Eredeti geometria mentése
+                originalGeometry = feature.getGeometry().clone();
             }
         });
         this.modify.on('modifyend', (event) => {
             console.log('modositas vege');
             if (selectedFeatures.getLength() > 0) {
                 const feature = selectedFeatures.item(0);
-                this.modifyPopup(feature, originalGeometry); // Popup megjelenítése
+                this.modifyPopup(feature, originalGeometry);
             }
         });
 
@@ -220,7 +225,7 @@ class TerritoriesVectorLayer{
         const deleteButton = document.getElementById('delete-selected-feature');
         deleteButton.removeEventListener('click', deletingBundle);
         deleteButton.addEventListener('click',  deletingBundle);
-
+        
     }
 
     deletePopup(feature){
@@ -278,6 +283,7 @@ class TerritoriesVectorLayer{
             //this.selectenabled = false;
             map.removeInteraction(this.select);
             map.removeInteraction(this.modify);
+            this.drawingLayer.getSource().changed();
 
             //this.selectenabled = true;
             this.addSelect();
