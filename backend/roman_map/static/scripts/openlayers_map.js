@@ -151,6 +151,13 @@ class TerritoriesVectorLayer{
                 radius: 8,
                 fill: new ol.style.Fill({ color: 'yellow' }),
                 stroke: new ol.style.Stroke({ color: 'red', width: 2 })
+            }),
+            text: new ol.style.Text({
+                font: 'bold 14px Arial',
+                fill: new ol.style.Fill({ color: 'black' }),
+                stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
+                offsetY: -15, // A szöveg eltolása felfelé
+                text: function(feature) { return feature.get('name') || ''; }
             })
         })
 
@@ -182,11 +189,37 @@ class TerritoriesVectorLayer{
         
     }
 
+    selectedStyleFunction(feature){
+        const zoom = map.getView().getZoom();
+        return [
+            new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(233,84,33,0.5)', 
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'blue',
+                    width: 2,
+                }),
+                image: new ol.style.Circle({
+                    radius: 8,
+                    fill: new ol.style.Fill({ color: 'yellow' }),
+                    stroke: new ol.style.Stroke({ color: 'red', width: 2 })
+                }),
+                text: new ol.style.Text({
+                    font: 'bold 14px Arial',
+                    fill: new ol.style.Fill({ color: 'black' }),
+                    stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
+                    offsetY: -15, // A szöveg eltolása felfelé
+                    text: zoom > 5 ? feature.get('name') || '' : '', 
+                })
+            })
+        ]
+    }
 
     addSelect(){
         this.select = new ol.interaction.Select({
             layers: [this.drawingLayer],
-            style: this.selectedStyle,
+            style: this.selectedStyleFunction,
         });
         map.addInteraction(this.select);
         this.modify = new ol.interaction.Modify({

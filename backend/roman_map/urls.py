@@ -12,4 +12,5 @@ urlpatterns = [
     path('logout/', view=views.kijelentkezes, name='kijelentkezes'),
     path('password/', view=views.jelszovaltas, name='jelszovaltas'),
     path('user-infos/', view=views.sajatadatok, name='sajatadatok'),
+    path('custom-draws/', view=views.customDraws, name='customDraws'),
 ]

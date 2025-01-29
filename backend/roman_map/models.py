@@ -67,3 +67,20 @@ class CustomPoint(models.Model):
 
     def __str__(self):
         return str(self.id)+' '+self.name+' '+self.created_by.last_name+' '+self.created_by.first_name
+
+class CustomDraw(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=255, blank=False)
+    description = models.TextField(blank=True)
+    coordinates = models.TextField(blank=False)
+    TYPE_CHOICHES = [
+        ("point","Point"),
+        ("linestring", "LineString"),
+        ("polygon", "Polygon"),
+        
+    ]
+    type = models.CharField(max_length=255, blank=False, choices=TYPE_CHOICHES)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.id)+' '+self.name+' '+self.created_by.last_name+' '+self.created_by.first_name

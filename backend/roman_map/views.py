@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer
-from rest_framework.decorators import api_view
+from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer, CustomDrawSerializer, CustomDrawSerializer_
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import Territorie, Historie, CustomPolygon, CustomPoint
+from .models import Territorie, Historie, CustomPolygon, CustomPoint, CustomDraw
 from rest_framework.views import status
 from .forms import LoginForm
 from django.contrib.auth import login, logout, authenticate
@@ -11,6 +11,9 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 import geojson
 from django.http import JsonResponse
+from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+import json
 # Create your views here.
 
 # Templates
@@ -108,3 +111,55 @@ def getCustompoints(request):
            "message": "successful get",
            "data": serializer.data
        }, status=status.HTTP_200_OK)
+
+#@permission_classes([IsAuthenticated])
+@api_view(['GET','POST', 'PATCH'])
+@csrf_exempt
+def customDraws(request):
+    if request.method == 'GET':
+        customdraws = CustomDraw.objects.filter(created_by=request.user)
+        serializer = CustomDrawSerializer(customdraws, many= True)
+        geojson_data = geojson.FeatureCollection(features=serializer.data)
+        return JsonResponse(geojson_data)
+    elif request.method == 'POST':
+        serializer = CustomDrawSerializer_(data=request.data)
+        if serializer.is_valid():
+            new_draw = serializer.save()
+            response = {
+                "status":"success",
+                "object_id": new_draw.id
+            }
+            return JsonResponse(response, status = 200)
+        else:
+            response = {
+                "status":"error",
+                "message":serializer.errors
+            }
+            return JsonResponse(response, status = 400)
+    elif request.method == 'PATCH':
+        print(f"Beérkezett adatok: {request.data}")
+        obj_id = request.data.pop('id')
+        print(f"Beérkezett adatok: {request.data}")
+        coordinates_str = json.dumps(request.data['coordinates'])
+        request.data['coordinates'] = coordinates_str
+        print(f"Beérkezett adatok2: {request.data}")
+
+        try:
+            custom_draw = CustomDraw.objects.get(id = obj_id)
+        except CustomDraw.DoesNotExist:
+            response = {
+                "status":"error",
+                "message":"A módosítani kívánt elem nem található az adatbázisban."
+            }
+            return JsonResponse(response, status=404)
+        serializer = CustomDrawSerializer_(custom_draw, data=request.data, partial = True)
+        
+        if serializer.is_valid(raise_exception=True):
+            print(f"Validált adatok: {serializer.validated_data}")
+            serializer.save()
+            response = {
+                "status":"success",
+                "message":"Az elem módosítása sikeresen megtörtént."
+            }
+            return JsonResponse(response, status= 200)
+
