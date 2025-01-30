@@ -1,3 +1,16 @@
 {
-    \"user\":"alma"
+    
+    "type": "Feature",
+    "properties": {
+        "name":"",
+        "description":"",
+        "created_by":2
+    },
+    "geometry": {
+        "coordinates": [
+        13.795992215271042,
+        41.559076331719126
+        ],
+        "type": "Point"
+        }
 }

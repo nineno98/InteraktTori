@@ -112,80 +112,70 @@ def geometry_type(type, geometry):
             
 class CustomDrawSerializer(serializers.Serializer):
 
+    created_by = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    type = serializers.ChoiceField(choices=CustomDraw.TYPE_CHOICHES)
+
     class Meta:
         model = CustomDraw
-        fields = ['id', 'coordinates', 'name', 'description', 'type']
-    #status = serializers.CharField()
-    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required = False)
-    geojson_data = serializers.JSONField(required = False)
-    
-    
-    def validate_geojson_data(self, data):
-        try:
-            if not isinstance(data, dict):
-                raise serializers.ValidationError("A geojson_data nem érvényes JSON objektum.")
-            elif data["type"] != "Feature":
-                raise serializers.ValidationError("A geojson_data 'type' mezőjének 'Feature'-nek kell lennie.")
-            elif "geometry" not in data:
-                raise serializers.ValidationError("A geojson_data nem tartalmaz 'geometry' mezőt.")
-            
+        fields = ['id', 'name', 'description', 'coordinates', 'type', 'created_by']
 
-            properties = data["properties"]
-            if "name" not in properties:
-                raise serializers.ValidationError("A properties mezőben kötelező a 'name' kulcs.")
-            if "description" not in properties:
-                raise serializers.ValidationError("A properties mezőben kötelező a 'description' kulcs.")
-            
-            geometry = data["geometry"]
-            geometry_types = {"Point", "Polygon", "LineString"}
-            if not isinstance(geometry, dict) or "coordinates" not in geometry or "type" not in geometry:
-                raise serializers.ValidationError("A geometry formátuma hibás.")
-            elif geometry["type"] not in geometry_types:
-                raise serializers.ValidationError("A geometry típusa hibás.")
-            
-            coordinates = geometry["coordinates"]
-            if geometry["type"] == "Point":
-                if len(coordinates) != 2:
-                    raise serializers.ValidationError("A Point típusú geometriának pontosan 2 koordinátát kell tartalmaznia.")
-            elif geometry["type"] == "Polygon":
-                if len(coordinates) < 1:
-                    raise serializers.ValidationError("A Polygon típusú geometriának legalább egy koordinátát kell tartalmaznia.")
-            elif geometry["type"] == "LineString":
-                if len(coordinates) < 2:
-                    raise serializers.ValidationError("A LineString típusú geometriának legalább kettő koordinátát kell tartalmaznia.")
-
-        except Exception as e:
-            raise serializers.ValidationError("Hiba: validate_types: "+str(e))
-        return data
-        
-            
     def create(self, validated_data):
-        geojson_data = validated_data.get('geojson_data')
-        user = validated_data.get('user')
-        
-        custom_draw = CustomDraw.objects.create(
-            name = geojson_data["properties"]["name"],
-            description = geojson_data["properties"]["description"],
-            coordinates = geojson_data["geometry"]["coordinates"],
-            type = geojson_data["geometry"]["type"].lower(),
-            created_by = user
-        )
-        return custom_draw
+        # Itt is használjuk a validated_data-t, hogy létrehozzuk az objektumot
+        return CustomDraw.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        # Csak a 'coordinates' mezőt frissítjük
-        print(validated_data)
-        print(str(instance))
-        coordinates = validated_data.get('coordinates', None)
-        print('steri: '+str(coordinates))
-        if coordinates:
-            print(f"Frissített koordináták: {coordinates}")
-            instance.coordinates = coordinates  # Frissítjük a koordinátákat
-
+        # Frissítés során csak a coordinates mezőt frissítjük, ha az új adatot tartalmaz
+        print("update: "+instance.coordinates)
+        coordinates = validated_data.get('coordinates')
+        instance.coordinates = coordinates
+        print("update_: "+instance.coordinates)
         instance.save()
-        
-        return instance  
+        return instance
+    
+    def to_internal_value(self, data):
+        request = self.context.get("request", None)
+        if request is None:
+            raise serializers.ValidationError({"request": "A kérés nem érhető el a serializer contextjében."})
+        print("request method: "+request.method)
+        if request.method == 'POST':
+            if not isinstance(data, dict):
+                raise serializers.ValidationError({"geojson": "A megadott adat nem érvényes JSON objektum."})
 
+            #print(data)
+            if data.get("type") != "Feature":
+                raise serializers.ValidationError({"geojson": "A 'type' mező értékének 'Feature'-nek kell lennie."})
+
+            properties = data.get("properties", {})
+            geometry = data.get("geometry", {})
+
+            print("geometry: "+str(geometry))
+
+            if "coordinates" not in geometry or "type" not in geometry:
+                raise serializers.ValidationError({"geometry": "A 'geometry' mező hibás vagy hiányzik."})
+
+            try:
+                user = CustomUser.objects.get(id=properties["created_by"])
+            except CustomUser.DoesNotExist:
+                raise serializers.ValidationError({"created_by": "A megadott felhasználó nem létezik."})
+            
+            return {
+                "name": properties.get("name", ""),
+                "description": properties.get("description", ""),
+                "created_by": user,  # created_by kezelése
+                "coordinates": json.dumps(geometry["coordinates"]),  # Koordináták JSON-ként tárolása
+                "type": geometry["type"].lower(),  # GeoJSON típus (Point, Polygon stb.)
+            }
+        elif request.method == 'PATCH':
+            if "coordinates" not in data:
+                raise serializers.ValidationError({"coordinates": "Ez a mező kötelező frissítéskor."})
+            elif not isinstance(data["coordinates"], (list, tuple)):
+                raise serializers.ValidationError({"coordinates": "A koordinátáknak listának kell lenniük."})
+            return {"coordinates": json.dumps(data["coordinates"])}
+        else:
+            raise serializers.ValidationError({"method": "Nem támogatott HTTP metódus."})
+            
+
+    
     def to_representation(self, instance):
         try:
             geometry = json.loads(instance.coordinates)
@@ -204,16 +194,12 @@ class CustomDrawSerializer(serializers.Serializer):
             raise serializers.ValidationError("Hiba. "+str(e))
         return feature
 
-class GeometrySerializer(serializers.Serializer):
-    type = serializers.CharField()
-    coordinates = serializers.ListField(child=serializers.FloatField())
-
 class CustomDrawSerializer_(serializers.ModelSerializer):
     created_by = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
     type = serializers.ChoiceField(choices=CustomDraw.TYPE_CHOICHES)
 
     
-    geometry = GeometrySerializer()
+    
 
     class Meta:
         model = CustomDraw

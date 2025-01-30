@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer, CustomDrawSerializer, CustomDrawSerializer_
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -113,7 +113,7 @@ def getCustompoints(request):
        }, status=status.HTTP_200_OK)
 
 #@permission_classes([IsAuthenticated])
-@api_view(['GET','POST', 'PATCH'])
+@api_view(['GET','POST', 'PATCH', 'DELETE'])
 @csrf_exempt
 def customDraws(request):
     if request.method == 'GET':
@@ -122,7 +122,7 @@ def customDraws(request):
         geojson_data = geojson.FeatureCollection(features=serializer.data)
         return JsonResponse(geojson_data)
     elif request.method == 'POST':
-        serializer = CustomDrawSerializer_(data=request.data)
+        serializer = CustomDrawSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             new_draw = serializer.save()
             response = {
@@ -136,14 +136,8 @@ def customDraws(request):
                 "message":serializer.errors
             }
             return JsonResponse(response, status = 400)
-    elif request.method == 'PATCH':
-        print(f"Beérkezett adatok: {request.data}")
+    elif request.method == 'PATCH':   
         obj_id = request.data.pop('id')
-        print(f"Beérkezett adatok: {request.data}")
-        coordinates_str = json.dumps(request.data['coordinates'])
-        request.data['coordinates'] = coordinates_str
-        print(f"Beérkezett adatok2: {request.data}")
-
         try:
             custom_draw = CustomDraw.objects.get(id = obj_id)
         except CustomDraw.DoesNotExist:
@@ -152,7 +146,7 @@ def customDraws(request):
                 "message":"A módosítani kívánt elem nem található az adatbázisban."
             }
             return JsonResponse(response, status=404)
-        serializer = CustomDrawSerializer_(custom_draw, data=request.data, partial = True)
+        serializer = CustomDrawSerializer(custom_draw, data=request.data, partial = True, context={"request": request})
         
         if serializer.is_valid(raise_exception=True):
             print(f"Validált adatok: {serializer.validated_data}")
@@ -162,4 +156,20 @@ def customDraws(request):
                 "message":"Az elem módosítása sikeresen megtörtént."
             }
             return JsonResponse(response, status= 200)
+    elif request.method == 'DELETE':
+        remowend_id = request.data.get('id')
+        try:
+            obj = CustomDraw.objects.get(id=remowend_id)  # Manuális keresés
+            obj.delete()
+            response = {
+                "status":"success",
+                "message":"Az elem törlése sikeresen megtörtént."
+            }
+            return JsonResponse(response, status=200)
+        except CustomDraw.DoesNotExist:  # Ha nincs meg, 404-et kell visszaadni
+            response = {
+                "status":"error",
+                "message":"Az elem törlése sikertelen. Az elem nem található."
+            }
+            return JsonResponse(response, status=404)
 
