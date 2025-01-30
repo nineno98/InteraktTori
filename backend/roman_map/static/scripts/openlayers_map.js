@@ -2,7 +2,21 @@ const hatter = new ol.layer.Tile({
     source: new ol.source.OSM(),
   });
   
-
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 class TerritoriesVectorLayer{
     constructor(apiUrl){
@@ -276,13 +290,44 @@ class TerritoriesVectorLayer{
         closeButton.addEventListener('click', this.closeDeleting);
 
         this.acceptDeleting = () => {
-            console.log('accept deleting');
+            const featureId = feature.get('id');
+            const csrftoken = getCookie('csrftoken')
+            console.log('document.cookie:', document.cookie);
+            console.log(csrftoken)
+            fetch('http://127.0.0.1:8000/custom-draws/',{
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id:featureId
+                })
+            }).then(response => {
+                if(response.ok){
+                    console.log('Feature törölve az adatbázisból');
+                    this.drawingLayer.getSource().removeFeature(feature);
+                    popupContainer.style.display = 'none';
+                    console.log("Feature törölve:", feature);
+
+                    map.removeInteraction(this.select);
+                    map.removeInteraction(this.modify);
+                    this.addSelect();
+                }else{
+                    console.error('Hiba a törlés során:', response.statusText);
+                }
+            }).catch(error => {
+                console.error('Hálózati hiba történt:', error);
+            });
+
+            /*console.log('accept deleting feature id: '+featureId);
             this.drawingLayer.getSource().removeFeature(feature);
             popupContainer.style.display = 'none';
             console.log("Feature törölve:", feature);
+
             map.removeInteraction(this.select);
             map.removeInteraction(this.modify);
-            this.addSelect();
+            this.addSelect();*/
         }
         saveButton.addEventListener('click', this.acceptDeleting);
 
@@ -310,17 +355,52 @@ class TerritoriesVectorLayer{
 
         this.saveModify = () => {
             console.log('mentes');
-            popupContainer.style.display = 'none';
-            console.log(feature.getGeometry().getCoordinates());
-            console.log(originalGeometry.getCoordinates());
-            //this.selectenabled = false;
-            map.removeInteraction(this.select);
-            map.removeInteraction(this.modify);
-            this.drawingLayer.getSource().changed();
+            const featureId = feature.get('id');
+            const csrftoken = getCookie('csrftoken')
+            const cloneFeature = feature.clone();
+            cloneFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326');
+            const coordinates4326 = cloneFeature.getGeometry().getCoordinates();
+            console.log(coordinates4326);
+            fetch('http://127.0.0.1:8000/custom-draws/', {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id : featureId,
+                    coordinates : coordinates4326
+                })
+            }).then(response => {
+                if(response.ok){
+                    console.log('Feature módosítva az adatbázisban');
+                    popupContainer.style.display = 'none';
+                    
+                    //this.selectenabled = false;
+                    map.removeInteraction(this.select);
+                    map.removeInteraction(this.modify);
+                    //this.drawingLayer.getSource().changed();
 
-            //this.selectenabled = true;
-            this.addSelect();
+                    //this.selectenabled = true;
+                    this.addSelect();
 
+                }else{
+                    popupContainer.style.display = 'none';
+                    feature.setGeometry(originalGeometry);
+                    console.error('Hiba a törlés során:', response.statusText);
+                    map.removeInteraction(this.select);
+                    map.removeInteraction(this.modify);
+                    this.drawingLayer.getSource().changed();
+
+                    //this.selectenabled = true;
+                    this.addSelect();
+                }
+            }).catch(error => {
+                console.error('Hálózati hiba történt:', error);
+            });
+            //this.drawingLayer.getSource().changed();
+            
+            
 
             
         };
@@ -371,6 +451,8 @@ class TerritoriesVectorLayer{
             //popupContainer.style.display = 'none';
             const name = document.getElementById('name').value;
             const description = document.getElementById('description').value;
+            const created_by = document.querySelector('meta[name="user-id"]').content
+            console.log(created_by);
             if(!name){
                 errorLabel.textContent = "A név megadása kötelező!";
                 errorLabel.style.display = "block";
@@ -380,18 +462,48 @@ class TerritoriesVectorLayer{
                 popupContainer.style.display = 'none';
                 document.getElementById('name').value = '';
                 document.getElementById('description').value = '';
-                feature.setProperties({ name, description });
+                feature.setProperties({ name, description, created_by });
+                const csrftoken = getCookie('csrftoken')
                 const format = new ol.format.GeoJSON({
                     dataProjection: 'EPSG:4326',
                     featureProjection: 'EPSG:3857'
                 });
                 const geojson = format.writeFeatureObject(feature);
-                console.log(geojson);
-                this.turnOffDaw();
-                //this.drawenabled = false;
-                //this.drawenabled = true;
-                this.turnOnDraw();
                 
+                fetch('http://127.0.0.1:8000/custom-draws/', {
+                    method:'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(geojson)
+
+
+                }).then(response => {
+                    if(response.ok){
+                        console.log("Mentés sikeresen megtörtént");
+                        return response.json()
+                        /*const data = response.json();
+                        const id = data.id;
+                        feature.setProperties({id})
+
+                        this.turnOffDaw();
+                        
+                        this.turnOnDraw();*/
+                    }else{
+                        console.log("Mentés sikertelen.");
+                        this.drawingLayer.getSource().removeFeature(feature)
+                        return Promise.reject("Sikertelen mentés");
+                    }
+                }).then(data => {
+                    const id = data.id;
+                    feature.setProperties({id})
+
+                    this.turnOffDaw();
+                    this.turnOnDraw();
+                }).catch(error => {
+                    console.error("Hiba:", error);
+                });            
             }
             
         };
@@ -458,7 +570,7 @@ class TerritoriesVectorLayer{
 
 
   const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/territories/');
-const drawing = new HandleDraw('http://127.0.0.1:8000/custompolygons/')
+const drawing = new HandleDraw('http://127.0.0.1:8000/custom-draws/')
 
   const map = new ol.Map({
     layers: [

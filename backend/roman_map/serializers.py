@@ -191,7 +191,8 @@ class CustomDrawSerializer(serializers.Serializer):
         except json.JSONDecodeError as e:
             raise serializers.ValidationError("Hibás JSON formátum. "+str(e))
         except Exception as e:
-            raise serializers.ValidationError("Hiba. "+str(e))
+            print(e)
+            raise serializers.ValidationError(f"Hiba,,,. {repr(e)}")
         return feature
 
 class CustomDrawSerializer_(serializers.ModelSerializer):

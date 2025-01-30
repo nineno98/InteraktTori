@@ -112,7 +112,7 @@ def getCustompoints(request):
            "data": serializer.data
        }, status=status.HTTP_200_OK)
 
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 @api_view(['GET','POST', 'PATCH', 'DELETE'])
 @csrf_exempt
 def customDraws(request):
