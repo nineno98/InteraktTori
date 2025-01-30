@@ -152,6 +152,7 @@ class TerritoriesVectorLayer{
         this.select = null;
         this.draw = null;
         this.modify = null;
+        this.showdrawsvisible = false;
 
         this.selectedStyle = new ol.style.Style({
             fill: new ol.style.Fill({
@@ -175,6 +176,21 @@ class TerritoriesVectorLayer{
             })
         })
 
+        this.basicStyle = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(0, 107, 195, 0.4)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                width: 1,
+            }),
+            image: new ol.style.Circle({
+                radius: 8,
+                fill: new ol.style.Fill({ color: 'rgba(0, 107, 195, 0.4)' }),
+                stroke: new ol.style.Stroke({ color: 'blue', width: 1 })
+            }),
+        })
+
         this.drawingSource = new ol.source.Vector({
             wrapX: false,
             format: new ol.format.GeoJSON(),
@@ -185,7 +201,7 @@ class TerritoriesVectorLayer{
         this.drawingLayer = new ol.layer.Vector({
             source: this.drawingSource,
         });
-
+        this.drawingLayer.setStyle(null);
         this.undoButton = document.getElementById('undo');
         this.undoButton.addEventListener('click', this.undoHandling.bind(this), false);
 
@@ -198,9 +214,20 @@ class TerritoriesVectorLayer{
         this.selectenableButton = document.getElementById('select-enable');
         this.selectenableButton.addEventListener('click', this.enableSelect.bind(this), false);
 
-        
+        this.showOrHiddenDraws = document.getElementById('show-or-hidden-drawing-layer');
+        this.showOrHiddenDraws.addEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
 
         
+    }
+
+    showOrHiddenDrawsF(){
+        if(this.showdrawsvisible){
+            this.drawingLayer.setStyle(null);
+            this.showdrawsvisible = false;
+        }else{
+            this.drawingLayer.setStyle(this.basicStyle);
+            this.showdrawsvisible = true;
+        }
     }
 
     selectedStyleFunction(feature){
