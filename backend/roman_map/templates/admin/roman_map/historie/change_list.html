@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="upload-xlsx-file-from-admin" class="addlink">Importálás .XLSX</a>
+    </li>
+
+{% endblock %}

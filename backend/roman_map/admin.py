@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Territorie, Historie, CustomPolygon, CustomDraw
-from .forms import TerritoriesJSONForm
+from .forms import TerritoriesJSONForm, HistorieXLSXImportForm
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import path
@@ -9,6 +9,45 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 
 # Register your models here.
+
+@admin.register(Historie)
+class HistoriesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'date', 'historie_type')
+    list_filter = ('id','name', 'date',)
+
+    def get_urls(self):
+        urls =  super().get_urls()
+        custom_urls = [
+            path('upload-xlsx-file-from-admin/', self.upload_file),
+        ]
+        return custom_urls + urls
+    
+    def upload_file(self, request):
+        print(request.method)
+        if request.method == 'POST':
+            print("post")
+            if "xlsx_file" in request.POST:
+                form = HistorieXLSXImportForm(request.POST, request.FILES)
+                if form.is_valid():
+                    try:
+                        print("errors:")
+                        print(form.errors)
+                        form.save()
+                        print(form.errors)
+                        self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+                        return redirect(reverse('admin:roman_map_historie_changelist'))
+                    except Exception as e:
+                        self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
+                else:
+                    self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
+                    return redirect(reverse('admin:roman_map_historie_changelist'))
+            else:
+                self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
+        form = HistorieXLSXImportForm()
+        data = {'form':form}
+        return render(request, 'admin/roman_map/historie/import_form.html', data)
+
+
 
 class CustomUserAdmin(UserAdmin):
     list_display = (
@@ -98,7 +137,7 @@ class TerritorieAdmin(admin.ModelAdmin):
 #admin.site.register(Territorie, TerritorieAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(CustomPolygon)
-admin.site.register(Historie)
+#admin.site.register(Historie)
 admin.site.register(CustomDraw)
 #admin.site.index_template = 'admin/admin_import_section.html'
 

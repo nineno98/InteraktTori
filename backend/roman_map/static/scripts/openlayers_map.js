@@ -8,7 +8,7 @@ function getCookie(name) {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
+            
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
@@ -216,7 +216,7 @@ class TerritoriesVectorLayer{
 
         this.showOrHiddenDraws = document.getElementById('show-or-hidden-drawing-layer');
         this.showOrHiddenDraws.addEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
-
+        this.showOrHiddenDraws.style.background = 'lightgrey';
         
     }
 
@@ -224,9 +224,11 @@ class TerritoriesVectorLayer{
         if(this.showdrawsvisible){
             this.drawingLayer.setStyle(null);
             this.showdrawsvisible = false;
+            this.showOrHiddenDraws.removeEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
         }else{
             this.drawingLayer.setStyle(this.basicStyle);
             this.showdrawsvisible = true;
+            this.showOrHiddenDraws.removeEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
         }
     }
 

@@ -36,6 +36,7 @@ class Historie(models.Model):
     ]
     historie_type = models.CharField(max_length=255, choices=HISTORIE_TYPE_CHOICHES)
     image = models.ImageField(upload_to='historie/', default=None)
+    date = models.IntegerField(default=1000)
     coordinates = models.TextField(blank=False)
 
     def __str__(self):

@@ -2,8 +2,9 @@ from django import forms
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 import json
 import os
-from .models import Territorie
+from .models import Territorie, Historie
 from .static.files import schema as ValidationsSchema
+import pandas as pd
 
 class TerritoriesJSONForm(forms.Form):
 
@@ -76,6 +77,53 @@ class LoginForm(forms.Form):
     username = forms.CharField(max_length = 30, label="Felhasználónév", required=True)
     password = forms.CharField(max_length = 30, label="Jelszó", widget= forms.PasswordInput, required=True)       
 
-        
+class HistorieXLSXImportForm(forms.Form):
+    file = forms.FileField(label="XLSX fájl feltöltése")
+
+    def clean_file(self):
+        super().clean()
+        try:
+
+            file = self.cleaned_data.get('file')
+
+            if not file.name.endswith(".xlsx"):
+                raise forms.ValidationError("Csak .xlsx kiterjesztésű fájl engedélyezett.")
+            try:
+                df = pd.read_excel(file, engine='openpyxl')
+            except Exception:
+                raise forms.ValidationError("Hibás vagy sérült XLSX fájl.")
+            required_columns = {"name", "description", "coordinates", "time", "type", "image"}
+            if not required_columns.issubset(df.columns):
+                raise forms.ValidationError(f"A fájl nem tartalmazza az összes szükséges mezőket: {required_columns}")
+            
+            for _, row in df.iterrows():
+                coordinates = str(row["coordinates"]).strip()
+                if not (coordinates.startswith("[") and coordinates.endswith("]")):
+                    raise forms.ValidationError(f"Érvénytelen koordináta formátum: {coordinates}")
+                historie_type = str(row['type'])
+                print(historie_type)
+                if historie_type not in {'csata', 'esemeny'}:
+                    raise forms.ValidationError("Érvénytelen típusformátum. a típusnak 'csata' vagy 'esemeny' kell lennie.")
+
+            self.cleaned_data["df"] = df
+        except Exception as e:
+            print(e)
+            raise forms.ValidationError(f"clean_file: Hiba: {e}")
+            
+        return file
+    def save(self):
+        df = self.cleaned_data.get("df")
+
+        for _, row in df.iterrows():
+            Historie.objects.create(
+                name=row["name"],
+                description=row["description"],
+                coordinates = row["coordinates"],
+                historie_type = row["type"].lower(),
+                image = row["image"] if pd.notna(row["image"]) else None,
+                date = row["time"]
+
+            )
+
         
 
