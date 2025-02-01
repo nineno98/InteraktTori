@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Territorie, Historie, CustomPolygon, CustomPoint, CustomUser, CustomDraw
+from .models import Territorie, Historie, CustomUser, CustomDraw, Point
 from rest_framework import serializers
 import json
 import geojson
@@ -32,27 +32,46 @@ class TerritorieSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Hiba. "+str(e))
         return feature
     
+class HistoriePointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Point
+        fields = ['id', 'coordinates']
 
 class HistorieSerializer(serializers.ModelSerializer):
-    
+    image_url = serializers.SerializerMethodField()
+    points = HistoriePointSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Historie
+        fields = ['id', 'name', 'description', 'historie_type', 'image_url', 'date', 'points']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+            
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
     def to_representation(self, instance):
+        
         try:
             geometry = json.loads(instance.coordinates)
-            point = geojson.Point(geometry)
+            multipoint = geojson.MultiPoint(geometry)
             properties = {
                 "id": instance.id,
                 "name": instance.name,
                 "description": instance.description,
-                "historie_type":instance.historie_type,
-                "image": instance.image
+                "date":instance.date,
+                
+                
             }
-            feature = geojson.Feature(properties=properties, geometry=point)
-
+            feature = geojson.Feature(properties=properties, geometry=multipoint)
+        
         except json.JSONDecodeError as e:
             raise serializers.ValidationError("Hibás JSON formátum. "+str(e))
         except Exception as e:
             raise serializers.ValidationError("Hiba. "+str(e))
         return feature
+    
       
 
 class CustomPolygonSerializer(serializers.ModelSerializer):

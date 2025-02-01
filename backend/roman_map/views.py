@@ -91,9 +91,9 @@ def getTerritories(request):
 @api_view(['GET'])
 def getHistories(request):
     histories = Historie.objects.all()
-    serializer = HistorieSerializer(histories, many=True)
+    serializer = HistorieSerializer(histories, many = True)
     geojson_data = geojson.FeatureCollection(features=serializer.data)
-    return JsonResponse(geojson_data)
+    return JsonResponse(geojson_data, safe=False)
 
 @api_view(['GET'])
 def getCustomPolygons(request):
