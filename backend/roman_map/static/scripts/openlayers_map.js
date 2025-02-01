@@ -144,7 +144,7 @@ class TerritoriesVectorLayer{
 
 
   
-  class HandleDraw {
+class HandleDraw {
     constructor(apiUrl){
         this.apiUrl = apiUrl;
         this.drawenabled = false;
@@ -594,18 +594,39 @@ class TerritoriesVectorLayer{
             map.removeInteraction(this.modify);
         }
     }
-  }
+}
+
+class HistorieVectorLayer{
+    constructor(api_url){
+        this.apiUrl = api_url;
+        this.historieSource = new ol.source.Vector({
+            wrapX: false,
+            format: new ol.format.GeoJSON(),
+            url: this.apiUrl,
+
+        });
+        this.historieLayer = new ol.layer.Vector({
+            source: this.historieSource,
+        });
+
+    };
+    getLayer(){
+        return this.historieLayer;
+    }
+}
 
 
 
-  const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/territories/');
-const drawing = new HandleDraw('http://127.0.0.1:8000/custom-draws/')
+const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/territories/');
+const drawing = new HandleDraw('http://127.0.0.1:8000/custom-draws/');
+const histories = new HistorieVectorLayer('http://127.0.0.1:8000/histories/');
 
   const map = new ol.Map({
     layers: [
         hatter,
         territories.getLayer(),
         drawing.getLayer(),
+        histories.getLayer(),
         
 
     ],
@@ -617,35 +638,3 @@ const drawing = new HandleDraw('http://127.0.0.1:8000/custom-draws/')
     }),
   });
 
-
-  /*const handledraw = new HandleDraw();
-  handledraw.addInteraction();*/
-
-  /*const typeSelect = document.getElementById('type');
-  
-  let draw; // global so we can remove it later
-  function addInteraction() {
-    const value = typeSelect.value;
-    if (value !== 'None') {
-      draw = new ol.interaction.Draw({
-        source: source,
-        type: typeSelect.value,
-      });
-      map.addInteraction(draw);
-    }
-  }
-  
-  
-  /**
-   * Handle change event.
-   
-  typeSelect.onchange = function () {
-    map.removeInteraction(draw);
-    addInteraction();
-  };
-  
-  document.getElementById('undo').addEventListener('click', function () {
-    draw.removeLastPoint();
-  });
-  
-  addInteraction();*/

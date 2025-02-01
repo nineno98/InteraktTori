@@ -61,6 +61,7 @@ class HistorieSerializer(serializers.ModelSerializer):
                 "name": instance.name,
                 "description": instance.description,
                 "date":instance.date,
+                "image_url":self.get_image_url(instance)
                 
                 
             }
