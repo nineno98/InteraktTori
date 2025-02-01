@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Territorie, Historie, CustomPolygon, CustomDraw
+from .models import CustomUser, Territorie, Historie, CustomPolygon, CustomDraw, Point
 from .forms import TerritoriesJSONForm, HistorieXLSXImportForm
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -9,11 +9,20 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 
 # Register your models here.
+@admin.register(Point)
+class PointAdmin(admin.ModelAdmin):
+    list_display = ('id', 'historie', 'coordinates')
+
+class PointInline(admin.TabularInline):
+    model = Point
+    extra = 0
+    
 
 @admin.register(Historie)
 class HistoriesAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'date', 'historie_type')
     list_filter = ('id','name', 'date',)
+    inlines = [PointInline]
 
     def get_urls(self):
         urls =  super().get_urls()
@@ -139,5 +148,6 @@ admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(CustomPolygon)
 #admin.site.register(Historie)
 admin.site.register(CustomDraw)
+#admin.site.register(Point)
 #admin.site.index_template = 'admin/admin_import_section.html'
 

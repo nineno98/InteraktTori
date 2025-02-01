@@ -48,6 +48,13 @@ def delete_image_file(sender, instance, **kwargs):
         if os.path.isfile(instance.image.path):
             os.remove(instance.image.path)
 
+class Point(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    coordinates = models.CharField(max_length=100)
+    historie = models.ForeignKey(Historie, on_delete=models.CASCADE, related_name="points")
+
+    def __str__(self):
+        return str(self.id)+' '+str(self.historie)+' '+str(self.coordinates)
 
 class CustomPolygon(models.Model):
     id = models.BigAutoField(primary_key=True)

@@ -2,9 +2,13 @@ from django import forms
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 import json
 import os
-from .models import Territorie, Historie
+from .models import Territorie, Historie, Point
 from .static.files import schema as ValidationsSchema
 import pandas as pd
+import re
+
+
+
 
 class TerritoriesJSONForm(forms.Form):
 
@@ -90,40 +94,51 @@ class HistorieXLSXImportForm(forms.Form):
                 raise forms.ValidationError("Csak .xlsx kiterjesztésű fájl engedélyezett.")
             try:
                 df = pd.read_excel(file, engine='openpyxl')
+                
             except Exception:
                 raise forms.ValidationError("Hibás vagy sérült XLSX fájl.")
-            required_columns = {"name", "description", "coordinates", "time", "type", "image"}
+            required_columns = {"name", "description", "coordinates", "time", "type"}
             if not required_columns.issubset(df.columns):
                 raise forms.ValidationError(f"A fájl nem tartalmazza az összes szükséges mezőket: {required_columns}")
             
             for _, row in df.iterrows():
                 coordinates = str(row["coordinates"]).strip()
+                coordinate = coordinates.split(';')
+                #print(coordinate)
                 if not (coordinates.startswith("[") and coordinates.endswith("]")):
                     raise forms.ValidationError(f"Érvénytelen koordináta formátum: {coordinates}")
                 historie_type = str(row['type'])
-                print(historie_type)
+                
                 if historie_type not in {'csata', 'esemeny'}:
                     raise forms.ValidationError("Érvénytelen típusformátum. a típusnak 'csata' vagy 'esemeny' kell lennie.")
 
             self.cleaned_data["df"] = df
+            self.cleaned_data['coordinate'] = coordinate
         except Exception as e:
-            print(e)
+            
             raise forms.ValidationError(f"clean_file: Hiba: {e}")
             
         return file
     def save(self):
         df = self.cleaned_data.get("df")
-
+        
+        
         for _, row in df.iterrows():
-            Historie.objects.create(
+            x = json.loads(str(row["coordinates"]))
+            matches = re.findall(r"\[?([\d.]+),\s*([\d.]+)\]?", row["coordinates"])
+            print(matches)
+            #print(type(row["coordinates"]))
+            historie = Historie.objects.create(
                 name=row["name"],
                 description=row["description"],
                 coordinates = row["coordinates"],
                 historie_type = row["type"].lower(),
-                image = row["image"] if pd.notna(row["image"]) else None,
+                image = None,
                 date = row["time"]
-
             )
+            for lon, lat in matches:
+                point = Point.objects.create(coordinates=f"[{lon},{lat}]", historie = historie)
+                
 
         
 
