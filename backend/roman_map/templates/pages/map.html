@@ -12,87 +12,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.3.1/ol.css">
 
     <meta name="user-id" content="{{ request.user.id }}">
-     
+    <link rel="stylesheet" href="{% static 'styles/map_style.css' %}">
     <style>
-        #map {
-        width: 100%;
-        height: 500px; /* vagy bármilyen megfelelő magasság */
-        border: 1px solid #ccc; /* Csak hogy lásd a konténert */
-        }
         
-      
-      .show-custom-polygons-button {
-        top: 65px;
-        left: .5em;
-      }
-      .ol-touch .show-custom-polygons-button {
-        top: 80px;
-      }
-
-      .hidden-button-control {
-        top: 90px;
-        left:.5em;
-      }
-      .draw-type-control{
-        top: 90px;
-        left: 2.1em;
-      }
-
-      .popup-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5); /* Sötét háttér */
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      .popup-content {
-          background: white;
-          padding: 20px;
-          border-radius: 8px;
-          width: 300px;
-          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-          text-align: center;
-      }
-
-      .popup-content h3 {
-          margin-top: 0;
-      }
-
-      .popup-content input {
-          width: 100%;
-          padding: 8px;
-          margin: 10px 0;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-      }
-
-        .popup-buttons {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .popup-buttons button {
-            padding: 8px 12px;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .apply-button {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .close-button{
-            background: #f44336;
-            color: white;
-        }
     
     </style>
 
@@ -104,9 +26,10 @@
     <button id="noveles">Növelés</button>
     <button id="csokkentes">Csökkentés</button>
     <a href="{% url 'fooldal' %}">Főoldal</a>
-    
-    <div>
+    <input type="range" id="date-slider" min="-700" max="700" value="-700">
+    <div id="container">
         <div id="map"></div>
+        <div id="panel"></div>
     </div>
     <span class="input-group">
           <label class="input-group-text" for="type">Geometry type:</label>
@@ -120,7 +43,7 @@
           <input class="form-control" type="button" value="Undo" id="undo">
           
         </span>
-      <input type="range" id="date-slider" min="-700" max="700" value="-700">
+      
         <span id="slider-value"></span>
         <input class="btn btn-primary" type="button" value="Rajz" id="draw-enable">
         <input class="btn btn-primary" type="button" value="Kijelölés" id="select-enable">

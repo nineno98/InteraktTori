@@ -599,19 +599,123 @@ class HandleDraw {
 class HistorieVectorLayer{
     constructor(api_url){
         this.apiUrl = api_url;
-        this.historieSource = new ol.source.Vector({
+        this.selectenabled = false;
+        this.select = null;
+        this.historieSource = null;
+        /*this.historieSource = new ol.source.Vector({
             wrapX: false,
             format: new ol.format.GeoJSON(),
             url: this.apiUrl,
 
+        });*/
+        this.historieSource = new ol.source.Vector({
+            format: new ol.format.GeoJSON()
         });
         this.historieLayer = new ol.layer.Vector({
-            source: this.historieSource,
+            source: this.historieSource
         });
 
+        fetch(this.apiUrl)
+        .then(response => {
+            if(response.ok){
+                console.log('adatok bekerve');
+                return response.json();
+            }else{
+                console.log('hiba');
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+        })
+        .then(data => {
+            console.log(data)
+            
+            const features = this.historieSource.getFormat().readFeatures(data, {
+                featureProjection: 'EPSG:3857',
+            });
+            this.historieSource.addFeatures(features);
+            this.loadDescriptionsPanel(this.historieSource.getFeatures());
+            
+        })
+        .catch(error => console.error("Hiba a GeoJSON lekérésekor:", error));
+
+        /*this.historieLayer = new ol.layer.Vector({
+            source: this.historieSource,
+        });*/
+        /*this.historieSource.on('change', () => {
+            if (this.historieSource.getState() === 'ready') {
+                this.loadDescriptionsPanel(this.historieSource.getFeatures());
+            }
+        });*/
+        
+        
     };
     getLayer(){
         return this.historieLayer;
+    }
+    loadDescriptionsPanel(features){
+        
+        //const features = this.historieLayer.getSource().getFeatures();
+        //const descriptions = [];
+        const descriptionsMap = new Map();
+        console.log(features);
+
+        features.forEach(feature => {
+            console.log('beolvas');
+            const properties = feature.getProperties();
+            if(properties.date && properties.description && properties.id){
+                if(!descriptionsMap.has(properties.id)){
+                    descriptionsMap.set(properties.id,{
+                        date: properties.date,
+                        description: properties.description,
+                        
+                    });
+                }
+                
+            }
+        });
+        //descriptionsMap = new Map([...descriptionsMap.entries()].sort());
+        console.log(descriptionsMap.length)
+
+
+        const panelroot = document.getElementById('panel');
+
+        descriptionsMap.forEach((item, id) =>{
+            const container = document.createElement('div');
+            const header = document.createElement('h2');
+            const description = document.createElement('p');
+
+            header.innerText = id;
+            description.innerText = item.description;
+            container.setAttribute('data-id', id);
+            container.classList.add('panel-item');
+
+            panelroot.appendChild(container);
+            container.appendChild(header);
+            container.appendChild(description);
+        })
+        
+        
+    }
+    addSelect(){
+        this.select = new ol.interaction.Select({
+            layers: [this.historieLayer],
+            style: this.selectedStyleFunction,
+        });
+        map.addInteraction(this.select);
+
+        this.select.on('select', (event) =>{
+            const selectedFeatures = event.selected;
+            if (selectedFeatures.length > 0) {
+                const selectedFeature = selectedFeatures[0];
+                const featureId = selectedFeature.get('id');
+
+                console.log("Kiválasztott Feature ID:", featureId);
+
+                const panelItem = document.querySelector(`.panel-item[data-id="${featureId}"]`)
+                if(panelItem){
+                    panelItem.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }
+        })
     }
 }
 
@@ -638,3 +742,4 @@ const histories = new HistorieVectorLayer('http://127.0.0.1:8000/histories/');
     }),
   });
 
+histories.addSelect();
