@@ -2,10 +2,12 @@ from django import forms
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 import json
 import os
-from .models import Territorie, Historie, Point
+from .models import Territorie, Historie, Point, Quiz, CustomUser, Question, Answer
 from .static.files import schema as ValidationsSchema
 import pandas as pd
 import re
+from django.forms import inlineformset_factory, modelform_factory
+
 
 
 
@@ -104,7 +106,7 @@ class HistorieXLSXImportForm(forms.Form):
             for _, row in df.iterrows():
                 coordinates = str(row["coordinates"]).strip()
                 coordinate = coordinates.split(';')
-                #print(coordinate)
+                
                 if not (coordinates.startswith("[") and coordinates.endswith("]")):
                     raise forms.ValidationError(f"Érvénytelen koordináta formátum: {coordinates}")
                 historie_type = str(row['type'])
@@ -125,9 +127,7 @@ class HistorieXLSXImportForm(forms.Form):
         
         for _, row in df.iterrows():
             x = json.loads(str(row["coordinates"]))
-            matches = re.findall(r"\[?([\d.]+),\s*([\d.]+)\]?", row["coordinates"])
-            print(matches)
-            #print(type(row["coordinates"]))
+            matches = re.findall(r"\[?([\d.]+),\s*([\d.]+)\]?", row["coordinates"]) 
             historie = Historie.objects.create(
                 name=row["name"],
                 description=row["description"],
@@ -139,6 +139,25 @@ class HistorieXLSXImportForm(forms.Form):
             for lon, lat in matches:
                 point = Point.objects.create(coordinates=f"[{lon},{lat}]", historie = historie)
                 
+class QuizForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = ('title', 'description')
 
+QuestionForm = modelform_factory(Question, fields=["text", "points"])
+ValaszelemForm = inlineformset_factory(Question, Answer, fields=["text", "is_correct"], extra=4)
+IgazHamisForm = inlineformset_factory(Question, Answer, fields=["text", "is_correct"], extra=2)
+class QuestionTypeForm(forms.Form):
+    question_type = forms.ChoiceField(
+        choices=Question.QUESTION_TYPES,
+        label="Válassz kérdés típust",
+    )
         
 
+AnswerFormSet = inlineformset_factory(
+    Question,  # A fő modell (kérdés)
+    Answer,  # A kapcsolt modell (válasz)
+    fields=['text', 'is_correct'],
+    extra=4,  # Alapból 4 válaszlehetőséget jelenítünk meg
+    can_delete=True  # Megadható, hogy egy választ törölhessünk
+)

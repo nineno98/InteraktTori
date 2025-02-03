@@ -1,0 +1,27 @@
+{% extends "pages/test.html" %}
+
+{% block content %}
+
+<h2>A "{{ quiz.title }}" teszt kérdései:</h2>
+<ul>
+    {% for question in questions %}
+        <li>{{ question.text }} ({{ question.get_question_type_display }})</li>
+    {% empty %}
+        <li>Még nincsenek kérdések.</li>
+    {% endfor %}
+</ul>
+<h2>Új kérdés hozzáadása a "{{ quiz.title }}" teszthez</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <h3>Kérdés adatai</h3>
+    {{ form.as_p }}
+
+    <button type="submit">Tovább</button>
+</form>
+
+
+
+<a href="{% url 'teszt' %}">Vissza a kvízek listájához</a>
+{% endblock %}

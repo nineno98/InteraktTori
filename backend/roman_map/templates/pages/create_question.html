@@ -1,0 +1,24 @@
+{% extends "pages/test.html" %}
+
+{% block content %}
+<h2>Kérdés hozzáadása a "{{ quiz.title }}" kvízhez</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <h3>Kérdés adatai</h3>
+    {{ question_form.as_p }}
+
+    <h3>Válaszlehetőségek</h3>
+    {{ formset.management_form }}
+    {% for form in formset %}
+        <div class="answer-form border p-2 mb-2">
+            {{ form.as_p }}
+        </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Kérdés mentése</button>
+</form>
+
+<a href="{% url 'teszt_reszletei' quiz.id %}" class="btn btn-secondary">Vissza a kvízhez</a>
+{% endblock %}

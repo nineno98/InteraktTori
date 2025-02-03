@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .serializers import TerritorieSerializer, HistorieSerializer, CustomPolygonSerializer, CustomPointSerializer, CustomDrawSerializer, CustomDrawSerializer_
+from .serializers import TerritorieSerializer, HistorieSerializer, CustomDrawSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import Territorie, Historie, CustomPolygon, CustomPoint, CustomDraw
+from .models import Territorie, Historie, CustomDraw, Quiz
 from rest_framework.views import status
-from .forms import LoginForm
+from .forms import LoginForm, QuizForm, QuestionTypeForm, QuestionForm, ValaszelemForm,IgazHamisForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
@@ -95,22 +95,6 @@ def getHistories(request):
     geojson_data = geojson.FeatureCollection(features=serializer.data)
     return JsonResponse(geojson_data, safe=False)
 
-@api_view(['GET'])
-def getCustomPolygons(request):
-    custompolygons = CustomPolygon.objects.all()
-    serializer = CustomPolygonSerializer(custompolygons, many=True)
-    geojson_data = geojson.FeatureCollection(features=serializer.data)
-    return JsonResponse(geojson_data)
-
-@api_view(['GET'])
-def getCustompoints(request):
-    custompoints = CustomPoint.objects.all()
-    serializer = CustomPointSerializer(custompoints, many= True)
-    return Response({
-           "success": True,
-           "message": "successful get",
-           "data": serializer.data
-       }, status=status.HTTP_200_OK)
 
 @permission_classes([IsAuthenticated])
 @api_view(['GET','POST', 'PATCH', 'DELETE'])
@@ -159,17 +143,93 @@ def customDraws(request):
     elif request.method == 'DELETE':
         remowend_id = request.data.get('id')
         try:
-            obj = CustomDraw.objects.get(id=remowend_id)  # Manuális keresés
+            obj = CustomDraw.objects.get(id=remowend_id)
             obj.delete()
             response = {
                 "status":"success",
                 "message":"Az elem törlése sikeresen megtörtént."
             }
             return JsonResponse(response, status=200)
-        except CustomDraw.DoesNotExist:  # Ha nincs meg, 404-et kell visszaadni
+        except CustomDraw.DoesNotExist:
             response = {
                 "status":"error",
                 "message":"Az elem törlése sikertelen. Az elem nem található."
             }
             return JsonResponse(response, status=404)
+
+def teszt(request):
+    all_quizs = Quiz.objects.all()
+    return render(request,'pages/test.html',{"quiz_list":all_quizs})
+
+def uj_teszt_keszitese(request):
+    if request.method == 'POST':
+        form = QuizForm(request.POST)
+        if form.is_valid():
+            quiz = form.save(commit=False)
+            quiz.created_by = request.user
+            form.save()
+            return redirect('teszt_reszletei', quiz_id=quiz.id)
+        else:
+            messages.error(request, "Hiba történt, a teszt létrehozása sikertelen!")
+    else:
+        form = QuizForm()
+        return render(request, 'pages/create_test.html', {"form":form})
+
+def teszt_reszletei(request, quiz_id):
+    try:
+        quiz = Quiz.objects.get(id = quiz_id)
+    except Quiz.DoesNotExist:
+        messages.error(request, "Hiba történt a folyamat során!")
+    if request.method == "POST":
+        form = QuestionTypeForm(request.POST)
+        if form.is_valid():
+            question_type = form.cleaned_data["question_type"]
+            return redirect("kerdes_hozzadasa", quiz_id=quiz.id, question_type=question_type)
+    
+
+    questions = quiz.questions.all()  # Meglévő kérdések listája
+    form = QuestionTypeForm()
+    return render(request, "pages/test_details.html", {
+        "quiz": quiz,
+        "questions": questions,
+        "form": form
+    })
+
+def kerdes_hozzadasa(request, quiz_id, question_type):
+    try:
+        quiz = Quiz.objects.get(id = quiz_id)
+    except Quiz.DoesNotExist:
+        messages.error(request, "Hiba történt a folyamat során!")
+    if question_type == "mc":  # Több válaszos
+        AnswerFormSetClass = ValaszelemForm
+    else:  # Igaz/Hamis
+        AnswerFormSetClass = IgazHamisForm
+
+    if request.method == "POST":
+        question_form = QuestionForm(request.POST)
+        formset = AnswerFormSetClass(request.POST)
+
+        if question_form.is_valid() and formset.is_valid():
+            question = question_form.save(commit=False)
+            question.quiz = quiz
+            question.question_type = question_type
+            question.save()
+
+            answers = formset.save(commit=False)
+            for answer in answers:
+                answer.question = question
+                answer.save()
+
+            return redirect("teszt_reszletei", quiz_id=quiz.id)  # Tovább a kvízhez
+
+    else:
+        question_form = QuestionForm()
+        formset = AnswerFormSetClass()
+
+    return render(request, "pages/create_question.html", {
+        "quiz": quiz,
+        "question_form": question_form,
+        "formset": formset,
+        "question_type": question_type
+    })
 

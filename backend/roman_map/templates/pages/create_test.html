@@ -1,0 +1,11 @@
+{% extends "pages/test.html" %}
+{% load static %}
+
+{% block content %}
+    <p>Új teszt helye</p>
+    <form action="." method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <button type="submit">Új teszt létrehozása</button>
+    </form>
+{% endblock content %}
