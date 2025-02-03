@@ -635,65 +635,56 @@ class HistorieVectorLayer{
             this.loadDescriptionsPanel(this.historieSource.getFeatures());
             
         })
-        .catch(error => console.error("Hiba a GeoJSON lekérésekor:", error));
-
-        /*this.historieLayer = new ol.layer.Vector({
-            source: this.historieSource,
-        });*/
-        /*this.historieSource.on('change', () => {
-            if (this.historieSource.getState() === 'ready') {
-                this.loadDescriptionsPanel(this.historieSource.getFeatures());
-            }
-        });*/
-        
-        
+        .catch(error => console.error("Hiba a GeoJSON lekérésekor:", error));       
     };
     getLayer(){
         return this.historieLayer;
     }
     loadDescriptionsPanel(features){
-        
-        //const features = this.historieLayer.getSource().getFeatures();
-        //const descriptions = [];
-        const descriptionsMap = new Map();
+        const featuresArr = [];
         console.log(features);
 
         features.forEach(feature => {
             console.log('beolvas');
             const properties = feature.getProperties();
             if(properties.date && properties.description && properties.id){
-                if(!descriptionsMap.has(properties.id)){
-                    descriptionsMap.set(properties.id,{
+                
+                featuresArr.push({
+                        id: properties.id,
                         date: properties.date,
                         description: properties.description,
-                        
-                    });
-                }
-                
+                        image_link: properties.image_url,
+                        name: properties.name,    
+                });
             }
         });
-        //descriptionsMap = new Map([...descriptionsMap.entries()].sort());
-        console.log(descriptionsMap.length)
-
+        featuresArr.sort((a, b) => a.date - b.date);
 
         const panelroot = document.getElementById('panel');
-
-        descriptionsMap.forEach((item, id) =>{
+        featuresArr.forEach((item) =>{
             const container = document.createElement('div');
             const header = document.createElement('h2');
             const description = document.createElement('p');
-
-            header.innerText = id;
+            const date = document.createElement('label');
+        
+            header.innerText = item.name;
+            date.innerText = item.date;
             description.innerText = item.description;
-            container.setAttribute('data-id', id);
-            container.classList.add('panel-item');
-
+            container.setAttribute('data-id', item.id);
+            container.classList.add('panel-item');            
             panelroot.appendChild(container);
             container.appendChild(header);
+            container.appendChild(date);
+            
+            if(item.image_link){
+                const image = document.createElement('img');
+                image.setAttribute('src', item.image_link);
+                image.setAttribute('alt', item.name);
+                image.setAttribute('class', 'historie-panel-item-image');
+                container.appendChild(image);            
+            }
             container.appendChild(description);
         })
-        
-        
     }
     addSelect(){
         this.select = new ol.interaction.Select({
@@ -707,9 +698,6 @@ class HistorieVectorLayer{
             if (selectedFeatures.length > 0) {
                 const selectedFeature = selectedFeatures[0];
                 const featureId = selectedFeature.get('id');
-
-                console.log("Kiválasztott Feature ID:", featureId);
-
                 const panelItem = document.querySelector(`.panel-item[data-id="${featureId}"]`)
                 if(panelItem){
                     panelItem.scrollIntoView({ behavior: "smooth", block: "start" });

@@ -1,18 +1,23 @@
+.historie-panel-item-image{
+    width: auto;
+    height: 30vh;
+    display: block;
+}
 #container{
     display: flex;
-    height: 100vh;
-  }
-  #panel{
+    height: 90vh;
+}
+#panel{
     flex: 1;
     overflow-y: auto;
-    margin: 5%;
-  }
+    margin: 1%;
+}
 
-  #map {
+#map {
   flex: 3;
-  height: 100%; /* vagy bármilyen megfelelő magasság */
-  border: 1px solid #ccc; /* Csak hogy lásd a konténert */
-  }
+  height: 100%;
+  border: 1px solid #ccc;
+}
   
 
 .show-custom-polygons-button {

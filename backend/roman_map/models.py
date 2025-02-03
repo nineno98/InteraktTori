@@ -35,9 +35,9 @@ class Historie(models.Model):
         ('esemeny', 'esemény'),
     ]
     historie_type = models.CharField(max_length=255, choices=HISTORIE_TYPE_CHOICHES)
-    image = models.ImageField(upload_to='historie/', default=None)
+    image = models.ImageField(upload_to='historie/', default=None, blank=True)
     date = models.IntegerField(default=1000)
-    coordinates = models.TextField(blank=False)
+    
 
     def __str__(self):
         return str(self.id)+' '+self.name+' '+self.historie_type
@@ -92,3 +92,31 @@ class CustomDraw(models.Model):
 
     def __str__(self):
         return str(self.id)+' '+self.name+' '+self.created_by.last_name+' '+self.created_by.first_name
+    
+class Quiz(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(max_length=500)
+    created_date = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.title
+    
+class Question(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    QUESTION_TYPES = [
+        ('mc', 'Több válasz'),
+        ('tf', 'Igaz/Hamis')
+    ]
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    text = models.CharField(max_length=255, blank=False)
+    question_type = models.CharField(max_length=2, choices=QUESTION_TYPES)
+
+    def __str__(self):
+        return self.text
+class Answer(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
+    text = models.CharField(max_length=255)
+    is_correct = models.BooleanField(default=False)
+    def __str__(self):
+        return f"{self.text} ({'Correct' if self.is_correct else 'Incorrect'})"

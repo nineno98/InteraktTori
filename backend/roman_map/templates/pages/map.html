@@ -13,18 +13,13 @@
 
     <meta name="user-id" content="{{ request.user.id }}">
     <link rel="stylesheet" href="{% static 'styles/map_style.css' %}">
-    <style>
-        
-    
-    </style>
-
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
+  
     <title>Térkép</title>
 </head>
 <body>
     
     <p>Ez a térkép oldal</p>
-    <button id="noveles">Növelés</button>
-    <button id="csokkentes">Csökkentés</button>
     <a href="{% url 'fooldal' %}">Főoldal</a>
     <input type="range" id="date-slider" min="-700" max="700" value="-700">
     <div id="container">
