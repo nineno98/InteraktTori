@@ -144,9 +144,24 @@ class QuizForm(forms.ModelForm):
         model = Quiz
         fields = ('title', 'description')
 
+class IgazHamisForm(forms.ModelForm):
+    TRUE_FALSE_CHOICES = [
+        (True, "Igaz"),
+        (False, "Hamis"),
+    ]
+
+    is_correct = forms.ChoiceField(
+        choices=TRUE_FALSE_CHOICES,
+        widget=forms.RadioSelect  # Rádiógombként jelenik meg
+    )
+
+    class Meta:
+        model = Answer
+        fields = ["is_correct"]
+
 QuestionForm = modelform_factory(Question, fields=["text", "points"])
 ValaszelemForm = inlineformset_factory(Question, Answer, fields=["text", "is_correct"], extra=4)
-IgazHamisForm = inlineformset_factory(Question, Answer, fields=["text", "is_correct"], extra=2)
+IgazHamisForm = inlineformset_factory(Question, Answer, form=IgazHamisForm, fields=["is_correct"], extra=1)
 class QuestionTypeForm(forms.Form):
     question_type = forms.ChoiceField(
         choices=Question.QUESTION_TYPES,

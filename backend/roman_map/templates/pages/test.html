@@ -68,6 +68,7 @@
                 <td>{{ quiz.title }}</td>
                 <td>{{ quiz.description }}</td>
                 <td><a href="{% url 'teszt_reszletei' quiz.id %}">Részletek</a></td>
+                <td><a href="{% url 'teszt_inditasa' quiz.id %}">Teszt indítása</a></td>
                 <td><a href="{% url 'teszt_torlese' quiz.id %}" onclick="return confirmDelete(event, this.href);">Törlés</a></td>
             </tr>
                 

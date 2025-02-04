@@ -120,7 +120,7 @@ class Question(models.Model):
 class Answer(models.Model):
     id = models.BigAutoField(primary_key=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
-    text = models.CharField(max_length=255)
+    text = models.CharField(max_length=255, blank=True)
     is_correct = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.text} ({'Correct' if self.is_correct else 'Incorrect'})"

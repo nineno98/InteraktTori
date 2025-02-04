@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 import json
+import random
 # Create your views here.
 
 # Templates
@@ -251,4 +252,14 @@ def kerdes_torlese(request, quiz_id, question_id):
     question.delete()
     messages.success(request,"Kérdés törlése sikeresen megtörtént.")
     return redirect('teszt_reszletei', quiz_id=quiz_id)
+
+def teszt_inditasa(request, quiz_id):
+    try:
+        quiz = Quiz.objects.get(id = quiz_id)
+    except Quiz.DoesNotExist:
+        messages.error(request, "Hiba. A teszt nem található")
+    questions = list(quiz.questions.all())
+    random.shuffle(questions)
+    return render(request, 'pages/run_test.html', {'quiz': quiz, 'questions': questions})
+
 

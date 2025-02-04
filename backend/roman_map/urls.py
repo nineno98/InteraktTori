@@ -16,6 +16,7 @@ urlpatterns = [
     path('test/<int:quiz_id>/test-details/', view=views.teszt_reszletei, name='teszt_reszletei'),
     path("test/<int:quiz_id>/add-question/<str:question_type>/", view=views.kerdes_hozzadasa, name="kerdes_hozzadasa"),
     path('test/<int:quiz_id>/delete/', view=views.teszt_torlese, name='teszt_torlese'),
-    path('test/<int:quiz_id>/test-details/<int:question_id>', view=views.kerdes_torlese, name='kerdes_torlese'),
+    path('test/<int:quiz_id>/test-details/<int:question_id>/', view=views.kerdes_torlese, name='kerdes_torlese'),
+    path('test/run-test/<int:quiz_id>/', view=views.teszt_inditasa, name='teszt_inditasa'),
 
 ]

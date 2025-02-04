@@ -1,0 +1,17 @@
+{% extends "pages/test.html" %}
+{% block content %}
+    <h2>{{ quiz.title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div>
+                <p><strong>{{ forloop.counter }}. {{ question.text }}</strong></p>
+                {% for answer in question.answers.all %}
+                    <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                    {{ answer.text }}<br>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <button type="submit">Teszt befejezése</button>
+    </form>
+{% endblock content %}
