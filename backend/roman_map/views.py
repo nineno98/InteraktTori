@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .serializers import TerritorieSerializer, HistorieSerializer, CustomDrawSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import Territorie, Historie, CustomDraw, Quiz
+from .models import Territorie, Historie, CustomDraw, Quiz, Question
 from rest_framework.views import status
 from .forms import LoginForm, QuizForm, QuestionTypeForm, QuestionForm, ValaszelemForm,IgazHamisForm
 from django.contrib.auth import login, logout, authenticate
@@ -175,6 +175,17 @@ def uj_teszt_keszitese(request):
         form = QuizForm()
         return render(request, 'pages/create_test.html', {"form":form})
 
+def teszt_torlese(request, quiz_id):
+    print('törlés')
+    try:
+        quiz = Quiz.objects.get(id = quiz_id)
+    except Quiz.DoesNotExist:
+        messages.error(request, "Hiba történt a folyamat során!")
+    quiz.delete()
+    messages.success(request, "A teszt sikeresen törölve lett.")
+    return redirect('teszt')
+
+
 def teszt_reszletei(request, quiz_id):
     try:
         quiz = Quiz.objects.get(id = quiz_id)
@@ -232,4 +243,12 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
         "formset": formset,
         "question_type": question_type
     })
+def kerdes_torlese(request, quiz_id, question_id):
+    try:
+        question = Question.objects.get(id = question_id)
+    except Question.DoesNotExist:
+        messages.error(request, "Hiba történt a folyamat során!")
+    question.delete()
+    messages.success(request,"Kérdés törlése sikeresen megtörtént.")
+    return redirect('teszt_reszletei', quiz_id=quiz_id)
 

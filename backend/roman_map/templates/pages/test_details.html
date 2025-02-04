@@ -3,12 +3,25 @@
 {% block content %}
 
 <h2>A "{{ quiz.title }}" teszt kérdései:</h2>
-<ul>
+<table>
+    <tr>
+        <th>Kérdés</th>
+        <th>Típus</th>
+    </tr>
     {% for question in questions %}
-        <li>{{ question.text }} ({{ question.get_question_type_display }})</li>
+    <tr>
+        <td>{{ question.text }}</td>
+        <td>({{ question.get_question_type_display }})</td>
+        <td><a href="{% url "kerdes_torlese" quiz.id question.id %}" onclick="return confirmDelete(event, this.href);">Törlés</a></td>
+    </tr>    
     {% empty %}
-        <li>Még nincsenek kérdések.</li>
+    <tr>
+        <td>Még nincsenek kérdések.</td>
+    </tr>
     {% endfor %}
+</table>
+<ul>
+    
 </ul>
 <h2>Új kérdés hozzáadása a "{{ quiz.title }}" teszthez</h2>
 

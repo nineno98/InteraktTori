@@ -4,27 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tesztek</title>
+    <style>
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .popup-buttons button {
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .apply-button {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .close-button {
+            background: #f44336;
+            color: white;
+        }
+    </style>
 </head>
+
 <body>
     
     {% block content %}
         <p>Tesztek főoldala</p>
         <table>
-            <thead>
+            <tr>
                 <th>Teszt neve</th>
-                <th>Létrehozó</th>
-            </thead>
-            <tbody>
-                {% for quiz in quiz_list %}
-                    <tr>{{ quiz.title }}</tr>
-                    <tr>{{ quiz.description }}</tr>
-                    <tr></tr>
-                {% endfor %}
-            </tbody>
+                <th>Leírás</th>
+            </tr>
+            
+            {% for quiz in quiz_list %}
+            <tr>
+                <td>{{ quiz.title }}</td>
+                <td>{{ quiz.description }}</td>
+                <td><a href="{% url 'teszt_reszletei' quiz.id %}">Részletek</a></td>
+                <td><a href="{% url 'teszt_torlese' quiz.id %}" onclick="return confirmDelete(event, this.href);">Törlés</a></td>
+            </tr>
+                
+            {% endfor %}
+            
         </table>
         
         <a href="{% url 'uj_teszt_keszitese' %}">Teszt hozzáadása</a>
         
+        
+        
     {% endblock content %}
+    <div id="delete-popup" class="popup-overlay">
+        <div class="popup-content">
+        <h3>Objektum törlése</h3>
+        <label for="">Biztosan törli az objektumot?</label>
+        <div class="popup-buttons">
+            <button type="button" id="deleteFeatureButton" class="apply-button">Törlés</button>
+            <button type="button" id="closeDeletingPopup">Mégse</button>
+        </div>
+        </div>
+    </div>
+    <script>
+        function confirmDelete(event, url) {
+            event.preventDefault();
+            const popupContainer = document.getElementById('delete-popup');
+            const confirmButton = document.getElementById('deleteFeatureButton');
+            const closeButton = document.getElementById('closeDeletingPopup');
+            popupContainer.style.display = 'block';
+            function closeDeleting () {
+                popupContainer.style.display = 'none';
+            }
+            closeButton.addEventListener('click', closeDeleting);
+
+            confirmButton.addEventListener('click', function() {
+                window.location.href = url;  // Törlés végrehajtása az adott URL-re
+            });
+
+        }
+    </script>
 </body>
 </html>

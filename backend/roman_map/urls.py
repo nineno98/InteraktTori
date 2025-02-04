@@ -14,6 +14,8 @@ urlpatterns = [
     path('test/', views.teszt, name='teszt'),
     path('test/add-test/', view=views.uj_teszt_keszitese, name='uj_teszt_keszitese'),
     path('test/<int:quiz_id>/test-details/', view=views.teszt_reszletei, name='teszt_reszletei'),
-    path("quiz/<int:quiz_id>/add-question/<str:question_type>/", view=views.kerdes_hozzadasa, name="kerdes_hozzadasa"),
+    path("test/<int:quiz_id>/add-question/<str:question_type>/", view=views.kerdes_hozzadasa, name="kerdes_hozzadasa"),
+    path('test/<int:quiz_id>/delete/', view=views.teszt_torlese, name='teszt_torlese'),
+    path('test/<int:quiz_id>/test-details/<int:question_id>', view=views.kerdes_torlese, name='kerdes_torlese'),
 
 ]
