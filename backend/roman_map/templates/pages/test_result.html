@@ -1,0 +1,7 @@
+{% extends 'pages/test.html' %}
+
+{% block content %}
+    <h2>{{ quiz.title }} - Teszt eredménye</h2>
+    <p>Elért pontszám: {{ score }}</p>
+    <a href="{% url 'teszt' %}">Vissza a tesztekhez</a>
+{% endblock %}

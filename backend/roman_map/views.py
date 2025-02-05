@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .serializers import TerritorieSerializer, HistorieSerializer, CustomDrawSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import Territorie, Historie, CustomDraw, Quiz, Question
+from .models import Territorie, Historie, CustomDraw, Quiz, Question, Answer, UserAnswer, UserScore
 from rest_framework.views import status
 from .forms import LoginForm, QuizForm, QuestionTypeForm, QuestionForm, ValaszelemForm,IgazHamisForm
 from django.contrib.auth import login, logout, authenticate
@@ -258,8 +258,51 @@ def teszt_inditasa(request, quiz_id):
         quiz = Quiz.objects.get(id = quiz_id)
     except Quiz.DoesNotExist:
         messages.error(request, "Hiba. A teszt nem található")
+    if request.method == 'POST':
+        score = 0
+        user = request.user
+        for question in quiz.questions.all():
+            user_answer = request.POST.get(f'question_{question.id}')
+
+            if question.question_type == "tf":
+                correct_answer = question.answers.first().is_correct
+                is_correct = (user_answer == "true" and correct_answer) or (user_answer == "false" and not correct_answer)
+
+                UserAnswer.objects.create(
+                    user=user,
+                    question=question,
+                    selected_answer=question.answers.first(),
+                    is_correct=is_correct,
+                    points_awarded=question.points if is_correct else 0
+                )
+
+                if is_correct:
+                    score += question.points
+
+            else:  # Többválaszos kérdések
+                selected_answers = set(map(int, request.POST.getlist(f'question_{question.id}')))
+                correct_answers = set(question.answers.filter(is_correct=True).values_list('id', flat=True))
+                is_correct = selected_answers == correct_answers
+
+                for answer_id in selected_answers:
+                    answer = Answer.objects.get(id=answer_id)
+                    UserAnswer.objects.create(
+                        user=user,
+                        question=question,
+                        selected_answer=answer,
+                        is_correct=is_correct,
+                        points_awarded=question.points if is_correct else 0
+                    )
+
+                if is_correct:
+                    score += question.points
+        UserScore.objects.create(user=user, quiz=quiz, total_score=score)
+        return render(request, 'pages/test_result.html', {'quiz': quiz, 'score': score})
+    
     questions = list(quiz.questions.all())
     random.shuffle(questions)
     return render(request, 'pages/run_test.html', {'quiz': quiz, 'questions': questions})
+
+
 
 

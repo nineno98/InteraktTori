@@ -6,10 +6,17 @@
         {% for question in questions %}
             <div>
                 <p><strong>{{ forloop.counter }}. {{ question.text }}</strong></p>
-                {% for answer in question.answers.all %}
-                    <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
-                    {{ answer.text }}<br>
-                {% endfor %}
+                {% if question.question_type == 'tf' %}
+                    <input type="radio" name="question_{{ question.id }}" value="true">Igaz
+                    <input type="radio" name="question_{{ question.id }}" value="false">Hamis
+                {% else %}
+                    {% for answer in question.answers.all %}
+                        <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                        {{ answer.text }}<br>
+                    {% endfor %}
+                {% endif %}
+                
+                
             </div>
         {% endfor %}
         <button type="submit">Teszt befejezése</button>
