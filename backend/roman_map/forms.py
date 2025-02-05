@@ -2,7 +2,7 @@ from django import forms
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 import json
 import os
-from .models import Territorie, Historie, Point, Quiz, CustomUser, Question, Answer
+from .models import Territorie, Historie, Quiz, CustomUser, Question, Answer
 from .static.files import schema as ValidationsSchema
 import pandas as pd
 import re
@@ -136,8 +136,7 @@ class HistorieXLSXImportForm(forms.Form):
                 image = None,
                 date = row["time"]
             )
-            for lon, lat in matches:
-                point = Point.objects.create(coordinates=f"[{lon},{lat}]", historie = historie)
+            
                 
 class QuizForm(forms.ModelForm):
     class Meta:

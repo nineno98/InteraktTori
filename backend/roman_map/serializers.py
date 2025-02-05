@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Territorie, Historie, CustomUser, CustomDraw, Point
+from .models import Territorie, Historie, CustomUser, CustomDraw
 from rest_framework import serializers
 import json
 import geojson
@@ -32,14 +32,11 @@ class TerritorieSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Hiba. "+str(e))
         return feature
     
-class HistoriePointSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Point
-        fields = ['id', 'coordinates']
+
 
 class HistorieSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
-    points = HistoriePointSerializer(many=True, read_only=True)
+    #points = HistoriePointSerializer(many=True, read_only=True)
 
     class Meta:
         model = Historie
