@@ -33,13 +33,15 @@ def jelszovaltas(request):
                 messages.success(request, "A jelszó sikeresen módosítva! ")
                 return redirect('fooldal')
             else:
-                messages.error(request, "Hiba: A jelszó módosítása sikertelen!")
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.warning(request, f"{field}: {error}")
         else:
             form = PasswordChangeForm(request.user)
             print(form.errors)
         return render(request, 'accounts/change_password.html', {'form':form})
     except Exception as e:
-        print(str(e))
+        messages.error(request, "Hiba történt a jelszó változtatás során!")
 
 def terkep(request):
     return render(request, 'pages/map.html')
@@ -47,9 +49,10 @@ def terkep(request):
 def kijelentkezes(request):
     try:
         logout(request)
+        messages.success(request, "Kijelentkezve. Viszlát!")
         return redirect('fooldal')
     except Exception as e:
-        print(str(e))
+        messages.error(request, "Hiba történt a folyamat során.")
 
 
 def bejelentkezes(request):
@@ -169,6 +172,7 @@ def uj_teszt_keszitese(request):
             quiz = form.save(commit=False)
             quiz.created_by = request.user
             form.save()
+            messages.success(request, f"A '{quiz.title}' teszt létrehozása sikeres.")
             return redirect('teszt_reszletei', quiz_id=quiz.id)
         else:
             messages.error(request, "Hiba történt, a teszt létrehozása sikertelen!")
@@ -183,7 +187,7 @@ def teszt_torlese(request, quiz_id):
     except Quiz.DoesNotExist:
         messages.error(request, "Hiba történt a folyamat során!")
     quiz.delete()
-    messages.success(request, "A teszt sikeresen törölve lett.")
+    messages.success(request, f"A '{quiz.title}' teszt sikeresen törölve lett.")
     return redirect('teszt')
 
 
@@ -231,7 +235,7 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
             for answer in answers:
                 answer.question = question
                 answer.save()
-
+            messages.success(request, "A kérdés létrehozása sikeres")
             return redirect("teszt_reszletei", quiz_id=quiz.id)  # Tovább a kvízhez
 
     else:
@@ -297,6 +301,7 @@ def teszt_inditasa(request, quiz_id):
                 if is_correct:
                     score += question.points
         UserScore.objects.create(user=user, quiz=quiz, total_score=score)
+        messages.success(request, "A teszt mentése sikeres.")
         return render(request, 'pages/test_result.html', {'quiz': quiz, 'score': score})
     
     questions = list(quiz.questions.all())
