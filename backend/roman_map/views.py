@@ -19,7 +19,7 @@ import sqlite3
 import os
 from django.conf import settings
 # Create your views here.
-MBTILES_PATH = os.path.join(settings.BASE_DIR, "roman_map", "static", "tiles", "csak_domborzat_telepules_nelkul_zoom_3_10.mbtiles")
+MBTILES_PATH = os.path.join(settings.BASE_DIR, "roman_map", "static", "tiles", "main_tile.mbtiles")
 # Templates
 
 def sajatadatok(request):

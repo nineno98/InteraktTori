@@ -1,6 +1,6 @@
-const hatter = new ol.layer.Tile({
+/*const hatter = new ol.layer.Tile({
     source: new ol.source.OSM(),
-  });
+  });*/
   
 function getCookie(name) {
     let cookieValue = null;
@@ -713,8 +713,18 @@ const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/territorie
 const drawing = new HandleDraw('http://127.0.0.1:8000/custom-draws/');
 const histories = new HistorieVectorLayer('http://127.0.0.1:8000/histories/');
 
+const osmLayer = new ol.layer.Tile({
+    source: new ol.source.OSM(),
+});
+
+const hatter = new ol.layer.Tile({
+    source: new ol.source.XYZ({
+        url: 'http://127.0.0.1:8000/tiles/{z}/{x}/{y}.png'
+    })
+  });
   const map = new ol.Map({
     layers: [
+        osmLayer,
         hatter,
         territories.getLayer(),
         drawing.getLayer(),
