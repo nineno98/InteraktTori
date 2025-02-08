@@ -10,13 +10,16 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 import geojson
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 import json
 import random
+import sqlite3
+import os
+from django.conf import settings
 # Create your views here.
-
+MBTILES_PATH = os.path.join(settings.BASE_DIR, "roman_map", "static", "tiles", "csak_domborzat_telepules_nelkul_zoom_3_10.mbtiles")
 # Templates
 
 def sajatadatok(request):
@@ -308,6 +311,30 @@ def teszt_inditasa(request, quiz_id):
     random.shuffle(questions)
     return render(request, 'pages/run_test.html', {'quiz': quiz, 'questions': questions})
 
+def serve_tile(request, z , x, y):
+    try:
+        y_tms = (2 ** int(z)) - int(y) - 1
+        #print("kiiratva"+str(z)+","+ str(x) + ", "+ str(y_tms))
+        conn = sqlite3.connect(MBTILES_PATH)
+        
+        cursor = conn.execute("SELECT tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?", (int(z), int(x), y_tms))
+        #cursor = conn.execute("SELECT  MAX(zoom_level), MIN(zoom_level), min(tile_column), max(tile_column), min(tile_row), max(tile_row) FROM tiles;")
+        result = cursor.fetchone()
+        conn.close()
+        #print(result)
+        if result:
+            tile_data = result[0]
+            return HttpResponse(tile_data, content_type = 'image/png')
+        else:
+            print("http404")
+            raise Http404("Tile not found")
+    except sqlite3.DatabaseError as e:
+        # Handle database errors, and return a 500 internal server error response
+        return HttpResponse(f"Database error: {e}", status=500)
+    except Exception as e:
+        print("Error"+str(e))
 
+def index(request):
+    return render(request, 'pages/index.html')
 
 
