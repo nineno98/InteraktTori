@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Territorie, Historie, CustomUser, CustomDraw
+from .models import Territorie, Historie, CustomUser, CustomDraw, AncientPlaces
 from rest_framework import serializers
 import json
 import geojson
@@ -10,6 +10,24 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username','first_name','last_name']
 
+class AncientPlacesSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        
+        try:
+            geometry = json.loads(instance.coordinates)
+            multipolygon = geojson.Point(geometry)
+            properties = {
+                "id": instance.id,
+                "ancient_name": instance.ancient_name,
+                "modern_name": instance.modern_name
+            }
+            feature = geojson.Feature(properties=properties, geometry=multipolygon)
+        
+        except json.JSONDecodeError as e:
+            raise serializers.ValidationError("Hibás JSON formátum. "+str(e))
+        except Exception as e:
+            raise serializers.ValidationError("Hiba. "+str(e))
+        return feature
 
 class TerritorieSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):

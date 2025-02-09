@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .serializers import TerritorieSerializer, HistorieSerializer, CustomDrawSerializer
+from .serializers import TerritorieSerializer, HistorieSerializer, CustomDrawSerializer, AncientPlacesSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import Territorie, Historie, CustomDraw, Quiz, Question, Answer, UserAnswer, UserScore
+from .models import Territorie, Historie, CustomDraw, Quiz, Question, Answer, UserAnswer, UserScore, AncientPlaces
 from rest_framework.views import status
 from .forms import LoginForm, QuizForm, QuestionTypeForm, QuestionForm, ValaszelemForm,IgazHamisForm
 from django.contrib.auth import login, logout, authenticate
@@ -101,6 +101,12 @@ def getHistories(request):
     serializer = HistorieSerializer(histories, many = True, context={'request': request})
     geojson_data = geojson.FeatureCollection(features=serializer.data)
     return JsonResponse(geojson_data, safe=False)
+
+def getAncientPlaces(request):
+    ancient_places = AncientPlaces.objects.all()
+    serializer = AncientPlacesSerializer(ancient_places, many=True)
+    geojson_data = geojson.FeatureCollection(features=serializer.data)
+    return JsonResponse(geojson_data)
 
 
 @permission_classes([IsAuthenticated])
