@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Territorie, Historie, CustomDraw, Answer, Question, Quiz
-from .forms import TerritoriesJSONForm, HistorieXLSXImportForm
+from .models import CustomUser, Territorie, Historie, CustomDraw, Answer, Question, Quiz, AncientPlaces
+from .forms import TerritoriesJSONForm, HistorieXLSXImportForm, AncientPlacesJSONForm
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import path
@@ -10,7 +10,40 @@ from django.urls import reverse
 
 # Register your models here.
 
-    
+@admin.register(AncientPlaces)
+class AncientPlacesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'ancient_name', 'modern_name')
+    list_filter = ('id', 'ancient_name', 'modern_name')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('upload-geojson-ancient-places/', self.upload_file),
+        ]
+        return custom_urls + urls
+    def upload_file(self, request):
+        if request.method == 'POST':
+            if "places_geojson" in request.POST:
+                form = AncientPlacesJSONForm(request.POST, request.FILES)
+                if form.is_valid():
+                    try:
+                        form.save()
+                        self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+                        return redirect(reverse('admin:roman_map_ancientplaces_changelist'))
+                    except Exception as e:
+                        self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
+                else:
+                    self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
+                    print(form.errors)
+                    return redirect(reverse('admin:roman_map_ancientplaces_changelist'))
+            else:
+                self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
+        form = AncientPlacesJSONForm()
+        data = {'form': form}
+        return render(request, 'admin/roman_map/ancientplaces/import_form.html', data)
+
+                        
+
 
 @admin.register(Historie)
 class HistoriesAdmin(admin.ModelAdmin):

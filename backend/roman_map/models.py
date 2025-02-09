@@ -49,11 +49,6 @@ def delete_image_file(sender, instance, **kwargs):
         if os.path.isfile(instance.image.path):
             os.remove(instance.image.path)
 
-
-
-
-
-
 class CustomDraw(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255, blank=False)
@@ -118,3 +113,13 @@ class UserAnswer(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.question.text}: {'Correct' if self.is_correct else 'Incorrect'} ({self.points_awarded} points)"
+    
+class AncientPlaces(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    modern_name = models.CharField(max_length=255)
+    ancient_name = models.CharField(max_length=255)
+    coordinates = models.CharField(max_length=100)
+    
+
+    def __str__(self):
+        return f"{self.id} {self.ancient_name} {self.modern_name}"

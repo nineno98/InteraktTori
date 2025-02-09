@@ -2,7 +2,7 @@ from django import forms
 from jsonschema import validate, ValidationError as JsonSchemaValidationError
 import json
 import os
-from .models import Territorie, Historie, Quiz, CustomUser, Question, Answer
+from .models import Territorie, Historie, Quiz, CustomUser, Question, Answer, AncientPlaces
 from .static.files import schema as ValidationsSchema
 import pandas as pd
 import re
@@ -10,7 +10,64 @@ from django.forms import inlineformset_factory, modelform_factory
 
 
 
-
+class AncientPlacesJSONForm(forms.Form):
+    file = forms.FileField(required=True, label="Válasz egy geojson fájlt!")
+    def clean_file(self):
+        super().clean()
+        file = self.cleaned_data.get('file')
+        extension = os.path.splitext(file.name)[1].lower()
+        if file:
+            if extension != '.geojson':
+                raise forms.ValidationError('A feltöltött fájl kiterjesztése nem megfelelő!')
+        else:
+            raise forms.ValidationError('Nincs fájl feltöltve!')
+        try:
+            file_data = file.read().decode('utf-8')
+            file.seek(0)
+            json_data = json.loads(file_data)
+            #validate(instance=json_data, schema=ValidationsSchema)
+        except OSError:
+            raise forms.ValidationError('Hiba a fájl beolvasása közben!')
+        except UnicodeDecodeError:
+            raise forms.ValidationError('Hiba a fájl dekódolásánál. Nem érvényes utf-8 formátum!')
+        except json.JSONDecodeError:
+            raise forms.ValidationError('Hibás a JSON formátum!')
+        except JsonSchemaValidationError as e:
+            raise forms.ValidationError(f'Json validációs hiba: {e.message}')
+        except Exception as e:
+            raise forms.ValidationError(str(e))
+        
+        return file
+    def save(self):
+        uploaded_file = self.cleaned_data.get('file')
+        try:
+            file_data = uploaded_file.read().decode('utf-8')
+            json_data = json.loads(file_data)
+            feature_type = json_data.get('type')
+            
+            if feature_type == "FeatureCollection":
+                if "features" in json_data:
+                    features = json_data.get('features')
+                    for feature in features:
+                        modern_name = feature["properties"].get("modern_name", "A nem ismert")
+                        AncientPlaces.objects.create(
+                            modern_name=modern_name,
+                            ancient_name=feature["properties"]["ancient_name"],
+                            coordinates=feature["geometry"]["coordinates"]
+                        )
+                else:
+                    raise forms.ValidationError("A 'features' kulcs hiányzik az objektumból.")
+            elif feature_type == "Feature":
+                modern_name = json_data["properties"].get("modern_name", "A nem ismert")
+                AncientPlaces.objects.create(
+                    modern_name = modern_name,
+                    ancient_name = json_data["properties"]["ancient_name"],
+                    coordinates = json_data["geometry"]["coordinates"]
+                )
+            
+        except:
+            pass
+        
 
 class TerritoriesJSONForm(forms.Form):
 
