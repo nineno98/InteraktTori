@@ -16,6 +16,7 @@
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
   
     <title>Térkép</title>
+    
 </head>
 <body>
     
@@ -84,6 +85,10 @@
 
         </div>
 
+        <div id="places-popup" class="ol-popup">
+          <a href="#" id="places-popup-closer" class="ol-popup-closer">&#10060;</a>
+          <div id="places-popup-content"></div>
+        </div>
     
     <script type="module" src="{% static 'scripts/openlayers_map.js' %}"></script>
 </body>

@@ -602,12 +602,7 @@ class HistorieVectorLayer{
         this.selectenabled = false;
         this.select = null;
         this.historieSource = null;
-        /*this.historieSource = new ol.source.Vector({
-            wrapX: false,
-            format: new ol.format.GeoJSON(),
-            url: this.apiUrl,
-
-        });*/
+        
         this.historieSource = new ol.source.Vector({
             format: new ol.format.GeoJSON()
         });
@@ -707,8 +702,109 @@ class HistorieVectorLayer{
     }
 }
 
+class AncientPlaces{
+    constructor(api_url, overlay){
+        this.apiUrl = api_url;
+        this.select = null;
+        this.overlay = overlay;
+        
+
+        this.placesSource = new ol.source.Vector({
+            wrapX: false,
+            format: new ol.format.GeoJSON(),
+            url: this.apiUrl,
+
+        });
+
+        this.placesLayer = new ol.layer.Vector({
+            source: this.placesSource,
+            style: this.setStyleFunction.bind(this),
+        });
+        
+
+        
+    }
+
+    addSelect(){
+        this.select = new ol.interaction.Select({
+            layers: [this.placesLayer],
+            style: this.setStyleFunction(),
+        });
+        map.addInteraction(this.select);
+        this.select.on('select', (event) => {
+            //console.log(event.selected[0].getGeometry().getCoordinates())
+            const content = document.getElementById('places-popup-content');
+            
+            
+            //console.log(coordinate);
+            if(event.selected.length > 0){
+                const coordinate = event.selected[0].getGeometry().getCoordinates();
+                const feature = event.selected[0];
+                const ancient_name = feature.get('ancient_name') || '-';
+                const modern_name = feature.get('modern_name') || '-';
+                content.innerHTML = 
+                `<h1>&#8962;</h1>
+                <p>${ancient_name}</p>
+                <label>Jelenkori elnevezés: </label>
+                        <p>${modern_name}</p>`;
+                this.overlay.setPosition(coordinate);
+            }else {
+                this.overlay.setPosition(undefined);
+            }
+            
+        });
+        const closer = document.getElementById('places-popup-closer');
+        closer.onclick = function () {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+          };
+        
+    }
+
+    selectedStyleFunction(){
 
 
+    }
+    setStyleFunction(feature){
+        const zoom = map.getView().getZoom();
+        
+        return new ol.style.Style({
+            
+            
+            image: new ol.style.Circle({
+                radius: 3,
+                fill: new ol.style.Fill({ color: 'white' }),
+                stroke: new ol.style.Stroke({ color: 'black', width: 1 })
+            }),
+            text: new ol.style.Text({
+                font: '12px Arial',
+                fill: new ol.style.Fill({ color: '#000' }),
+                stroke: new ol.style.Stroke({ color: '#fff', width: 4 }),
+                text: zoom > 6 ? feature.get('ancient_name') || '' : '',
+                offsetY: -10,
+            }),
+
+        });
+    }
+    getLayer(){
+        return this.placesLayer;
+    }
+    getOverlay(){
+        return this.overlay;
+    }
+}
+const container = document.getElementById('places-popup');
+const overlay = new ol.Overlay({
+    element: document.getElementById('places-popup'),
+    autoPan: {
+      animation: {
+        duration: 250,
+      },
+    },
+});
+
+const places = new AncientPlaces('http://127.0.0.1:8000/places/', overlay);
 const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/territories/');
 const drawing = new HandleDraw('http://127.0.0.1:8000/custom-draws/');
 const histories = new HistorieVectorLayer('http://127.0.0.1:8000/histories/');
@@ -721,23 +817,27 @@ const hatter = new ol.layer.Tile({
     source: new ol.source.XYZ({
         url: 'http://127.0.0.1:8000/tiles/{z}/{x}/{y}.png'
     })
-  });
-  const map = new ol.Map({
+});
+
+
+const map = new ol.Map({
     layers: [
         osmLayer,
         hatter,
         territories.getLayer(),
+        places.getLayer(),
         drawing.getLayer(),
         histories.getLayer(),
         
-
     ],
+    overlays: [overlay],
     target: 'map',
     view: new ol.View({
       center: ol.proj.fromLonLat([12.496366, 41.902782]),
       zoom: 4,
       projection: 'EPSG:3857',
     }),
-  });
+});
 
 histories.addSelect();
+places.addSelect();
