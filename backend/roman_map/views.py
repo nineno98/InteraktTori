@@ -24,7 +24,7 @@ from django.conf import settings
 
 def sajatadatok(request):
     try:
-        return render(request, 'pages/user_informations.html')
+        return render(request, 'users/user_informations.html')
     except Exception as e:
         pass
 
@@ -37,7 +37,7 @@ def jelszovaltas(request):
                 form.save()
                 update_session_auth_hash(request, form.user)
                 messages.success(request, "A jelszó sikeresen módosítva! ")
-                return redirect('fooldal')
+                return redirect('sajatadatok')
             else:
                 for field, errors in form.errors.items():
                     for error in errors:
@@ -45,7 +45,7 @@ def jelszovaltas(request):
         else:
             form = PasswordChangeForm(request.user)
             print(form.errors)
-        return render(request, 'accounts/change_password.html', {'form':form})
+        return render(request, 'users/change_password.html', {'form':form})
     except Exception as e:
         messages.error(request, "Hiba történt a jelszó változtatás során!")
 
@@ -209,7 +209,7 @@ class CustomDrawsAPIView(APIView):
 def teszt(request):
     try:
         all_quizs = Quiz.objects.all()
-        return render(request,'pages/test.html',{"quiz_list":all_quizs})
+        return render(request,'quiz/test.html',{"quiz_list":all_quizs})
     except Exception as e:
         pass
 
@@ -227,7 +227,7 @@ def uj_teszt_keszitese(request):
                 messages.error(request, "Hiba történt, a teszt létrehozása sikertelen!")
         else:
             form = QuizForm()
-            return render(request, 'pages/create_test.html', {"form":form})
+            return render(request, 'quiz/create_test.html', {"form":form})
     except Exception as e:
         pass
 
@@ -256,7 +256,7 @@ def teszt_reszletei(request, quiz_id):
                 return redirect("kerdes_hozzadasa", quiz_id=quiz.id, question_type=question_type)
         questions = quiz.questions.all()  # Meglévő kérdések listája
         form = QuestionTypeForm()
-        return render(request, "pages/test_details.html", {
+        return render(request, "quiz/test_details.html", {
             "quiz": quiz,
             "questions": questions,
             "form": form
@@ -295,7 +295,7 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
             question_form = QuestionForm()
             formset = AnswerFormSetClass()
 
-        return render(request, "pages/create_question.html", {
+        return render(request, "quiz/create_question.html", {
             "quiz": quiz,
             "question_form": question_form,
             "formset": formset,
@@ -359,14 +359,14 @@ def teszt_inditasa(request, quiz_id):
                         score += question.points
             UserScore.objects.create(user=user, quiz=quiz, total_score=score)
             messages.success(request, "A teszt mentése sikeres.")
-            return render(request, 'pages/test_result.html', {'quiz': quiz, 'score': score})
+            return render(request, 'quiz/test_result.html', {'quiz': quiz, 'score': score})
         
         questions = list(quiz.questions.all())
         random.shuffle(questions)
-        return render(request, 'pages/run_test.html', {'quiz': quiz, 'questions': questions})
+        return render(request, 'quiz/run_test.html', {'quiz': quiz, 'questions': questions})
     except Exception as e:
         pass
-    
+
 MBTILES_PATH = os.path.join(settings.BASE_DIR, "roman_map", "static", "tiles", "main_tile.mbtiles")
 def serve_tile(request, z , x, y):
     try:
