@@ -141,4 +141,7 @@
   }
   #places-popup-content > h1{
     font-size: 50pt;
+    line-height: 80%;
+    margin: 0%;
+    padding: 0%;
   }

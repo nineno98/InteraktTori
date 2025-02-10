@@ -180,6 +180,159 @@
               "properties",
               "geometry"
             ]
+          },
+          {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "crs": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "properties": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "properties"
+                ]
+              },
+              "xy_coordinate_resolution": {
+                "type": "number"
+              },
+              "features": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "properties": {
+                        "type": "object",
+                        "properties": {
+                          "ancient_name": {
+                            "type": "string"
+                          },
+                          "modern_name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "ancient_name",
+                          "modern_name"
+                        ]
+                      },
+                      "geometry": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string"
+                          },
+                          "coordinates": {
+                            "type": "array",
+                            "items": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "coordinates"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "properties",
+                      "geometry"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "name",
+              "crs",
+              "xy_coordinate_resolution",
+              "features"
+            ]
+          },
+          {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "properties": {
+                "type": "object",
+                "properties": {
+                  "ancient_name": {
+                    "type": "string"
+                  },
+                  "modern_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ancient_name",
+                  "modern_name"
+                ]
+              },
+              "geometry": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "items": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "coordinates"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "properties",
+              "geometry"
+            ]
           }
     ]
 }

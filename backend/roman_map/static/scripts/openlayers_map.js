@@ -744,9 +744,9 @@ class AncientPlaces{
                 const modern_name = feature.get('modern_name') || '-';
                 content.innerHTML = 
                 `<h1>&#8962;</h1>
-                <p>${ancient_name}</p>
-                <label>Jelenkori elnevezés: </label>
-                        <p>${modern_name}</p>`;
+                <span><strong>${ancient_name}</strong></span><br>
+                <label>Jelenkori elnevezés: </label><br>
+                <span>${modern_name}</span>`;
                 this.overlay.setPosition(coordinate);
             }else {
                 this.overlay.setPosition(undefined);
