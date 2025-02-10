@@ -14,18 +14,18 @@ class AncientPlacesJSONForm(forms.Form):
     file = forms.FileField(required=True, label="Válasz egy geojson fájlt!")
     def clean_file(self):
         super().clean()
-        file = self.cleaned_data.get('file')
-        extension = os.path.splitext(file.name)[1].lower()
-        if file:
-            if extension != '.geojson':
-                raise forms.ValidationError('A feltöltött fájl kiterjesztése nem megfelelő!')
-        else:
-            raise forms.ValidationError('Nincs fájl feltöltve!')
         try:
+            file = self.cleaned_data.get('file')
+            extension = os.path.splitext(file.name)[1].lower()
+            if file:
+                if extension != '.geojson':
+                    raise forms.ValidationError('A feltöltött fájl kiterjesztése nem megfelelő!')
+            else:
+                raise forms.ValidationError('Nincs fájl feltöltve!')
             file_data = file.read().decode('utf-8')
             file.seek(0)
             json_data = json.loads(file_data)
-            #validate(instance=json_data, schema=ValidationsSchema)
+            validate(instance=json_data, schema=ValidationsSchema)
         except OSError:
             raise forms.ValidationError('Hiba a fájl beolvasása közben!')
         except UnicodeDecodeError:
@@ -36,11 +36,11 @@ class AncientPlacesJSONForm(forms.Form):
             raise forms.ValidationError(f'Json validációs hiba: {e.message}')
         except Exception as e:
             raise forms.ValidationError(str(e))
-        
         return file
+    
     def save(self):
-        uploaded_file = self.cleaned_data.get('file')
         try:
+            uploaded_file = self.cleaned_data.get('file')
             file_data = uploaded_file.read().decode('utf-8')
             json_data = json.loads(file_data)
             feature_type = json_data.get('type')
@@ -64,28 +64,22 @@ class AncientPlacesJSONForm(forms.Form):
                     ancient_name = json_data["properties"]["ancient_name"],
                     coordinates = json_data["geometry"]["coordinates"]
                 )
-            
-        except:
-            pass
+        except Exception as e:
+            raise forms.ValidationError("Hiba a mentés során.")
         
-
 class TerritoriesJSONForm(forms.Form):
-
     file = forms.FileField(required=True, label="Válasz egy geojson fájlt!")
 
     def clean_file(self):
-
-        super().clean()
-
-        file = self.cleaned_data.get('file')
-        extension = os.path.splitext(file.name)[1].lower()
-        if file:
-            if extension != '.geojson':
-                raise forms.ValidationError('A feltöltött fájl kiterjesztése nem megfelelő!')
-        else:
-            raise forms.ValidationError('Nincs fájl feltöltve!')
-        
+        super().clean()   
         try:
+            file = self.cleaned_data.get('file')
+            extension = os.path.splitext(file.name)[1].lower()
+            if file:
+                if extension != '.geojson':
+                    raise forms.ValidationError('A feltöltött fájl kiterjesztése nem megfelelő!')
+            else:
+                raise forms.ValidationError('Nincs fájl feltöltve!')
             file_data = file.read().decode('utf-8')
             file.seek(0)
             json_data = json.loads(file_data)
@@ -103,9 +97,9 @@ class TerritoriesJSONForm(forms.Form):
         
         return file
     
-    def save(self):
-        uploaded_file = self.cleaned_data.get('file')
+    def save(self):    
         try:
+            uploaded_file = self.cleaned_data.get('file')
             file_data = uploaded_file.read().decode('utf-8')
             json_data = json.loads(file_data)
             feature_type = json_data.get('type')
@@ -123,7 +117,6 @@ class TerritoriesJSONForm(forms.Form):
                 else:
                     raise forms.ValidationError("A 'features' kulcs hiányzik az objektumból.")
             elif feature_type == "Feature":
-
                 Territorie.objects.create(
                     name=json_data["properties"]["name"],
                     start_date=int(json_data["properties"]["start_date"]),
@@ -151,11 +144,9 @@ class HistorieXLSXImportForm(forms.Form):
 
             if not file.name.endswith(".xlsx"):
                 raise forms.ValidationError("Csak .xlsx kiterjesztésű fájl engedélyezett.")
-            try:
-                df = pd.read_excel(file, engine='openpyxl')
+            
+            df = pd.read_excel(file, engine='openpyxl')
                 
-            except Exception:
-                raise forms.ValidationError("Hibás vagy sérült XLSX fájl.")
             required_columns = {"name", "description", "coordinates", "time", "type"}
             if not required_columns.issubset(df.columns):
                 raise forms.ValidationError(f"A fájl nem tartalmazza az összes szükséges mezőket: {required_columns}")
@@ -173,26 +164,34 @@ class HistorieXLSXImportForm(forms.Form):
 
             self.cleaned_data["df"] = df
             self.cleaned_data['coordinate'] = coordinate
+        except pd.errors.ParserError as e:
+            raise forms.ValidationError(f"clean_file: A táblázat szerkezete hibás. {e}")
+        except PermissionError as e:
+            raise forms.ValidationError(f"clean_file: A fájlt nem lehet megnyitni. {e}")
+        except ValueError as e:
+            raise forms.ValidationError(f"clean_file: A fájl formátuma nem megfelelő. {e}")
+        except FileNotFoundError as e:
+            raise forms.ValidationError(f"clean_file: A fájl nem található: {e}")
         except Exception as e:
-            
-            raise forms.ValidationError(f"clean_file: Hiba: {e}")
-            
+            raise forms.ValidationError(f"clean_file: Hiba: {e}")  
         return file
     def save(self):
-        df = self.cleaned_data.get("df")
-        
-        
-        for _, row in df.iterrows():
-            x = json.loads(str(row["coordinates"]))
-            matches = re.findall(r"\[?([\d.]+),\s*([\d.]+)\]?", row["coordinates"]) 
-            historie = Historie.objects.create(
-                name=row["name"],
-                description=row["description"],
-                coordinates = row["coordinates"],
-                historie_type = row["type"].lower(),
-                image = None,
-                date = row["time"]
-            )
+        try:
+            df = self.cleaned_data.get("df")
+            
+            for _, row in df.iterrows():
+                x = json.loads(str(row["coordinates"]))
+                matches = re.findall(r"\[?([\d.]+),\s*([\d.]+)\]?", row["coordinates"]) 
+                historie = Historie.objects.create(
+                    name=row["name"],
+                    description=row["description"],
+                    coordinates = row["coordinates"],
+                    historie_type = row["type"].lower(),
+                    image = None,
+                    date = row["time"]
+                )
+        except Exception as e:
+            raise forms.ValidationError("Hiba a mentés során.")
             
                 
 class QuizForm(forms.ModelForm):
@@ -208,7 +207,7 @@ class IgazHamisForm(forms.ModelForm):
 
     is_correct = forms.ChoiceField(
         choices=TRUE_FALSE_CHOICES,
-        widget=forms.RadioSelect  # Rádiógombként jelenik meg
+        widget=forms.RadioSelect
     )
 
     class Meta:

@@ -20,9 +20,7 @@ import random
 import sqlite3
 import os
 from django.conf import settings
-# Create your views here.
-#MBTILES_PATH = os.path.join(settings.BASE_DIR, "roman_map", "static", "tiles", "main_tile.mbtiles")
-# Templates
+
 
 def sajatadatok(request):
     try:
@@ -342,7 +340,7 @@ def teszt_inditasa(request, quiz_id):
                     if is_correct:
                         score += question.points
 
-                else:  # Többválaszos kérdések
+                else:
                     selected_answers = set(map(int, request.POST.getlist(f'question_{question.id}')))
                     correct_answers = set(question.answers.filter(is_correct=True).values_list('id', flat=True))
                     is_correct = selected_answers == correct_answers
@@ -368,10 +366,11 @@ def teszt_inditasa(request, quiz_id):
         return render(request, 'pages/run_test.html', {'quiz': quiz, 'questions': questions})
     except Exception as e:
         pass
-
+    
+MBTILES_PATH = os.path.join(settings.BASE_DIR, "roman_map", "static", "tiles", "main_tile.mbtiles")
 def serve_tile(request, z , x, y):
     try:
-        MBTILES_PATH = os.path.join(settings.BASE_DIR, "roman_map", "static", "tiles", "main_tile.mbtiles")
+        
         if not os.path.exists(MBTILES_PATH):
             raise Http404("Adatbázis nem tálálható.")
         y_tms = (2 ** int(z)) - int(y) - 1
