@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js Buborékdiagram</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        svg {
+            display: block;
+            margin: auto;
+        }
+        .bubble text {
+            fill: white;
+            font-size: 12px;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>D3.js Buborékdiagram</h2>
+    <svg width="800" height="600"></svg>
+<script>
+    fetch("http://127.0.0.1:8000/top-questions/")
+        .then(response => response.json())
+        .then(data => {
+            const formattedData = { "name": "root", "children": data.map(d => ({ name: d.text, value: d.correct_answers })) };
+
+            const width = 800, height = 600;
+            const color = d3.scaleOrdinal(d3.schemeCategory10);
+            const pack = d3.pack().size([width, height]).padding(5);
+
+            const root = d3.hierarchy(formattedData).sum(d => d.value);
+            const nodes = pack(root).leaves();
+
+            const svg = d3.select("svg");
+
+            const bubbles = svg.selectAll(".bubble")
+                .data(nodes)
+                .enter()
+                .append("g")
+                .attr("class", "bubble")
+                .attr("transform", d => `translate(${d.x}, ${d.y})`);
+
+            bubbles.append("circle")
+                .attr("r", d => d.r)
+                .attr("fill", (d, i) => color(i))
+                .attr("stroke", "#333")
+                .attr("stroke-width", 2);
+
+            bubbles.append("text")
+                .attr("dy", "-0.3em")
+                .text(d => d.data.name.substring(0, 10))
+                .attr("font-size", d => Math.min(d.r / 3, 16))
+                .attr("fill", "white");
+
+            bubbles.append("text")
+                .attr("dy", "1.2em")
+                .text(d => d.data.value)
+                .attr("font-size", d => Math.min(d.r / 4, 14))
+                .attr("fill", "white");
+        });
+</script>
+</body>
+</html>

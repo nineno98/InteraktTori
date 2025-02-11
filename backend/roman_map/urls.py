@@ -21,5 +21,7 @@ urlpatterns = [
     path('test/run-test/<int:quiz_id>/', view=views.teszt_inditasa, name='teszt_inditasa'),
     path('tiles/<int:z>/<int:x>/<int:y>.png', view=views.serve_tile, name='serve_tile'),
     path('index/', view=views.index),
+    path('top-questions/', view=views.getTopQuestions, name='getTopQuestions'),
+    path('top-wrost-questions/', view=views.getWrostQuestions, name='getWrostQuestions'),
 
 ]

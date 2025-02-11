@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .serializers import TerritorieSerializer, HistorieSerializer, CustomDrawSerializer, AncientPlacesSerializer
+from .serializers import TerritorieSerializer, HistorieSerializer, CustomDrawSerializer, AncientPlacesSerializer,QuestionSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,6 +20,8 @@ import random
 import sqlite3
 import os
 from django.conf import settings
+from django.db.models import Count, Q, Sum, F
+from django.db.models.functions import Coalesce
 
 
 def sajatadatok(request):
@@ -211,7 +213,8 @@ def teszt(request):
         all_quizs = Quiz.objects.all()
         return render(request,'quiz/test.html',{"quiz_list":all_quizs})
     except Exception as e:
-        pass
+        messages.error(request, "Valami hiba történt. Kérlek próbáld újra később!")
+        return redirect('fooldal')
 
 def uj_teszt_keszitese(request):
     try:
@@ -229,7 +232,8 @@ def uj_teszt_keszitese(request):
             form = QuizForm()
             return render(request, 'quiz/create_test.html', {"form":form})
     except Exception as e:
-        pass
+        messages.error(request, "Valami hiba történt. Kérlek próbáld újra később!")
+        return render(request, 'quiz/test.html', {"form": form})
 
 def teszt_torlese(request, quiz_id):
     try:
@@ -393,6 +397,49 @@ def serve_tile(request, z , x, y):
         pass
 
 def index(request):
-    return render(request, 'pages/index.html')
+    return render(request, 'pages/test_chart.html')
+
+def getTopQuestions(request):
+    
+    questions = Question.objects.annotate(
+        total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
+        total_answers = Coalesce(Count('user_answers'),1),   
+    )
+    questions_data = []
+    for question in questions:
+        full_points = question.points * question.total_answers
+        if full_points > 0:
+            score_ratio = question.total_awarded_points / full_points
+        else:
+            score_ratio = 0
+        print(score_ratio)
+        questions_data.append({
+            "id": question.id,
+            "text": question.text,
+            "score_ratio": score_ratio
+        })
+    sorted_data = sorted([q for q in questions_data if q['score_ratio'] > 0], key=lambda x : x['score_ratio'], reverse=True)[:10]
+    return JsonResponse(sorted_data, safe=False)
+
+def getWrostQuestions(request):
+    questions = Question.objects.annotate(
+        total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
+        total_answers = Coalesce(Count('user_answers'),1),   
+    )
+    questions_data = []
+    for question in questions:
+        full_points = question.points * question.total_answers
+        if full_points > 0:
+            score_ratio = question.total_awarded_points / full_points
+        else:
+            score_ratio = 0
+        print(score_ratio)
+        questions_data.append({
+            "id": question.id,
+            "text": question.text,
+            "score_ratio": score_ratio
+        })
+    sorted_data = sorted([q for q in questions_data if q['score_ratio'] > 0], key=lambda x : x['score_ratio'])[:10]
+    return JsonResponse(sorted_data, safe=False)
 
 

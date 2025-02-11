@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import Territorie, Historie, CustomUser, CustomDraw, AncientPlaces
+from .models import Territorie, Historie, CustomUser, CustomDraw, AncientPlaces, Question, UserAnswer
 from rest_framework import serializers
 import json
 import geojson
@@ -212,3 +212,13 @@ class CustomDrawSerializer(serializers.Serializer):
         except Exception as e:
             raise serializers.ValidationError(f"Hiba a reprezentáció során: {e}")
         return feature
+    
+class QuestionSerializer(serializers.ModelSerializer):
+    #correct_answers = serializers.SerializerMethodField()
+    score_ratio = serializers.SerializerMethodField()
+    class Meta:
+        model = Question
+        fields = ['id', 'text', 'score_ratio']
+    
+    def get_score_ratio(self, obj):
+        return float(getattr(obj, 'score_ratio', None))

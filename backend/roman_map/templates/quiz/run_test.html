@@ -1,4 +1,4 @@
-{% extends "pages/test.html" %}
+{% extends "quiz/test.html" %}
 {% block content %}
     <h2>{{ quiz.title }}</h2>
     <form method="post">
@@ -11,7 +11,7 @@
                     <input type="radio" name="question_{{ question.id }}" value="false">Hamis
                 {% else %}
                     {% for answer in question.answers.all %}
-                        <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                        <input type="checkbox" name="question_{{ question.id }}" value="{{ answer.id }}">
                         {{ answer.text }}<br>
                     {% endfor %}
                 {% endif %}
