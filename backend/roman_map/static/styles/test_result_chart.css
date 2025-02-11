@@ -1,0 +1,14 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+svg {
+    display: block;
+    margin: auto;
+}
+.bubble text {
+    fill: white;
+    font-size: 12px;
+    text-anchor: middle;
+    pointer-events: none;
+}

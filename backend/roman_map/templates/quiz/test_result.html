@@ -2,6 +2,6 @@
 
 {% block content %}
     <h2>{{ quiz.title }} - Teszt eredménye</h2>
-    <p>Elért pontszám: {{ score }}</p>
+    <p>Elért pontszám: {{ score }} / {{ quiz.points }}</p>
     <a href="{% url 'teszt' %}">Vissza a tesztekhez</a>
 {% endblock %}

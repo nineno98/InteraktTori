@@ -399,9 +399,20 @@ def serve_tile(request, z , x, y):
 def index(request):
     return render(request, 'pages/test_chart.html')
 
-def getTopQuestions(request):
+def teszteredmenyek(request, quiz_id):
+    try:
+        quiz = Quiz.objects.get(id = quiz_id)
+        return render(request, 'quiz/test_chart.html', {"quiz_id": quiz.id})
+        
+    except Exception as e:
+        
+        messages.error(request, "Hiba történt az oldal betöltése közben.")
+        return redirect('teszt')
+        
+
+def getTopQuestions(request, quiz_id):
     
-    questions = Question.objects.annotate(
+    questions = Question.objects.filter(quiz = quiz_id).annotate(
         total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
         total_answers = Coalesce(Count('user_answers'),1),   
     )
@@ -412,7 +423,6 @@ def getTopQuestions(request):
             score_ratio = question.total_awarded_points / full_points
         else:
             score_ratio = 0
-        print(score_ratio)
         questions_data.append({
             "id": question.id,
             "text": question.text,
@@ -421,8 +431,8 @@ def getTopQuestions(request):
     sorted_data = sorted([q for q in questions_data if q['score_ratio'] > 0], key=lambda x : x['score_ratio'], reverse=True)[:10]
     return JsonResponse(sorted_data, safe=False)
 
-def getWrostQuestions(request):
-    questions = Question.objects.annotate(
+def getWrostQuestions(request, quiz_id):
+    questions = Question.objects.filter(quiz = quiz_id).annotate(
         total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
         total_answers = Coalesce(Count('user_answers'),1),   
     )
@@ -433,13 +443,13 @@ def getWrostQuestions(request):
             score_ratio = question.total_awarded_points / full_points
         else:
             score_ratio = 0
-        print(score_ratio)
+        score_ratio = 1 - score_ratio
         questions_data.append({
             "id": question.id,
             "text": question.text,
             "score_ratio": score_ratio
         })
-    sorted_data = sorted([q for q in questions_data if q['score_ratio'] > 0], key=lambda x : x['score_ratio'])[:10]
+    sorted_data = sorted([q for q in questions_data if q['score_ratio'] < 1 and q['score_ratio'] > 0], key=lambda x : x['score_ratio'])[:10]
     return JsonResponse(sorted_data, safe=False)
 
 
