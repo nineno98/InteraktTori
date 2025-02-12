@@ -781,6 +781,32 @@ class AncientPlaces{
         return this.overlay;
     }
 }
+
+class HandleDrawControl extends ol.control.Control{
+    constructor(handleDraw){
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ol-draw-control ol-unselectable ol-control';
+
+        const toggleDrawsButton = document.createElement('button');
+        toggleDrawsButton.innerHTML = '👁️';
+        toggleDrawsButton.style.background = 'white';
+        toggleDrawsButton.title = "Rajzok mutatása / rejtése";
+        toggleDrawsButton.addEventListener('click', () => {
+            if(toggleDrawsButton.style.background === 'white')
+                toggleDrawsButton.style.background = 'lightgrey';
+            else
+                toggleDrawsButton.style.background = 'white';
+            handleDraw.showOrHiddenDrawsF();
+        });
+
+        controlDiv.appendChild(toggleDrawsButton);
+
+        super({
+            element: controlDiv
+        });
+    }
+}
+
 const container = document.getElementById('places-popup');
 const overlay = new ol.Overlay({
     element: document.getElementById('places-popup'),
@@ -825,6 +851,7 @@ const map = new ol.Map({
       projection: 'EPSG:3857',
     }),
 });
-
+const drawControl = new HandleDrawControl(drawing);
+map.addControl(drawControl);
 histories.addSelect();
 places.addSelect();
