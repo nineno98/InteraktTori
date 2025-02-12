@@ -1,20 +1,23 @@
+{% extends "quiz/test.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D3.js Buborékdiagram</title>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <link rel="stylesheet" href="{% static 'styles/test_result_chart.css' %}">
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
+
+{% block content %}
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <input id="quiz_id" value = "{{quiz_id}}" type=hidden>
-</head>
-<body>
-    
     <h2>D3.js Buborékdiagram</h2>
     <svg width="800" height="600" id="top-score"></svg>
     <svg width="800" height="600" id="wrost-score"></svg>
+
+    <div id="table-container">
+        <table id="table-root">
+            
+
+        </table>
+    </div>
+
+
     <script type="module" src="{% static 'scripts/test_results.js' %}"></script>
-</body>
-</html>
+
+{% endblock content %}
+
+

@@ -24,5 +24,6 @@ urlpatterns = [
     path('top-questions/<int:quiz_id>/', view=views.getTopQuestions, name='getTopQuestions'),
     path('top-wrost-questions/<int:quiz_id>/', view=views.getWrostQuestions, name='getWrostQuestions'),
     path('test/results/<int:quiz_id>/', view=views.teszteredmenyek, name='teszteredmenyek'),
+    path('api/test-questions/<int:quiz_id>/', view=views.getTestQuestions, name='getTestQuestions'),
 
 ]

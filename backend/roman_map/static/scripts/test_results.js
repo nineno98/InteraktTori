@@ -1,38 +1,41 @@
 const quiz_id = document.getElementById("quiz_id").value;
-console.log(quiz_id);
 
+async function fetchData(apiUrl) {
+    try {
+        const response = await fetch(apiUrl);
+        return await response.json();
+    } catch (error) {
+        console.error("Hiba az adatlekéréskor:", error);
+        return [];
+    }
+}
+function createChart(data, containerId, BubbleColor){
+   
+    const formattedData = { "name": "root", "children": data.map(d => ({ name: d.text, value: d.scoreRatio })) };
 
-function createBubleChart(apiUrl, containerId, color){
-    let color_ = color;
-    
-    fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => {
-        const formattedData = { "name": "root", "children": data.map(d => ({ name: d.text, value: d.score_ratio })) };
+    const width = 800, height = 600;
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const pack = d3.pack().size([width, height]).padding(5);
 
-        const width = 800, height = 600;
-        const color = d3.scaleOrdinal(d3.schemeCategory10);
-        const pack = d3.pack().size([width, height]).padding(5);
+    const root = d3.hierarchy(formattedData).sum(d => d.value);
+    const nodes = pack(root).leaves();
 
-        const root = d3.hierarchy(formattedData).sum(d => d.value);
-        const nodes = pack(root).leaves();
+    const svg = d3.select(containerId);
 
-        const svg = d3.select(containerId);
-
-        const bubbles = svg.selectAll(".bubble")
+    const bubbles = svg.selectAll(".bubble")
             .data(nodes)
             .enter()
             .append("g")
             .attr("class", "bubble")
             .attr("transform", d => `translate(${d.x}, ${d.y})`);
         
-        bubbles.append("circle")
+    bubbles.append("circle")
             .attr("r", d => d.r)
-            .attr("fill", color_)
+            .attr("fill", BubbleColor)
             .attr("stroke", "#333")
             .attr("stroke-width", 2);
 
-        bubbles.append("text")
+    bubbles.append("text")
             .attr("dy", "-0.1em")
             
             .attr("font-size", d => Math.min(d.r / 3, 16))
@@ -48,14 +51,68 @@ function createBubleChart(apiUrl, containerId, color){
                     });
                 }
             });
-    })
-    .catch(error => {
-        console.log(error);
-    });
+    
 };
 
+function createDataTable(data){
+    const tableRoot = document.getElementById('table-root');
+    const tHead = document.createElement("thead");
+    tHead.innerHTML = `
+        <tr>
+            <th>#</th>
+            <th>Kérdés</th>
+            <th>Arány</th>
+        </tr>
+    `;
+    tableRoot.appendChild(tHead);
+    const tBody = document.createElement("tbody");
+    data.forEach((item, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.text}</td>
+            <td>${(item.scoreRatio * 100).toFixed(2)}%</td>
+        `;
+        tBody.appendChild(row);
+    })
+    tableRoot.appendChild(tBody);
 
+};
 
+function calculateScoreRatio(data){
+    return data.map(d => {
+        const fullPoint = d.points * d.total_answers;
+        const scoreRatio = fullPoint > 0 ? d.total_awarded_points / fullPoint : 0;
+        return {...d, scoreRatio:scoreRatio}
+    });
+}
 
-createBubleChart(`http://127.0.0.1:8000/top-questions/${quiz_id}/`, "#top-score" , "#90EE90")
-createBubleChart(`http://127.0.0.1:8000/top-wrost-questions/${quiz_id}/`, "#wrost-score" , "#FF4C4C")
+async function initComponents() {
+    const QuestionsAPIData = await fetchData(`http://127.0.0.1:8000/api/test-questions/${quiz_id}/`);
+    const calculatedData = calculateScoreRatio(QuestionsAPIData);
+
+    const topQuestionsData = calculatedData
+        .filter(d => d.scoreRatio > 0)
+        .sort((a, b) => a.scoreRatio - b.scoreRatio)
+        .slice(0, 10);
+    
+    const worstQuestionsData = calculatedData
+        .filter(d => d.scoreRatio > 0)
+        .sort((a, b) => a.scoreRatio - b.scoreRatio)
+        .slice(0, 10);
+    
+    const maxScoreRatio = Math.max(...worstQuestionsData.map(q => q.scoreRatio));
+    const invertedWorstQuestions = worstQuestionsData.map(q => ({
+        ...q,
+        inverted_score_ratio: maxScoreRatio - q.scoreRatio + 0.01
+    }));
+
+    //createDataTable(topQuestionsData);
+    createChart(topQuestionsData, "#top-score",  "#90EE90");
+    createChart(worstQuestionsData, "#wrost-score",  "#FF4C4C");
+
+    createDataTable(calculatedData);
+}
+
+initComponents();
+

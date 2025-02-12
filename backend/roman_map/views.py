@@ -405,10 +405,26 @@ def teszteredmenyek(request, quiz_id):
         return render(request, 'quiz/test_chart.html', {"quiz_id": quiz.id})
         
     except Exception as e:
-        
+        print(str(e))
         messages.error(request, "Hiba történt az oldal betöltése közben.")
         return redirect('teszt')
-        
+
+def getTestQuestions(request, quiz_id):
+    questions = Question.objects.filter(quiz = quiz_id).annotate(
+        total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
+        total_answers = Coalesce(Count('user_answers'),1),   
+    )
+    questions_data = []
+    for question in questions:
+        questions_data.append({
+            "id": question.id,
+            "text": question.text,
+            "points":question.points,
+            "total_awarded_points": question.total_awarded_points,
+            "total_answers":question.total_answers           
+        })
+    return JsonResponse(questions_data, safe=False)
+
 
 def getTopQuestions(request, quiz_id):
     
