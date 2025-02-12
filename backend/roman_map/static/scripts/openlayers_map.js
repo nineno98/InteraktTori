@@ -839,6 +839,12 @@ class HandleDrawControl extends ol.control.Control{
         const undoButton = document.createElement("button");
         undoButton.setAttribute("id", "undoButton");
         undoButton.innerHTML = "&#8630;";
+        undoButton.style.display = "none";
+
+        const undoButtonFunction = () => {
+            handleDraw.undoHandling();
+        }
+        undoButton.addEventListener('click', undoButtonFunction);
 
 
 
@@ -866,7 +872,7 @@ class HandleDrawControl extends ol.control.Control{
                 enableDrawButton.style.display = "block";
                 enableSelectButton.style.display = "block";
                 deleteButton.style.display = "block";
-                //typeSelect.style.display = "block";
+                
             }
                 
             else{
@@ -879,6 +885,7 @@ class HandleDrawControl extends ol.control.Control{
                 deleteButton.style.background = "white";
                 typeSelect.style.display = "none";
                 typeSelect.value = "Point";
+                undoButton.style.display = "none";
             }
                 
             handleDraw.showOrHiddenDrawsF();
@@ -896,10 +903,12 @@ class HandleDrawControl extends ol.control.Control{
             if(enableDrawButton.style.background === 'white'){
                 enableDrawButton.style.background = 'lightgrey';
                 typeSelect.style.display = "block";
+                undoButton.style.display = "block";
             }   
             else{
                 enableDrawButton.style.background = 'white';
-                typeSelect.style.display = "block";
+                typeSelect.style.display = "none";
+                undoButton.style.display = "none";
             }
             
             handleDraw.enableDraw();
