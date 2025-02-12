@@ -396,8 +396,6 @@ def serve_tile(request, z , x, y):
     except Exception as e:
         pass
 
-def index(request):
-    return render(request, 'pages/test_chart.html')
 
 def teszteredmenyek(request, quiz_id):
     try:
@@ -409,6 +407,7 @@ def teszteredmenyek(request, quiz_id):
         messages.error(request, "Hiba történt az oldal betöltése közben.")
         return redirect('teszt')
 
+@api_view(['GET'])
 def getTestQuestions(request, quiz_id):
     questions = Question.objects.filter(quiz = quiz_id).annotate(
         total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
@@ -425,47 +424,5 @@ def getTestQuestions(request, quiz_id):
         })
     return JsonResponse(questions_data, safe=False)
 
-
-def getTopQuestions(request, quiz_id):
-    
-    questions = Question.objects.filter(quiz = quiz_id).annotate(
-        total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
-        total_answers = Coalesce(Count('user_answers'),1),   
-    )
-    questions_data = []
-    for question in questions:
-        full_points = question.points * question.total_answers
-        if full_points > 0:
-            score_ratio = question.total_awarded_points / full_points
-        else:
-            score_ratio = 0
-        questions_data.append({
-            "id": question.id,
-            "text": question.text,
-            "score_ratio": score_ratio
-        })
-    sorted_data = sorted([q for q in questions_data if q['score_ratio'] > 0], key=lambda x : x['score_ratio'], reverse=True)[:10]
-    return JsonResponse(sorted_data, safe=False)
-
-def getWrostQuestions(request, quiz_id):
-    questions = Question.objects.filter(quiz = quiz_id).annotate(
-        total_awarded_points = Coalesce(Sum('user_answers__points_awarded'),0),
-        total_answers = Coalesce(Count('user_answers'),1),   
-    )
-    questions_data = []
-    for question in questions:
-        full_points = question.points * question.total_answers
-        if full_points > 0:
-            score_ratio = question.total_awarded_points / full_points
-        else:
-            score_ratio = 0
-        score_ratio = 1 - score_ratio
-        questions_data.append({
-            "id": question.id,
-            "text": question.text,
-            "score_ratio": score_ratio
-        })
-    sorted_data = sorted([q for q in questions_data if q['score_ratio'] < 1 and q['score_ratio'] > 0], key=lambda x : x['score_ratio'])[:10]
-    return JsonResponse(sorted_data, safe=False)
 
 

@@ -804,10 +804,10 @@ const overlay = new ol.Overlay({
     },
 });
 
-const places = new AncientPlaces('http://127.0.0.1:8000/places/', overlay);
-const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/territories/');
-const drawing = new HandleDraw('http://127.0.0.1:8000/custom-draws/');
-const histories = new HistorieVectorLayer('http://127.0.0.1:8000/histories/');
+const places = new AncientPlaces('http://127.0.0.1:8000/api/places/', overlay);
+const territories = new TerritoriesVectorLayer('http://127.0.0.1:8000/api/territories/');
+const drawing = new HandleDraw('http://127.0.0.1:8000/api/custom-draws/');
+const histories = new HistorieVectorLayer('http://127.0.0.1:8000/api/histories/');
 
 const osmLayer = new ol.layer.Tile({
     source: new ol.source.OSM(),
