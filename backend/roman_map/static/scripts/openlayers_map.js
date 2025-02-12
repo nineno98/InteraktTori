@@ -349,14 +349,7 @@ class HandleDraw {
                 console.error('Hálózati hiba történt:', error);
             });
 
-            /*console.log('accept deleting feature id: '+featureId);
-            this.drawingLayer.getSource().removeFeature(feature);
-            popupContainer.style.display = 'none';
-            console.log("Feature törölve:", feature);
-
-            map.removeInteraction(this.select);
-            map.removeInteraction(this.modify);
-            this.addSelect();*/
+            
         }
         saveButton.addEventListener('click', this.acceptDeleting);
 
@@ -512,13 +505,7 @@ class HandleDraw {
                     if(response.ok){
                         console.log("Mentés sikeresen megtörtént");
                         return response.json()
-                        /*const data = response.json();
-                        const id = data.id;
-                        feature.setProperties({id})
-
-                        this.turnOffDaw();
                         
-                        this.turnOnDraw();*/
                     }else{
                         console.log("Mentés sikertelen.");
                         this.drawingLayer.getSource().removeFeature(feature)
