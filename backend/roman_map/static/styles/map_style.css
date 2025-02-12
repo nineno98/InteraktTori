@@ -188,6 +188,11 @@
     flex-shrink: 0;
 }
 
+#enableDrawButton:hover {
+  background: lightgray;
+  filter: brightness(80%);
+}
+
 #enableSelectButton{
   background: white;
     border: none;
@@ -202,6 +207,7 @@
 }
 #enableSelectButton:hover {
   background: lightgray;
+  filter: brightness(80%);
 }
 
 #deleteButton{
@@ -219,10 +225,12 @@
 
 #deleteButton:hover {
   background: lightgray;
+  filter: brightness(80%);
 }
 
 #showOrHiddenDrawsButton:hover {
     background: lightgray;
+    filter: brightness(80%);
 }
 
 .ol-draw-control select {
@@ -249,6 +257,11 @@
     border-style: none;
     display: none;
 }
+#typeSelect:hover{
+  filter: brightness(80%);
+  
+}
+
 #undoButton{
   background: white;
     border: none;
@@ -261,4 +274,7 @@
     justify-content: center;
     border-radius: 5px;
     flex-shrink: 0;
+}
+#undoButton:hover{
+  filter: brightness(80%);
 }
