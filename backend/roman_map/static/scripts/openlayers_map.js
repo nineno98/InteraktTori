@@ -1,6 +1,4 @@
-/*const hatter = new ol.layer.Tile({
-    source: new ol.source.OSM(),
-  });*/
+
   
 function getCookie(name) {
     let cookieValue = null;
@@ -153,6 +151,7 @@ class HandleDraw {
         this.draw = null;
         this.modify = null;
         this.showdrawsvisible = false;
+        this.selectedFeatures = null;
 
         this.selectedStyle = new ol.style.Style({
             fill: new ol.style.Fill({
@@ -205,7 +204,7 @@ class HandleDraw {
         this.undoButton = document.getElementById('undo');
         this.undoButton.addEventListener('click', this.undoHandling.bind(this), false);
 
-        this.typeSelect = document.getElementById('type');
+        this.typeSelect = document.getElementById('typeSelect');
         this.typeSelect.addEventListener('change', this.changeHandle.bind(this), false);
 
         this.drawenableButton = document.getElementById('draw-enable');
@@ -224,6 +223,11 @@ class HandleDraw {
         if(this.showdrawsvisible){
             this.drawingLayer.setStyle(null);
             this.showdrawsvisible = false;
+            this.drawenabled = false;
+            this.selectenabled = false;
+            map.removeInteraction(this.modify);
+            map.removeInteraction(this.select);
+            map.removeInteraction(this.draw);
             this.showOrHiddenDraws.removeEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
         }else{
             this.drawingLayer.setStyle(this.basicStyle);
@@ -271,24 +275,25 @@ class HandleDraw {
         map.addInteraction(this.modify);
         
         let originalGeometry = null;
-        const selectedFeatures = this.select.getFeatures();
+        //const selectedFeatures = this.select.getFeatures();
+        this.selectedFeatures = this.select.getFeatures();
 
-        this.modify.on('modifystart', function (event) {
+        this.modify.on('modifystart', (event) => {
             console.log('módosítás elkezdődött');
-            if (selectedFeatures.getLength() > 0) {
-                const feature = selectedFeatures.item(0);
+            if (this.selectedFeatures.getLength() > 0) {
+                const feature = this.selectedFeatures.item(0);
                 originalGeometry = feature.getGeometry().clone();
             }
         });
         this.modify.on('modifyend', (event) => {
             console.log('modositas vege');
-            if (selectedFeatures.getLength() > 0) {
-                const feature = selectedFeatures.item(0);
+            if (this.selectedFeatures.getLength() > 0) {
+                const feature = this.selectedFeatures.item(0);
                 this.modifyPopup(feature, originalGeometry);
             }
         });
 
-        const deletingBundle = () =>{
+        /*const deletingBundle = () =>{
             if(selectedFeatures.getLength() > 0){
                 const feature = selectedFeatures.item(0);
                 this.deletePopup(feature);
@@ -301,8 +306,19 @@ class HandleDraw {
         const deleteButton = document.getElementById('delete-selected-feature');
         deleteButton.removeEventListener('click', deletingBundle);
         deleteButton.addEventListener('click',  deletingBundle);
-        
+        */
     }
+
+    deletingBundle(){
+        if(this.selectedFeatures.getLength() > 0){
+            const feature = this.selectedFeatures.item(0);
+            this.deletePopup(feature);
+        }
+        else{
+            alert('A törléshez előbb ki kell jelölnöd egy elemet!')
+        }
+    }
+
 
     deletePopup(feature){
         const popupContainer = document.getElementById('delete-popup');
@@ -323,7 +339,7 @@ class HandleDraw {
             const csrftoken = getCookie('csrftoken')
             console.log('document.cookie:', document.cookie);
             console.log(csrftoken)
-            fetch('http://127.0.0.1:8000/custom-draws/',{
+            fetch('http://127.0.0.1:8000/api/custom-draws/',{
                 method: 'DELETE',
                 headers: {
                     'X-CSRFToken': csrftoken,
@@ -383,7 +399,7 @@ class HandleDraw {
             cloneFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326');
             const coordinates4326 = cloneFeature.getGeometry().getCoordinates();
             console.log(coordinates4326);
-            fetch('http://127.0.0.1:8000/custom-draws/', {
+            fetch('http://127.0.0.1:8000/api/custom-draws/', {
                 method: 'PATCH',
                 headers: {
                     'X-CSRFToken': csrftoken,
@@ -492,7 +508,7 @@ class HandleDraw {
                 });
                 const geojson = format.writeFeatureObject(feature);
                 
-                fetch('http://127.0.0.1:8000/custom-draws/', {
+                fetch('http://127.0.0.1:8000/api/custom-draws/', {
                     method:'POST',
                     headers: {
                         'X-CSRFToken': csrftoken,
@@ -787,19 +803,118 @@ class HandleDrawControl extends ol.control.Control{
         const controlDiv = document.createElement('div');
         controlDiv.className = 'ol-draw-control ol-unselectable ol-control';
 
-        const toggleDrawsButton = document.createElement('button');
-        toggleDrawsButton.innerHTML = '👁️';
-        toggleDrawsButton.style.background = 'white';
-        toggleDrawsButton.title = "Rajzok mutatása / rejtése";
-        toggleDrawsButton.addEventListener('click', () => {
-            if(toggleDrawsButton.style.background === 'white')
-                toggleDrawsButton.style.background = 'lightgrey';
-            else
-                toggleDrawsButton.style.background = 'white';
-            handleDraw.showOrHiddenDrawsF();
-        });
+        const drawControlContainer = document.createElement('div');
+        drawControlContainer.setAttribute("class", "draw-control-container");
 
-        controlDiv.appendChild(toggleDrawsButton);
+        const showOrHiddenDrawsButton = document.createElement('button');
+        showOrHiddenDrawsButton.setAttribute('id', 'showOrHiddenDrawsButton');
+        showOrHiddenDrawsButton.innerHTML = '👁️';
+        showOrHiddenDrawsButton.style.background = 'white';
+        showOrHiddenDrawsButton.title = "Rajzok mutatása / rejtése";
+
+        const enableDrawButton = document.createElement('button');
+        enableDrawButton.setAttribute('id', 'enableDrawButton');
+        enableDrawButton.innerHTML = '✏️';
+        enableDrawButton.title = "Rajzolás";
+        enableDrawButton.style.background = "white";
+        enableDrawButton.style.display = "none";
+
+        const enableSelectButton = document.createElement("button");
+        enableSelectButton.setAttribute("id", "enableSelectButton");
+        enableSelectButton.innerHTML = "🔲";
+        enableSelectButton.title = "Kijelölés";
+        enableSelectButton.style.display = "none";
+        enableSelectButton.style.background = "white";
+
+        const deleteButton = document.createElement('button');
+        deleteButton.setAttribute('id', 'deleteButton');
+        deleteButton.innerHTML = "🗑️";
+        deleteButton.title = "Kijelölt elem törlése";
+        deleteButton.style.background = "white";
+        deleteButton.style.display = "none";
+
+        const typeSelect = document.getElementById("typeSelect");
+        typeSelect.addEventListener('change', () => handleDraw.changeHandle());
+
+        const undoButton = document.createElement("button");
+        undoButton.setAttribute("id", "undoButton");
+        undoButton.innerHTML = "&#8630;";
+
+
+
+        const deleteButtonFunction = () => {
+            deleteButton.style.background = "lightgrey";
+            handleDraw.deletingBundle();
+            deleteButton.style.background = "white";
+        };
+        deleteButton.addEventListener('click', deleteButtonFunction);
+
+        const enableSelectButtonFunction = () => {
+            if(enableSelectButton.style.background === "white"){
+                enableSelectButton.style.background = "lightgrey";
+            }else{
+                enableSelectButton.style.background = "white";
+            }
+            handleDraw.enableSelect();
+            
+        };
+        enableSelectButton.addEventListener('click', enableSelectButtonFunction);
+        
+        const showOrHiddenDrawsButtonFunction = () => {
+            if(showOrHiddenDrawsButton.style.background === "white"){
+                showOrHiddenDrawsButton.style.background = "lightgrey";
+                enableDrawButton.style.display = "block";
+                enableSelectButton.style.display = "block";
+                deleteButton.style.display = "block";
+                //typeSelect.style.display = "block";
+            }
+                
+            else{
+                showOrHiddenDrawsButton.style.background = "white";
+                enableDrawButton.style.background = "white";
+                enableDrawButton.style.display = "none";
+                enableSelectButton.style.display = "none";
+                enableSelectButton.style.background = "white";
+                deleteButton.style.display = "none";
+                deleteButton.style.background = "white";
+                typeSelect.style.display = "none";
+                typeSelect.value = "Point";
+            }
+                
+            handleDraw.showOrHiddenDrawsF();
+            
+        };
+        
+        showOrHiddenDrawsButton.addEventListener('click', showOrHiddenDrawsButtonFunction);
+        
+        
+        
+
+        
+        const enableDrawButtonFunction = () => {
+            
+            if(enableDrawButton.style.background === 'white'){
+                enableDrawButton.style.background = 'lightgrey';
+                typeSelect.style.display = "block";
+            }   
+            else{
+                enableDrawButton.style.background = 'white';
+                typeSelect.style.display = "block";
+            }
+            
+            handleDraw.enableDraw();
+        };
+        enableDrawButton.addEventListener('click', enableDrawButtonFunction);
+        
+        drawControlContainer.appendChild(enableDrawButton);
+        drawControlContainer.appendChild(typeSelect);     
+        drawControlContainer.appendChild(undoButton);
+
+        controlDiv.appendChild(showOrHiddenDrawsButton);
+        controlDiv.appendChild(enableSelectButton);
+        controlDiv.appendChild(deleteButton);
+        controlDiv.appendChild(drawControlContainer);
+
 
         super({
             element: controlDiv
