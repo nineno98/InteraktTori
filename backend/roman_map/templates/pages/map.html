@@ -23,28 +23,19 @@
     <p>Ez a térkép oldal</p>
     <a href="{% url 'fooldal' %}">Főoldal</a>
     <input type="range" id="date-slider" min="-700" max="700" value="-700">
+    <span id="slider-value"></span>
     <div id="container">
         <div id="map"></div>
         <div id="panel"></div>
     </div>
-    <span class="input-group">
-          <label for="typeSelect">Típus</label>
+    
+          
           <select id="typeSelect">
-            
             <option value="Point">Pont</option>
             <option value="LineString">Vonal</option>
             <option value="Polygon">Terület</option>   
           </select>
-          <input class="form-control" type="button" value="Undo" id="undo">
-          
-        </span>
-      
-        <span id="slider-value"></span>
-        <input class="btn btn-primary" type="button" value="Rajz" id="draw-enable">
-        <input class="btn btn-primary" type="button" value="Kijelölés" id="select-enable">
-        <input class="btn btn-primary" type="button" value="Kijelölt elem törlése" id="delete-selected-feature">
-        <input class="btn btn-primary" type="button" value="Rajzok mutatása / rejtése" id="show-or-hidden-drawing-layer">
-
+  
         <div id="draw-popup" class="popup-overlay">
           <div class="popup-content">
               <h3>Objektum adatai</h3>
@@ -87,6 +78,19 @@
         <div id="places-popup" class="ol-popup">
           <a href="#" id="places-popup-closer" class="ol-popup-closer">&#10060;</a>
           <div id="places-popup-content"></div>
+        </div>
+
+        <div id="info-popup" class="popup-overlay">
+          <div class="popup-content">
+            <div class="info-popup-inner-container">
+              <span id="info-popup-icon"></span>
+              <label for="" id="info-popup-message"></label>
+            </div>            
+            <div class="popup-buttons">
+              <button type="button" id="info-popup-accept-button" class="apply-button">Rendben</button>
+            </div>
+          </div>
+          
         </div>
     
     <script type="module" src="{% static 'scripts/openlayers_map.js' %}"></script>

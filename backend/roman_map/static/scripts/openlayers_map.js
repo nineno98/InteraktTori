@@ -152,6 +152,7 @@ class HandleDraw {
         this.modify = null;
         this.showdrawsvisible = false;
         this.selectedFeatures = null;
+        
 
         this.selectedStyle = new ol.style.Style({
             fill: new ol.style.Fill({
@@ -201,21 +202,21 @@ class HandleDraw {
             source: this.drawingSource,
         });
         this.drawingLayer.setStyle(null);
-        this.undoButton = document.getElementById('undo');
-        this.undoButton.addEventListener('click', this.undoHandling.bind(this), false);
+        //this.undoButton = document.getElementById('undo');
+        //this.undoButton.addEventListener('click', this.undoHandling.bind(this), false);
 
         this.typeSelect = document.getElementById('typeSelect');
-        this.typeSelect.addEventListener('change', this.changeHandle.bind(this), false);
+        //this.typeSelect.addEventListener('change', this.changeHandle.bind(this), false);
 
-        this.drawenableButton = document.getElementById('draw-enable');
-        this.drawenableButton.addEventListener('click', this.enableDraw.bind(this), false);
+        //this.drawenableButton = document.getElementById('draw-enable');
+        //this.drawenableButton.addEventListener('click', this.enableDraw.bind(this), false);
 
-        this.selectenableButton = document.getElementById('select-enable');
-        this.selectenableButton.addEventListener('click', this.enableSelect.bind(this), false);
+        //this.selectenableButton = document.getElementById('select-enable');
+        //this.selectenableButton.addEventListener('click', this.enableSelect.bind(this), false);
 
-        this.showOrHiddenDraws = document.getElementById('show-or-hidden-drawing-layer');
-        this.showOrHiddenDraws.addEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
-        this.showOrHiddenDraws.style.background = 'lightgrey';
+        //this.showOrHiddenDraws = document.getElementById('show-or-hidden-drawing-layer');
+        //this.showOrHiddenDraws.addEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
+        //this.showOrHiddenDraws.style.background = 'lightgrey';
         
     }
 
@@ -228,11 +229,11 @@ class HandleDraw {
             map.removeInteraction(this.modify);
             map.removeInteraction(this.select);
             map.removeInteraction(this.draw);
-            this.showOrHiddenDraws.removeEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
+            //this.showOrHiddenDraws.removeEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
         }else{
             this.drawingLayer.setStyle(this.basicStyle);
             this.showdrawsvisible = true;
-            this.showOrHiddenDraws.removeEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
+            //this.showOrHiddenDraws.removeEventListener('click', this.showOrHiddenDrawsF.bind(this), false);
         }
     }
 
@@ -310,22 +311,49 @@ class HandleDraw {
     }
 
     deletingBundle(){
-        if(this.selectedFeatures.getLength() > 0){
+        if(this.selectedFeatures && this.selectedFeatures.getLength() > 0){
             const feature = this.selectedFeatures.item(0);
+            console.log(feature);
             this.deletePopup(feature);
         }
         else{
-            alert('A törléshez előbb ki kell jelölnöd egy elemet!')
+            //alert('A törléshez előbb ki kell jelölnöd egy elemet!');
+            this.infoPopup("A törléshez előbb ki kell jelölnöd egy elemet!", "info");
         }
     }
 
+    infoPopup(message, status){
+        const popupContainer = document.getElementById('info-popup');
+        const acceptButton = document.getElementById('info-popup-accept-button');
+        const messageLabel = document.getElementById('info-popup-message');
+        const iconSpan = document.getElementById('info-popup-icon');
+
+        if(status == 'ok'){
+            iconSpan.innerHTML = "&#x2705;";
+        } else if(status == 'error'){
+            iconSpan.innerHTML = "&#x274C;";
+        } else if(status == 'info'){
+            iconSpan.innerHTML = "&#x2139;";    
+        }
+
+        
+        messageLabel.textContent = message;
+        popupContainer.style.display = "flex";
+        acceptButton.removeEventListener('click', this.closeInfos);
+        this.closeInfos = () => {
+            popupContainer.style.display = "none";
+            messageLabel.textContent = "";
+        }
+        acceptButton.addEventListener('click', this.closeInfos);
+
+    }
 
     deletePopup(feature){
         const popupContainer = document.getElementById('delete-popup');
         const saveButton = document.getElementById('deleteFeatureButton');
         const closeButton = document.getElementById('closeDeletingPopup');
 
-        popupContainer.style.display = 'block';
+        popupContainer.style.display = 'flex';
         closeButton.removeEventListener('click', this.closeDeleting);
         saveButton.removeEventListener('click', this.acceptDeleting);
 
@@ -337,8 +365,7 @@ class HandleDraw {
         this.acceptDeleting = () => {
             const featureId = feature.get('id');
             const csrftoken = getCookie('csrftoken')
-            console.log('document.cookie:', document.cookie);
-            console.log(csrftoken)
+            
             fetch('http://127.0.0.1:8000/api/custom-draws/',{
                 method: 'DELETE',
                 headers: {
@@ -353,13 +380,15 @@ class HandleDraw {
                     console.log('Feature törölve az adatbázisból');
                     this.drawingLayer.getSource().removeFeature(feature);
                     popupContainer.style.display = 'none';
-                    console.log("Feature törölve:", feature);
+                    //console.log("Feature törölve:", feature);
+                    this.infoPopup("Rajz sikeresen törölve.", "ok");
 
                     map.removeInteraction(this.select);
                     map.removeInteraction(this.modify);
                     this.addSelect();
                 }else{
-                    console.error('Hiba a törlés során:', response.statusText);
+                    //console.error('Hiba a törlés során:', response.statusText);
+                    this.infoPopup("Törlés sikertelen.", "error");
                 }
             }).catch(error => {
                 console.error('Hálózati hiba történt:', error);
@@ -376,7 +405,7 @@ class HandleDraw {
         const saveButton = document.getElementById('modifiFeature');
         const closeButton = document.getElementById('closeModifyPopup');
 
-        popupContainer.style.display = 'block';
+        popupContainer.style.display = 'flex';
         closeButton.removeEventListener('click', this.closeModify);
         saveButton.removeEventListener('click', this.saveModify);
 
@@ -392,13 +421,13 @@ class HandleDraw {
         closeButton.addEventListener('click', this.closeModify);
 
         this.saveModify = () => {
-            console.log('mentes');
+            
             const featureId = feature.get('id');
             const csrftoken = getCookie('csrftoken')
             const cloneFeature = feature.clone();
             cloneFeature.getGeometry().transform('EPSG:3857', 'EPSG:4326');
             const coordinates4326 = cloneFeature.getGeometry().getCoordinates();
-            console.log(coordinates4326);
+            
             fetch('http://127.0.0.1:8000/api/custom-draws/', {
                 method: 'PATCH',
                 headers: {
@@ -411,21 +440,22 @@ class HandleDraw {
                 })
             }).then(response => {
                 if(response.ok){
-                    console.log('Feature módosítva az adatbázisban');
+                    
                     popupContainer.style.display = 'none';
                     
                     //this.selectenabled = false;
                     map.removeInteraction(this.select);
                     map.removeInteraction(this.modify);
                     //this.drawingLayer.getSource().changed();
-
+                    this.infoPopup("A módosítás sikeres!", "ok");
                     //this.selectenabled = true;
                     this.addSelect();
 
                 }else{
                     popupContainer.style.display = 'none';
                     feature.setGeometry(originalGeometry);
-                    console.error('Hiba a törlés során:', response.statusText);
+                    this.infoPopup("Hiba a módosítás során", "error");
+                    
                     map.removeInteraction(this.select);
                     map.removeInteraction(this.modify);
                     this.drawingLayer.getSource().changed();
@@ -434,7 +464,7 @@ class HandleDraw {
                     this.addSelect();
                 }
             }).catch(error => {
-                console.error('Hálózati hiba történt:', error);
+                this.infoPopup("Hálózati hiba történt!", "error");
             });
             //this.drawingLayer.getSource().changed();
             
@@ -472,7 +502,7 @@ class HandleDraw {
         //const description = descriptionInput.value.trim();
         const errorLabel = document.getElementById('nameError');
 
-        popupContainer.style.display = 'block';
+        popupContainer.style.display = 'flex';
 
         closeButton.removeEventListener('click', this.closePopupHandler);
         saveButton.removeEventListener('click', this.saveFeatureHandler);
@@ -480,7 +510,8 @@ class HandleDraw {
         this.closePopupHandler = () => {
             popupContainer.style.display = 'none';
             this.drawingSource.removeFeature(feature);
-            alert("A rajz megőrzéséhez előbb mentened kell azt!");
+            //alert("A rajz megőrzéséhez előbb mentened kell azt!");
+            this.infoPopup("A rajz megőrzéséhez előbb mentened kell azt!", "info");
         };
         closeButton.addEventListener('click', this.closePopupHandler);
 
@@ -493,7 +524,8 @@ class HandleDraw {
             console.log(created_by);
             if(!name){
                 errorLabel.textContent = "A név megadása kötelező!";
-                errorLabel.style.display = "block";
+                errorLabel.style.display = "flex";
+                errorLabel.style.color = "red";
                 return;
             }
             else{
@@ -519,11 +551,13 @@ class HandleDraw {
 
                 }).then(response => {
                     if(response.ok){
-                        console.log("Mentés sikeresen megtörtént");
+                        this.infoPopup("Mentés sikeresen megtörtént!", "ok");
+                        //console.log("Mentés sikeresen megtörtént");
                         return response.json()
                         
                     }else{
-                        console.log("Mentés sikertelen.");
+                        //console.log("Mentés sikertelen.");
+                        this.infoPopup("Mentés sikertelen!", "error");
                         this.drawingLayer.getSource().removeFeature(feature)
                         return Promise.reject("Sikertelen mentés");
                     }
@@ -534,7 +568,7 @@ class HandleDraw {
                     this.turnOffDaw();
                     this.turnOnDraw();
                 }).catch(error => {
-                    console.error("Hiba:", error);
+                    this.infoPopup("Hálózati hiba történt", "error");
                 });            
             }
             
