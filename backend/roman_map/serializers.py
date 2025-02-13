@@ -76,7 +76,8 @@ class HistorieSerializer(serializers.ModelSerializer):
                 "name": instance.name,
                 "description": instance.description,
                 "date":instance.date,
-                "image_url":self.get_image_url(instance)    
+                "image_url":self.get_image_url(instance),
+                "historie_type":instance.historie_type    
             }
             feature = geojson.Feature(properties=properties, geometry=multipoint)
         except json.JSONDecodeError as e:

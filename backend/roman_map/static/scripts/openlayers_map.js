@@ -644,7 +644,8 @@ class HistorieVectorLayer{
             format: new ol.format.GeoJSON()
         });
         this.historieLayer = new ol.layer.Vector({
-            source: this.historieSource
+            source: this.historieSource,
+            style : this.setIcons.bind(this)
         });
 
         fetch(this.apiUrl)
@@ -669,6 +670,58 @@ class HistorieVectorLayer{
         })
         .catch(error => console.error("Hiba a GeoJSON lekérésekor:", error));       
     };
+    setIcons(feature){
+        let featureType = feature.get("historie_type");
+        if(featureType == "esemeny"){
+            return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius:15,
+                    fill: new ol.style.Fill({
+                        color: "red"
+                    }),
+                    stroke: new ol.style.Stroke({
+                        width:1,
+                        color: "black"
+                    })
+                }),
+                text: new ol.style.Text({
+                    text: '📌',
+                    font: '20px Segoe UI Emoji',
+                    fill: new ol.style.Fill({
+                    color: 'white'
+                    }),
+                    
+                    offsetY: 0,
+                    textAlign: 'center',
+                    textBaseline: 'middle'
+                })
+            })  
+        }else if(featureType == "csata"){
+            return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius:15,
+                    fill: new ol.style.Fill({
+                        color: "red"
+                    }),
+                    stroke: new ol.style.Stroke({
+                        width:1,
+                        color: "black"
+                    })
+                }),
+                text: new ol.style.Text({
+                    text: '⚔️',
+                    font: '20px Segoe UI Emoji',
+                    fill: new ol.style.Fill({
+                    color: 'white'
+                    }),
+                    
+                    offsetY: 0,
+                    textAlign: 'center',
+                    textBaseline: 'middle'
+                })
+            })
+        }
+    }
     getLayer(){
         return this.historieLayer;
     }
@@ -686,7 +739,7 @@ class HistorieVectorLayer{
                         date: properties.date,
                         description: properties.description,
                         image_link: properties.image_url,
-                        name: properties.name,    
+                        name: properties.name,  
                 });
             }
         });
@@ -718,10 +771,62 @@ class HistorieVectorLayer{
             container.appendChild(description);
         })
     }
+    selectedStyleFunction(feature){
+        let featureType = feature.get("historie_type");
+        if(featureType == "esemeny"){
+            return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius:15,
+                    fill: new ol.style.Fill({
+                        color: "red"
+                    }),
+                    stroke: new ol.style.Stroke({
+                        width:4,
+                        color: "yellow"
+                    })
+                }),
+                text: new ol.style.Text({
+                    text: '📌',
+                    font: '20px Segoe UI Emoji',
+                    fill: new ol.style.Fill({
+                    color: 'white'
+                    }),
+                    
+                    offsetY: 0,
+                    textAlign: 'center',
+                    textBaseline: 'middle'
+                })
+            })  
+        }else if(featureType == "csata"){
+            return new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius:15,
+                    fill: new ol.style.Fill({
+                        color: "red"
+                    }),
+                    stroke: new ol.style.Stroke({
+                        width:4,
+                        color: "yellow"
+                    })
+                }),
+                text: new ol.style.Text({
+                    text: '⚔️',
+                    font: '20px Segoe UI Emoji',
+                    fill: new ol.style.Fill({
+                    color: 'white'
+                    }),
+                    
+                    offsetY: 0,
+                    textAlign: 'center',
+                    textBaseline: 'middle'
+                })
+            })
+        }
+    }
     addSelect(){
         this.select = new ol.interaction.Select({
             layers: [this.historieLayer],
-            style: this.selectedStyleFunction,
+            style: this.selectedStyleFunction.bind(this),
         });
         map.addInteraction(this.select);
 

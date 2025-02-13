@@ -20,14 +20,19 @@
 </head>
 <body>
   {% include "pages/messages.html" %}
-    <p>Ez a térkép oldal</p>
-    <a href="{% url 'fooldal' %}">Főoldal</a>
-    <input type="range" id="date-slider" min="-700" max="700" value="-700">
-    <span id="slider-value"></span>
     <div id="container">
-        <div id="map"></div>
-        <div id="panel"></div>
+      <div id="head-container">
+        <a href="{% url 'fooldal' %}">Főoldal</a>
+        <input type="range" id="date-slider" min="-700" max="700" value="-700">
+        <span id="slider-value"></span>
+      </div>
+      
+      <div id="map-container">
+          <div id="map"></div>
+          <div id="panel"></div>
+      </div>
     </div>
+    
     
           
           <select id="typeSelect">

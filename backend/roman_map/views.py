@@ -412,14 +412,14 @@ def serve_tile(request, z , x, y):
             raise Http404("Tile not found")
             
     except sqlite3.OperationalError as e:
-        messages.error(request, "Hiba a térkép betöltése közben")
+        pass
 
     except sqlite3.IntegrityError as e:
-        messages.error(request, "Hiba a térkép betöltése közben")
+        pass
     except sqlite3.DatabaseError as e:
-        messages.error(request, "Hiba a térkép betöltése közben")
+        pass
     except Exception as e:
-        messages.error(request, "Hiba a térkép betöltése közben")
+        pass
 
 
 def teszteredmenyek(request, quiz_id):
