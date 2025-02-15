@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   id="svg2"
+   sodipodi:docname="oldalszegely_arany.svg"
+   viewBox="0 0 315.216 672.93999"
+   version="1.1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   width="315.216"
+   height="672.94"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs1" />
+  <title
+     id="title3708">Greek Key Meander With Lines</title>
+  <sodipodi:namedview
+     id="base"
+     fit-margin-left="0"
+     inkscape:showpageshadow="false"
+     inkscape:zoom="0.717392"
+     borderopacity="1.0"
+     inkscape:snap-intersection-paths="false"
+     inkscape:cx="189.57557"
+     inkscape:cy="331.06029"
+     inkscape:snap-grids="true"
+     inkscape:object-paths="false"
+     inkscape:window-maximized="1"
+     showgrid="false"
+     fit-margin-right="0"
+     inkscape:guide-bbox="true"
+     showguides="true"
+     bordercolor="#666666"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     fit-margin-bottom="0"
+     inkscape:window-width="1366"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     pagecolor="#ffffff"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer2"
+     inkscape:window-height="705"
+     showborder="false"
+     fit-margin-top="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:grid
+       id="grid3034"
+       enabled="true"
+       visible="true"
+       snapvisiblegridlinesonly="true"
+       units="mm"
+       type="xygrid"
+       empspacing="5"
+       originx="-178.848"
+       originy="178.87"
+       spacingy="1"
+       spacingx="1" />
+  </sodipodi:namedview>
+  <g
+     id="layer2"
+     inkscape:label="Layer"
+     inkscape:groupmode="layer"
+     transform="translate(-196.286,-548.51)">
+    <g
+       id="g3717"
+       transform="rotate(90,353.894,884.98)">
+      <path
+         id="path3049"
+         style="fill:none;stroke:#ffd700;stroke-width:18.729"
+         inkscape:connector-curvature="0"
+         d="M 27.081,987.82 V 809.9 h 149.83 v 112.37 h -74.916 v -37.458 h 37.458 V 847.354 H 64.537 v 112.37 h 149.83 v -177.92" />
+      <path
+         id="path3051"
+         d="M 251.83,987.82 V 809.9 h 149.83 v 112.37 h -74.916 v -37.458 h 37.458 v -37.458 h -74.916 v 112.37 h 149.83 v -177.92"
+         style="fill:none;stroke:#ffd700;stroke-width:18.729"
+         inkscape:connector-curvature="0" />
+      <path
+         id="path3057"
+         d="M 476.57,987.82 V 809.9 H 626.4 v 112.37 h -74.916 v -37.458 h 37.458 v -37.458 h -74.916 v 112.37 h 149.83 v -177.92"
+         style="fill:none;stroke:#ffd700;stroke-width:18.729"
+         inkscape:connector-curvature="0" />
+      <path
+         id="path3061"
+         d="m 17.717,773.83 h 672.64"
+         sodipodi:nodetypes="cc"
+         style="fill:none;stroke:#ffd700;stroke-width:20.335"
+         inkscape:connector-curvature="0" />
+      <path
+         id="path3021"
+         sodipodi:nodetypes="cc"
+         style="fill:none;stroke:#ffd700;stroke-width:20.335"
+         inkscape:connector-curvature="0"
+         d="m 17.717,995.79 h 672.64" />
+      <path
+         id="path3061-8"
+         d="m 17.424,1033.1 h 672.94"
+         sodipodi:nodetypes="cc"
+         style="fill:none;stroke:#ffd700;stroke-width:18.976"
+         inkscape:connector-curvature="0" />
+      <path
+         id="path3061-8-2"
+         d="m 17.424,736.86 h 672.94"
+         sodipodi:nodetypes="cc"
+         style="fill:none;stroke:#ffd700;stroke-width:18.976"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+  <metadata
+     id="metadata1">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title> Repeating Border Greek Key With Lines</dc:title>
+        <dc:date>2012-02-12T19:00:29</dc:date>
+        <dc:description>A greek key pattern that can be repeated to make a border.</dc:description>
+        <dc:source>https://openclipart.org/detail/168150/repeating-border-greek-key-with-lines-by-gr8dan</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>GR8DAN</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>blue</rdf:li>
+            <rdf:li>border</rdf:li>
+            <rdf:li>greek</rdf:li>
+            <rdf:li>key</rdf:li>
+            <rdf:li>pattern</rdf:li>
+            <rdf:li>repeating</rdf:li>
+            <rdf:li>square</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

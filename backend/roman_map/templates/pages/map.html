@@ -19,14 +19,14 @@
     
 </head>
 <body>
-  {% include "pages/messages.html" %}
+  
     <div id="container">
       <div id="head-container">
-        <a href="{% url 'fooldal' %}">Főoldal</a>
+        <a href="{% url 'fooldal' %}" class="btn btn-warning head-link-items">Főoldal</a>
         <input type="range" id="date-slider" min="-700" max="700" value="-700">
         <span id="slider-value"></span>
       </div>
-      
+      <div class="disz-sav"></div>
       <div id="map-container">
           <div id="map"></div>
           <div id="panel"></div>

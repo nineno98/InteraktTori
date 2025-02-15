@@ -748,18 +748,22 @@ class HistorieVectorLayer{
         const panelroot = document.getElementById('panel');
         featuresArr.forEach((item) =>{
             const container = document.createElement('div');
-            const header = document.createElement('h2');
+            const header = document.createElement('h4');
             const description = document.createElement('p');
             const date = document.createElement('label');
+            const diszcsik = document.createElement('div');
+            diszcsik.setAttribute('class', 'disz-csik');
         
             header.innerText = item.name;
             date.innerText = item.date;
             description.innerText = item.description;
             container.setAttribute('data-id', item.id);
-            container.classList.add('panel-item');            
-            panelroot.appendChild(container);
+            container.classList.add('panel-item');
+            container.appendChild(diszcsik);
             container.appendChild(header);
-            container.appendChild(date);
+            container.appendChild(date);        
+            panelroot.appendChild(container);
+            
             
             if(item.image_link){
                 const image = document.createElement('img');

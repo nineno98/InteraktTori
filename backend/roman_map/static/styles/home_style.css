@@ -1,0 +1,61 @@
+#background{
+    background-color: #6B1016;
+}
+.content{
+    margin: 0% 15% 0% 15%;
+    text-align: center;
+    background-color: #98252c;
+}
+#page-links{
+    display: flex;
+    flex-direction: column;
+}
+.page-link-item{
+    border: 1px solid white;
+    border-radius: 10px;
+    width: 30%;
+    margin: auto;
+    padding: 1%;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    background-color: #6B1016;
+    color: white;
+    text-decoration: none;
+}
+.page-link-item:hover{
+    background-color: #FFD700;
+    color: black;
+}
+.separator-line-item{
+    border: 2px solid #FFD700;
+    border-radius: 2px;
+    width: 50%;
+    margin: auto;
+    opacity: 1;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    
+}
+.page-pattern{
+    position: absolute;
+    top: 0;
+    width: 80px;
+    height: 100%;
+    background-image: url('../images/oldalszegely_arany.svg');
+    background-repeat: repeat-y;
+    background-size: 80px;
+    z-index: 1;
+    
+    
+}
+.left-pattern{
+    left: 5%;
+}
+.right-pattern{
+    right: 5%;
+}
+#logo-image{
+    border: 3px solid #FFD700;
+    border-radius: 50%;
+    height: 40vh;
+}

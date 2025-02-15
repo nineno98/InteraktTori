@@ -1,38 +1,59 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Belépés</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+                integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+                crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'styles/login_style.css' %}">
 </head>
 <body>
-    <p>loginform helye</p>
-
-    <div>
-        <div>
-            {% include "pages/messages.html" %}
-        </div>
-        <div>
-            {% if not user.is_authenticated %}
-                <form action="." method="post">
-                    {{ form.as_p }}
-                    {% csrf_token %}
-                    <button type="submit">Belépés</button>
-                </form>
-            {% else %}
-            <a href="{% url 'kijelentkezes' %}">Kilépés</a>
-            <a href= "{% url 'jelszovaltas' %}" >Jelszó módosítás</a>
-
-            <div class="content">
-
-            </div>
+    
+    <div class="login-belepoablak">
+        <div class="disz-sav bal-disz-sav"></div>
+        {% if not user.is_authenticated %}
+            <form action="." method="post">
+                <div class="ancient-interactive-logo">
+                    <img src="{% static "images/logo_ai.png" %}" alt="" srcset="">
+                </div>
+                <h3>InteraktTöri</h3>
+                <div class="disz-csik"></div>
+                    
+                {% csrf_token %}
+                <div class="label-input-design">
+                    <div class="label-username">
+                        <label for="id_username">Felhasználónév:</label>
+                    </div>
+                    <div class="label-username">
+                        {{ form.username }}
+                    </div>
+                </div>
+                <div class="label-input-design">
+                    <div class="label-passwd">
+                        <label for="id_password">Jelszó:</label>
+                    </div>
+                    <div class="label-passwd">
+                        {{ form.password }}
+                    </div>
+                </div>
+                <div class"form-group">
+                    <button type="submit" id="belepesgomb" class="btn btn-warning btn-block">
+                        Belépés
+                    </button>
+                </div>
                 
-            {% endif %}
+            </form>
+        {% else %}
+        <a href="{% url 'kijelentkezes' %}">Kilépés</a>
             
-        </div>
-        <div>
+        {% endif %}
             
-        </div>
+        <div class="disz-sav jobb-disz-sav"></div>
     </div>
+    
 </body>
 </html>

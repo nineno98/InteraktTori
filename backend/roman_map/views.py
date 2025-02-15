@@ -66,7 +66,7 @@ def kijelentkezes(request):
         messages.success(request, "Kijelentkezve. Viszlát!")
         return redirect('fooldal')
     except Exception as e:
-        messages.error(request, "Hiba történt a folyamat során.")
+        messages.error(request, "Hiba történt a folyamat során."+str(e))
         return redirect('fooldal')
 
 
@@ -93,7 +93,7 @@ def bejelentkezes(request):
         form = LoginForm()
         return render(request, 'pages/login.html', {'form':form })
     except Exception as e:
-        messages.error(request, "Hiba a bejelentkezés során.")
+        messages.error(request, "Hiba a bejelentkezés során."+str(e))
         return redirect('fooldal')
 
 def fooldal(request):
