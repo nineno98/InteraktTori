@@ -22,9 +22,16 @@
   
     <div id="container">
       <div id="head-container">
-        <a href="{% url 'fooldal' %}" class="btn btn-warning head-link-items">Főoldal</a>
-        <input type="range" id="date-slider" min="-700" max="700" value="-700">
-        <span id="slider-value"></span>
+        
+        <div class="head-link-items">
+          <a href="{% url 'fooldal' %}" class="btn btn-warning head-link-items">Főoldal</a>
+          <div class="slide-container">
+            <input type="range" id="date-slider" min="-700" max="700" value="-700" class="slider">
+          </div>
+          
+          <h5 id="slider-value"></h5>
+        </div>
+        
       </div>
       <div class="disz-sav"></div>
       <div id="map-container">

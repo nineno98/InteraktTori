@@ -71,7 +71,7 @@ class TerritoriesVectorLayer{
 
     filterByDate(event){
         let selectedDate = parseInt(event.target.value);
-        document.getElementById('slider-value').textContent = selectedDate;
+        document.getElementById('slider-value').textContent = this.handleDates(selectedDate);
         //console.log('filtering')
         this.vectorSource.forEachFeature((feature) => {
             let stard_date = feature.get('start_date')
@@ -82,7 +82,7 @@ class TerritoriesVectorLayer{
                 feature.set('hidden', false);
             }
     
-            feature.changed()
+            feature.changed();
         });
     }
 
@@ -659,68 +659,95 @@ class HistorieVectorLayer{
             }
         })
         .then(data => {
-            console.log(data)
+            //console.log(data)
             
             const features = this.historieSource.getFormat().readFeatures(data, {
                 featureProjection: 'EPSG:3857',
             });
             this.historieSource.addFeatures(features);
             this.loadDescriptionsPanel(this.historieSource.getFeatures());
+
+            
+            
             
         })
-        .catch(error => console.error("Hiba a GeoJSON lekérésekor:", error));       
+        .catch(error => console.error("Hiba a GeoJSON lekérésekor:", error));
+
+        this.dateSlider = document.getElementById('date-slider');
+        this.dateSlider.addEventListener('input', this.filterByDate.bind(this), false);
+        
+        this.historieSource.once('addfeature', (event) => {    
+            this.filterByDate({ target: { value: -700 } });
+        });  
     };
+    filterByDate(event){
+        let selectedDate = parseInt(event.target.value);
+        this.historieSource.forEachFeature((feature) => {
+            let date = feature.get("date");
+            if(date >= selectedDate - 15 && date <= selectedDate + 15){
+                feature.set('hidden', false);
+            }else{
+                feature.set('hidden', true);
+            }
+            feature.changed();
+        })
+    }
     setIcons(feature){
         let featureType = feature.get("historie_type");
-        if(featureType == "esemeny"){
-            return new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius:15,
-                    fill: new ol.style.Fill({
-                        color: "red"
+        if(feature.get('hidden')){
+            return null;
+        }else{
+            if(featureType == "esemeny"){
+                return new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius:15,
+                        fill: new ol.style.Fill({
+                            color: "red"
+                        }),
+                        stroke: new ol.style.Stroke({
+                            width:1,
+                            color: "black"
+                        })
                     }),
-                    stroke: new ol.style.Stroke({
-                        width:1,
-                        color: "black"
+                    text: new ol.style.Text({
+                        text: '📌',
+                        font: '20px Segoe UI Emoji',
+                        fill: new ol.style.Fill({
+                        color: 'white'
+                        }),
+                        
+                        offsetY: 0,
+                        textAlign: 'center',
+                        textBaseline: 'middle'
                     })
-                }),
-                text: new ol.style.Text({
-                    text: '📌',
-                    font: '20px Segoe UI Emoji',
-                    fill: new ol.style.Fill({
-                    color: 'white'
+                })  
+            }else if(featureType == "csata"){
+                return new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius:15,
+                        fill: new ol.style.Fill({
+                            color: "red"
+                        }),
+                        stroke: new ol.style.Stroke({
+                            width:1,
+                            color: "black"
+                        })
                     }),
-                    
-                    offsetY: 0,
-                    textAlign: 'center',
-                    textBaseline: 'middle'
-                })
-            })  
-        }else if(featureType == "csata"){
-            return new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius:15,
-                    fill: new ol.style.Fill({
-                        color: "red"
-                    }),
-                    stroke: new ol.style.Stroke({
-                        width:1,
-                        color: "black"
+                    text: new ol.style.Text({
+                        text: '⚔️',
+                        font: '20px Segoe UI Emoji',
+                        fill: new ol.style.Fill({
+                        color: 'white'
+                        }),
+                        
+                        offsetY: 0,
+                        textAlign: 'center',
+                        textBaseline: 'middle'
                     })
-                }),
-                text: new ol.style.Text({
-                    text: '⚔️',
-                    font: '20px Segoe UI Emoji',
-                    fill: new ol.style.Fill({
-                    color: 'white'
-                    }),
-                    
-                    offsetY: 0,
-                    textAlign: 'center',
-                    textBaseline: 'middle'
                 })
-            })
+            }
         }
+        
     }
     getLayer(){
         return this.historieLayer;

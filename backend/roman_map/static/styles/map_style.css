@@ -56,6 +56,23 @@
 .ol-touch .show-custom-polygons-button {
   top: 80px;
 }
+.ol-control{
+  position: absolute;
+  background-color: var(--ol-subtle-background-color);
+  border-radius: 50%;
+}
+.ol-control button {
+  background: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+}
 
 .hidden-button-control {
   top: 90px;
@@ -192,13 +209,14 @@
 
   .ol-draw-control {
     background: rgba(255, 255, 255, 0.0);
-    border-radius: 5px;
-    padding: 5px;
+    border-radius: 4px;
+    
     display: flex;
     flex-direction: column;
     align-items: left;
     gap: 5px;
-    top: 4em;
+    top: 5em;
+    left: .5em;
     
 }
 
@@ -212,7 +230,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 5px;
+    border-radius: 4px;
     
 
 }
@@ -335,6 +353,60 @@
   margin-top: 15px;
   margin-bottom: 15px;
 }
+#slider-value{
+  color: #ecba04;
+  
+  height: 22px;
+  
+  
+}
 .head-link-items{
-
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 80%;
+  
+  
+}
+.head-link-items a{
+  padding: 5px 10px;
+  height: 80%;
+  width: 80px;
+  text-align: center;
+  justify-content: center;
+}
+.head-link-items input[type=range]::-moz-range-progress{
+  background-color: #ecba04;
+  height: 15px;
+}
+.slider{
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  outline: none;
+  background: #98252c;
+  border-radius: 3px;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+.slider:hover{
+  opacity: 1;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+}
+.slide-container{
+  width: 80%;
+  margin-left: 15px;
+  margin-right: 15px;
+  vertical-align: middle;
+  padding: 10px;
 }
