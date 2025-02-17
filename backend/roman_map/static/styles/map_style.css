@@ -1,7 +1,26 @@
-.historie-panel-item-image{
-    width: auto;
-    height: 30vh;
+.panel-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.panel-item img{
+    width: 90%;
+    height: auto;
     display: block;
+}
+.panel-item h4{
+  color: #ecba04;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.panel-item label{
+  color: white;
+  margin-bottom: 10px;
+}
+.panel-item p{
+  color: white;
+  margin-top: 10px
 }
 #container{
   display: flex;
@@ -29,12 +48,8 @@
   height: calc(100vh - 50px);
   
 }
-#map-container p{
-  color: white;
-}
-#map-container h4{
-  color: #ecba04;
-}
+
+
 #panel{
   flex: 1;
   overflow-y: auto;

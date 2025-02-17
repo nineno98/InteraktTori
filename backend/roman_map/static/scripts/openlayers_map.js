@@ -680,6 +680,25 @@ class HistorieVectorLayer{
             this.filterByDate({ target: { value: -700 } });
         });  
     };
+    handleDates(value){
+        try{
+            let number = parseInt(value);
+            if(!isNaN(number)){     
+                if(number <= 0){
+                    return 'Kr. e. '+String(Math.abs(number));
+                }
+                else{
+                    return 'Kr. u. '+String(number);
+                }
+            }
+            else{
+                return value
+            }
+        }catch (error) {
+            console.error('handleDates: Hiba:'+error.message);
+        }
+        
+    }
     filterByDate(event){
         let selectedDate = parseInt(event.target.value);
         this.historieSource.forEachFeature((feature) => {
@@ -782,7 +801,7 @@ class HistorieVectorLayer{
             diszcsik.setAttribute('class', 'disz-csik');
         
             header.innerText = item.name;
-            date.innerText = item.date;
+            date.innerText = this.handleDates(item.date);
             description.innerText = item.description;
             container.setAttribute('data-id', item.id);
             container.classList.add('panel-item');

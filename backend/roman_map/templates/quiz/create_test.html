@@ -2,10 +2,26 @@
 {% load static %}
 
 {% block content %}
-    <p>Új teszt helye</p>
-    <form action="." method="post">
-        {{ form.as_p }}
-        {% csrf_token %}
-        <button type="submit">Új teszt létrehozása</button>
-    </form>
+    <div class="content" id="create-test-content">
+        <form action="." method="post">
+            <h3 class="page-title-h3">Új teszt létrehozása</h3>
+            <div class="disz-csik"></div>
+            {% csrf_token %}
+            <div class="form-content">
+                <div class="form-container">
+                    <div>
+                        <label for="">Teszt címe*</label>
+                        {{ form.title }}
+                    </div>
+                    <div>
+                        <label for="">Teszt leírása</label>
+                        {{ form.description }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="disz-csik"></div>
+            <button type="submit" class="btn btn-warning">Új teszt létrehozása</button>
+        </form>
+    </div>  
 {% endblock content %}
