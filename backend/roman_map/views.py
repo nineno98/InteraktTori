@@ -285,6 +285,7 @@ def teszt_reszletei(request, quiz_id):
             "form": form
         })
     except Exception as e:
+        print(e)
         messages.error(request, "Hiba az oldal betöltése során.")
         return redirect('teszt')
 
@@ -328,6 +329,11 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
     except Exception as e:
         messages.error(request, "Hiba a kérdés létrehozása során.")
         return redirect('teszt_reszletei', quiz_id=quiz_id)
+
+def kerdes_kivalasztasa(request, quiz_id):
+    questions = Question.objects.filter(~Q(quiz = quiz_id))
+    return render(request, 'quiz/select_questions.html', {"questions":questions})
+
 def kerdes_torlese(request, quiz_id, question_id):
     try:
         question = Question.objects.get(id = question_id)

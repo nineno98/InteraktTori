@@ -24,6 +24,7 @@ urlpatterns = [
     path('test/run-test/<int:quiz_id>/', view=views.teszt_inditasa, name='teszt_inditasa'),
     path('tiles/<int:z>/<int:x>/<int:y>.png', view=views.serve_tile, name='serve_tile'),
     path('test/results/<int:quiz_id>/', view=views.teszteredmenyek, name='teszteredmenyek'),
+    path('test/<int:quiz_id>/select-questions/', view=views.kerdes_kivalasztasa, name="kerdes_kivalasztasa"),
     
 
 ]

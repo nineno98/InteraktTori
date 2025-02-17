@@ -1,0 +1,12 @@
+{% extends "quiz/test.html" %}
+{% block content %}
+<p>hello</p>
+<form action="" method="post">
+    {% for question in questions %}
+            <label for="{{question.id}}">{{question.text}}</label>
+            <input type="checkbox" id="{{question.id}}" name="{{question.id}}" value="{{question.text}}"><br>
+    {% endfor %}
+
+</form>
+    
+{% endblock content %}
