@@ -331,8 +331,27 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
         return redirect('teszt_reszletei', quiz_id=quiz_id)
 
 def kerdes_kivalasztasa(request, quiz_id):
-    questions = Question.objects.filter(~Q(quiz = quiz_id))
-    return render(request, 'quiz/select_questions.html', {"questions":questions})
+    try:
+        if request.method == 'POST':
+            selected_questions = request.POST.getlist('questions')
+            quiz = Quiz.objects.get(id = quiz_id)
+            for question_id in selected_questions:                
+                selected_question = Question.objects.get(id = question_id)
+                selected_question.quiz = quiz
+                selected_question.save()
+            messages.success(request, "A kérdések sikeresen hozzáadva!")
+            return redirect("teszt_reszletei", quiz_id=quiz.id)
+        questions = Question.objects.filter(~Q(quiz = quiz_id))
+        return render(request, 'quiz/select_questions.html', {"questions":questions})
+    except Question.DoesNotExist:
+        messages.error(request, "Hiba: A kérdés nem található!")
+        return redirect("teszt_reszletei", quiz_id=quiz.id)
+    except Quiz.DoesNotExist:
+        messages.error(request, "Hiba. A teszt nem található!")
+        return redirect("teszt_reszletei", quiz_id=quiz.id)
+    except Exception as e:
+        messages.error(request, "Hiba a kérdések hozzáadása során!")
+        return redirect("teszt_reszletei", quiz_id=quiz.id)
 
 def kerdes_torlese(request, quiz_id, question_id):
     try:

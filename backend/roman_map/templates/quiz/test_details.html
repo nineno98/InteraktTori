@@ -1,22 +1,27 @@
 {% extends "quiz/test.html" %}
 
 {% block content %}
-<div class="content">
-    <h2>A "{{ quiz.title }}" teszt kérdései:</h2>
+<div class="content" id="quiz-details-content">
+    <h3 id="quiz-details-h3">A " {{ quiz.title }} " teszt kérdései:</h3>
     {% if questions.count %}
-        <table>
-            <tr>
-                <th>Kérdés</th>
-                <th>Típus</th>
-            </tr>
-            {% for question in questions %}
-            <tr>
-                <td>{{ question.text }}</td>
-                <td>({{ question.get_question_type_display }})</td>
-                <td><a href="{% url "kerdes_torlese" quiz.id question.id %}" onclick="return confirmDelete(event, this.href);">Törlés</a></td>
-            </tr>    
+        <table class="table sajat-table">
+            <thead class="sajat-head">
+                <tr>
+                    <th>Kérdés</th>
+                    <th>Típus</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in questions %}
+                    <tr>
+                        <td>{{ question.text }}</td>
+                        <td>({{ question.get_question_type_display }})</td>
+                        <td><a href="{% url "kerdes_torlese" quiz.id question.id %}" onclick="return confirmDelete(event, this.href);" class="btn btn-warning">Törlés</a></td>
+                    </tr>    
+                
+                {% endfor %}
+            </tbody>
             
-            {% endfor %}
         </table>
     {% else %}
         <div>
@@ -25,20 +30,30 @@
     {% endif %}
     
     
-    <h2>Új kérdés hozzáadása a "{{ quiz.title }}" teszthez</h2>
+    
 
-    <form method="post">
+    <form method="post" id="new-question-form">
         {% csrf_token %}
+       
+        <h4>Új kérdés létrehozása</h4>
+        <label for="">{{ form.question_type.label }}</label>
+        <div id="new-question-start">
+            
+            {{ form.question_type }}   
+            <button type="submit" class="btn btn-warning">Tovább</button>
+        </div>
+        <div class="disz-csik"></div>
+        <div id="select-and-prew-links-container">
+            <a href="{% url 'kerdes_kivalasztasa' quiz.id %}" class="btn btn-warning">Kérdés hozzáadása a meglévő kérdések közzül</a>
+            <a href="{% url 'teszt' %}" class="btn btn-warning">Vissza a kvízek listájához</a>
+        </div>
         
-        <h3>Kérdés adatai</h3>
-        {{ form.as_p }}
 
-        <button type="submit">Tovább</button>
+        
     </form>
 
 
-    <a href="{% url 'kerdes_kivalasztasa' quiz.id %}">Kérdés hozzáadása a meglévő kérdések közzül</a>
-    <a href="{% url 'teszt' %}">Vissza a kvízek listájához</a>
+    
 </div>
 
 {% endblock %}

@@ -2,11 +2,12 @@
 {% block content %}
 <p>hello</p>
 <form action="" method="post">
+    {% csrf_token %}
     {% for question in questions %}
             <label for="{{question.id}}">{{question.text}}</label>
-            <input type="checkbox" id="{{question.id}}" name="{{question.id}}" value="{{question.text}}"><br>
+            <input type="checkbox" id="{{question.id}}" name="questions" value="{{question.id}}"><br>
     {% endfor %}
-
+    <button type="submit">Hozzáadás a teszthez</button>
 </form>
     
 {% endblock content %}

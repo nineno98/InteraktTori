@@ -90,8 +90,8 @@ function calculateScoreRatio(data){
 async function initComponents() {
     const QuestionsAPIData = await fetchData(`http://127.0.0.1:8000/api/test-questions/${quiz_id}/`);
     const calculatedData = calculateScoreRatio(QuestionsAPIData);
-
-    const topQuestionsData = calculatedData
+    console.log(calculatedData);
+    /*const topQuestionsData = calculatedData
         .filter(d => d.scoreRatio > 0)
         .sort((a, b) => a.scoreRatio - b.scoreRatio)
         .slice(0, 10);
@@ -111,7 +111,7 @@ async function initComponents() {
     createChart(topQuestionsData, "#top-score",  "#90EE90");
     createChart(worstQuestionsData, "#wrost-score",  "#FF4C4C");
 
-    createDataTable(calculatedData);
+    createDataTable(calculatedData);*/
 }
 
 initComponents();

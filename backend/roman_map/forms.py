@@ -221,6 +221,8 @@ class QuestionTypeForm(forms.Form):
     question_type = forms.ChoiceField(
         choices=Question.QUESTION_TYPES,
         label="Válassz kérdés típust",
+        widget=forms.Select(attrs={'class':'form-select form-select-sm',})
+        
     )
         
 

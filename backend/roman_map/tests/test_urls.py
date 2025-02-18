@@ -81,3 +81,8 @@ class TestUrls(SimpleTestCase):
         url = reverse('teszteredmenyek', kwargs={'quiz_id': quiz_id})
         self.assertEqual(resolve(url).func, views.teszteredmenyek)
     
+    def test_kerdes_kivalasztasa_url(self):
+        quiz_id = 1
+        url = reverse('kerdes_kivalasztasa', kwargs={'quiz_id': quiz_id})
+        self.assertEqual(resolve(url).func, views.kerdes_kivalasztasa)
+    

@@ -1,4 +1,34 @@
-
+.table.sajat-table>tbody>tr>td{
+    color: white;
+}
+#quiz-details-content{
+    padding-top: 10px;
+}
+#quiz-details-h3{
+    color: white;
+}
+#new-question-form label{
+    margin-bottom: 10px;
+}
+#new-question-form{
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    color: white;
+}
+#select-and-prew-links-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#new-question-start{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 10px;
+    
+    
+}
 .disz-csik{
     width: 70%;
     height: 2px;
@@ -56,7 +86,7 @@
 }
 .hozzaadas-gomb{
     margin-top: 15px;
-    margin-bottom: 15px;
+    
 }
 .sajat-head>tr>th {
     color: white;
@@ -103,6 +133,7 @@
     margin: auto;
     background-color: #6B1016;
     border-radius: 0 0 10px 10px;
+    padding-bottom: 10px;
 }
 
 .tests-background {
