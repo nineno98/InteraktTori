@@ -410,12 +410,15 @@ def teszt_inditasa(request, quiz_id):
                         score += question.points
             UserScore.objects.create(user=user, quiz=quiz, total_score=score)
             messages.success(request, "A teszt mentése sikeres.")
-            return render(request, 'quiz/test_result.html', {'quiz': quiz, 'score': score})
+            total_points = quiz.questions.aggregate(Sum('points'))['points__sum'] or 0
+            return render(request, 'quiz/test_result.html', {'quiz': quiz, 'score': score, 'total_points':total_points})
         
+        total_points = quiz.questions.aggregate(Sum('points'))['points__sum'] or 0
         questions = list(quiz.questions.all())
         random.shuffle(questions)
         return render(request, 'quiz/run_test.html', {'quiz': quiz, 'questions': questions})
     except Exception as e:
+        print(e)
         messages.error(request, "Hiba teszt során")
         return redirect('teszt')
 

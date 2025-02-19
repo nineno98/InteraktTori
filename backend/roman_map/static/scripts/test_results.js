@@ -10,53 +10,66 @@ async function fetchData(apiUrl) {
     }
 }
 function createChart(data, containerId, BubbleColor){
-   
-    const formattedData = { "name": "root", "children": data.map(d => ({ name: d.text, value: d.scoreRatio })) };
-
-    const width = 800, height = 600;
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-    const pack = d3.pack().size([width, height]).padding(5);
-
-    const root = d3.hierarchy(formattedData).sum(d => d.value);
-    const nodes = pack(root).leaves();
-
-    const svg = d3.select(containerId);
-
-    const bubbles = svg.selectAll(".bubble")
-            .data(nodes)
-            .enter()
-            .append("g")
-            .attr("class", "bubble")
-            .attr("transform", d => `translate(${d.x}, ${d.y})`);
+    if(data.length == 0 || data.every(d => d.scoreRatio ==0)){
+        const container = document.getElementById('chart-container');
+        while(container.hasChildNodes()){
+            container.removeChild(container.firstChild);
+        }
+        const message = document.createElement('p');
+        message.setAttribute('id','no-chart-message');
+        message.textContent = "Nincs megjeleníthető adat a buborékdiagram rajzolásához!";
+        container.appendChild(message);
         
-    bubbles.append("circle")
-            .attr("r", d => d.r)
-            .attr("fill", BubbleColor)
-            .attr("stroke", "#333")
-            .attr("stroke-width", 2);
+    }else{
+        const formattedData = { "name": "root", "children": data.map(d => ({ name: d.text, value: d.scoreRatio })) };
 
-    bubbles.append("text")
-            .attr("dy", "-0.1em")
+        const width = 800, height = 600;
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+        const pack = d3.pack().size([width, height]).padding(5);
+
+        const root = d3.hierarchy(formattedData).sum(d => d.value);
+        const nodes = pack(root).leaves();
+
+        const svg = d3.select(containerId);
+
+        const bubbles = svg.selectAll(".bubble")
+                .data(nodes)
+                .enter()
+                .append("g")
+                .attr("class", "bubble")
+                .attr("transform", d => `translate(${d.x}, ${d.y})`);
             
-            .attr("font-size", d => Math.min(d.r / 3, 16))
-            .attr("fill", "white")
-            .each(function (d) {
-                const words = d.data.name.match(/.{1,18}(\s|$)/g);
-                if (words) {
-                    words.forEach((word, i) => {
-                        d3.select(this).append("tspan")
-                            .attr("x", 0)
-                            .attr("dy", i === 0 ? "-5" : "1.2em")
-                            .text(word.trim());
-                    });
-                }
-            });
+        bubbles.append("circle")
+                .attr("r", d => d.r)
+                .attr("fill", BubbleColor)
+                .attr("stroke", "#333")
+                .attr("stroke-width", 2);
+
+        bubbles.append("text")
+                .attr("dy", "-0.1em")
+                
+                .attr("font-size", d => Math.min(d.r / 3, 16))
+                .attr("fill", "white")
+                .each(function (d) {
+                    const words = d.data.name.match(/.{1,18}(\s|$)/g);
+                    if (words) {
+                        words.forEach((word, i) => {
+                            d3.select(this).append("tspan")
+                                .attr("x", 0)
+                                .attr("dy", i === 0 ? "-5" : "1.2em")
+                                .text(word.trim());
+                        });
+                    }
+                });
+        
+        }
     
 };
 
 function createDataTable(data){
     const tableRoot = document.getElementById('table-root');
     const tHead = document.createElement("thead");
+    tHead.setAttribute('class','sajat-head');
     tHead.innerHTML = `
         <tr>
             <th>#</th>
@@ -91,7 +104,7 @@ async function initComponents() {
     const QuestionsAPIData = await fetchData(`http://127.0.0.1:8000/api/test-questions/${quiz_id}/`);
     const calculatedData = calculateScoreRatio(QuestionsAPIData);
     console.log(calculatedData);
-    /*const topQuestionsData = calculatedData
+    const topQuestionsData = calculatedData
         .filter(d => d.scoreRatio > 0)
         .sort((a, b) => a.scoreRatio - b.scoreRatio)
         .slice(0, 10);
@@ -111,7 +124,7 @@ async function initComponents() {
     createChart(topQuestionsData, "#top-score",  "#90EE90");
     createChart(worstQuestionsData, "#wrost-score",  "#FF4C4C");
 
-    createDataTable(calculatedData);*/
+    createDataTable(calculatedData);
 }
 
 initComponents();

@@ -1,7 +1,10 @@
 {% extends 'quiz/test.html' %}
 
 {% block content %}
-    <h2>{{ quiz.title }} - Teszt eredménye</h2>
-    <p>Elért pontszám: {{ score }} / {{ quiz.points }}</p>
-    <a href="{% url 'teszt' %}">Vissza a tesztekhez+++</a>
+    <div class="content">
+        <h2>"{{ quiz.title }}" teszt eredménye</h2>
+        <p>Elért pontszám: {{ score }} / {{ total_points }}</p>
+        <a href="{% url 'teszt' %}" class="btn btn-warning">Vissza a tesztekhez</a>
+    </div>
+    
 {% endblock %}

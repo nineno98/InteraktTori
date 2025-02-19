@@ -1,24 +1,43 @@
 {% extends "quiz/test.html" %}
 {% block content %}
-    <h2>{{ quiz.title }}</h2>
-    <form method="post">
-        {% csrf_token %}
-        {% for question in questions %}
-            <div>
-                <p><strong>{{ forloop.counter }}. {{ question.text }}</strong></p>
-                {% if question.question_type == 'tf' %}
-                    <input type="radio" name="question_{{ question.id }}" value="true">Igaz
-                    <input type="radio" name="question_{{ question.id }}" value="false">Hamis
-                {% else %}
-                    {% for answer in question.answers.all %}
-                        <input type="checkbox" name="question_{{ question.id }}" value="{{ answer.id }}">
-                        {{ answer.text }}<br>
-                    {% endfor %}
-                {% endif %}
-                
-                
-            </div>
-        {% endfor %}
-        <button type="submit">Teszt befejezése</button>
-    </form>
+    <div class="content">
+        <h2>"{{ quiz.title }}" teszt megoldása</h2>
+        <p>Sok sikert a teszt megoldása során!</p>
+        <div class="disz-csik"></div>
+        <form method="post">
+            {% csrf_token %}
+            {% for question in questions %}
+                <div class="question-item">
+                    <p><strong>{{ forloop.counter }}. {{ question.text }}</strong></p>
+                    <div class="question-item-inputs">
+                        {% if question.question_type == 'tf' %}
+                            <div class="form-check">
+                                <input type="radio" name="question_{{ question.id }}" value="true" class="form-check-input" id="question_{{ question.id }}">
+                                <label for="question_{{ question.id }}">Igaz</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" name="question_{{ question.id }}" value="false" class="form-check-input" id="question_{{ question.id }}">
+                                <label for="question_{{ question.id }}">Hamis</label>
+                            </div>  
+                                
+                            
+                        {% else %}
+                            {% for answer in question.answers.all %}
+                                <div class="form-check">
+                                    <input type="checkbox" name="question_{{ question.id }}" value="{{ answer.id }}" class="form-check-input" id="question_{{ question.id }}">
+                                    <label for="question_{{ question.id }}">{{ answer.text }}</label>
+                                </div>
+                                
+                                
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                </div>
+            {% endfor %}
+            <div class="disz-csik"></div>
+            <button type="submit" class="btn btn-warning">Teszt befejezése</button>
+        </form>
+    </div>
+    
 {% endblock content %}

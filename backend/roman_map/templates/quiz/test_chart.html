@@ -2,21 +2,31 @@
 {% load static %}
 
 {% block content %}
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <input id="quiz_id" value = "{{quiz_id}}" type=hidden>
-    <h2>D3.js Buborékdiagram</h2>
-    <svg width="800" height="600" id="top-score"></svg>
-    <svg width="800" height="600" id="wrost-score"></svg>
+    <div class="content">
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <input id="quiz_id" value = "{{quiz_id}}" type=hidden>
+        <h3 class="quiz-subpage-title">A teszt kérdéseinek eredményei</h3>
+        <div id="chart-container">
+            <h5>Legtöbb helyes választ kapó kérdések</h5>
+            <svg width="800" height="600" id="top-score"></svg>
+            <div class="disz-csik"></div>
+            <h5>Legtöbb helytelen választ kapó kérdések</h5>
+            <svg width="800" height="600" id="wrost-score"></svg>
+        </div>
+        <div class="disz-csik"></div>
 
-    <div id="table-container">
-        <table id="table-root">
-            
+        <div id="table-container" >
+            <h5>A teszt kérdései</h5>
+            <table id="table-root" class="table sajat-table">
+                
 
-        </table>
+            </table>
+        </div>
+        
+        <a href="{% url "teszt" %}" class="btn btn-warning">Vissza a tesztekhez</a>
+        <script type="module" src="{% static 'scripts/test_results.js' %}"></script>
     </div>
-
-
-    <script type="module" src="{% static 'scripts/test_results.js' %}"></script>
+    
 
 {% endblock content %}
 
