@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_delete
+from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 import os
 
@@ -23,8 +24,14 @@ class Territorie(models.Model):
     color = models.CharField(max_length=10)
     coordinates = models.TextField(blank=False)
 
+    def save(self, *args, **kwargs):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError("A kezdődátum nem lehet később mint a befejezés.")
+        super().save(*args, **kwargs)
+
+
     def __str__(self):
-        return str(self.id)+' '+self.name+str(self.start_date)+' '+str(self.end_date)
+        return str(self.id)+' '+self.name+' '+str(self.start_date)+' '+str(self.end_date)
 
 class Historie(models.Model):
     id = models.BigAutoField(primary_key=True)
