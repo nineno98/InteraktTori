@@ -29,6 +29,16 @@ class TestViews(TestCase):
         self.TEST_IMAGE_PATH = os.path.join(BASE_DIR, "test_images", "test_image.png")
         assert os.path.exists(self.TEST_IMAGE_PATH), f"Hiba: A fájl nem létezik: {self.TEST_IMAGE_PATH}"
 
+        User = get_user_model()
+        self.user = User.objects.create(
+            username='testuser',
+            password='testpass',
+            tanulo = False,
+            tanar = True,
+            first_name = 'test_first_name',
+            last_name = "test_last_name"
+        )
+
         self.territorie = Territorie.objects.create(
             name = "test_territorie",
             start_date = 100,
@@ -57,15 +67,7 @@ class TestViews(TestCase):
 
         self.current_time = timezone.now()
 
-        User = get_user_model()
-        self.user = User.objects.create(
-            username='testuser',
-            password='testpass',
-            tanulo = False,
-            tanar = True,
-            first_name = 'test_first_name',
-            last_name = "test_last_name"
-        )
+        
 
         self.quiz = Quiz.objects.create(
             title = "test_quiz",
@@ -123,7 +125,35 @@ class TestViews(TestCase):
         self.teszteredmenyek_url = reverse('teszteredmenyek', args=['1'])
         self.kerdes_kivalasztasa_url = reverse('kerdes_kivalasztasa', args=['1'])
 
+    def test_fooldal_get(self):
+        response = self.client.get(self.fooldal_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'pages/home.html')
 
+    def test_bejelentkezes_get(self):
+        response = self.client.get(self.bejelentkezes_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'pages/login.html')
+    
+    def test_terkep_get(self):
+        response = self.client.get(self.terkep_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'pages/map.html')
+
+    def test_kijelentkezes_get(self):
+        response = self.client.get(self.kijelentkezes_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.fooldal_url)
+
+    def test_jelszovaltas_get(self):
+        response = self.client.get(self.jelszovaltas_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.sajatadatok_url)
+
+    def test_sajatadatok_get(self):
+        response = self.client.get(self.sajatadatok_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'users/user_informations.html')
 
 
 
