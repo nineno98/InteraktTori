@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.urls import reverse
 import json
+import geojson
 from http import HTTPStatus
 from rest_framework.test import APIClient
 
@@ -30,7 +31,7 @@ class TestViews(TestCase):
         assert os.path.exists(self.TEST_IMAGE_PATH), f"Hiba: A fájl nem létezik: {self.TEST_IMAGE_PATH}"
 
         User = get_user_model()
-        self.user = User.objects.create(
+        self.user = User.objects.create_user(
             username='testuser',
             password='testpass',
             tanulo = False,
@@ -38,6 +39,7 @@ class TestViews(TestCase):
             first_name = 'test_first_name',
             last_name = "test_last_name"
         )
+        
 
         self.territorie = Territorie.objects.create(
             name = "test_territorie",
@@ -108,12 +110,20 @@ class TestViews(TestCase):
         self.client = Client()
         self.apiclient = APIClient()
 
+        self.apiclient.login(username = "testuser", password = "testpass" )
+
         self.fooldal_url = reverse('fooldal')
         self.bejelentkezes_url = reverse('bejelentkezes')
         self.terkep_url = reverse('terkep')
         self.kijelentkezes_url = reverse('kijelentkezes')
         self.jelszovaltas_url = reverse('jelszovaltas')
         self.sajatadatok_url = reverse('sajatadatok')
+
+        self.getTerritories_url = reverse('getTerritories')
+        self.getHistories_url = reverse('getHistories')
+        self.getAncientPlaces_url = reverse('getAncientPlaces')
+        self.customDraws_url = reverse('customDraws')
+        self.getTestQuestions_url = reverse('getTestQuestions', kwargs={'quiz_id': 1})
 
         self.uj_teszt_keszitese_url = reverse('uj_teszt_keszitese')
         self.teszt_reszletei_url = reverse('teszt_reszletei', args=['1'])
@@ -155,5 +165,60 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(response, 'users/user_informations.html')
 
+    def test_getTerritories_get(self):
+        response = self.apiclient.get(self.getTerritories_url)
+        if response.status_code == 200:
+            json_response = geojson.loads(response.content)
+            self.assertIsInstance(json_response, geojson.FeatureCollection)
+            self.assertIsInstance(json_response["features"][0], geojson.Feature)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+            
+    def test_getHistories_get(self):
+        response = self.apiclient.get(self.getHistories_url)
+        if response.status_code == 200:
+            json_response = geojson.loads(response.content)
+            self.assertIsInstance(json_response, geojson.FeatureCollection)
+            self.assertIsInstance(json_response["features"][0], geojson.Feature)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+    
+    def test_getAncientPlaces_get(self):
+        response = self.apiclient.get(self.getAncientPlaces_url)
+        if response.status_code == 200:
+            json_response = geojson.loads(response.content)
+            self.assertIsInstance(json_response, geojson.FeatureCollection)
+            self.assertIsInstance(json_response["features"][0], geojson.Feature)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+    
+    def test_customDraws_get(self):
+        response = self.apiclient.get(self.customDraws_url)
+        if response.status_code == 200:
+            json_response = geojson.loads(response.content)
+            self.assertIsInstance(json_response, geojson.FeatureCollection)
+            self.assertIsInstance(json_response["features"][0], geojson.Feature)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_customDraws_patch(self):
+        patch_data = {
+            "id" : self.customdraw.id,
+            "coordinates" : [0,0]
+        }
+        response = self.apiclient.patch(self.customDraws_url, data=patch_data, format="json")
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        #print(response)
+        self.customdraw.refresh_from_db()
+        self.assertEqual(self.customdraw.coordinates, '[0,0]')
+        #print(self.customdraw.coordinates)
 
 
+    def test_getTestQuestions_get(self):
+        response = self.apiclient.get(self.getTestQuestions_url)
+        if response.status_code == 200:
+            json_response = geojson.loads(response.content)
+            self.assertIsInstance(json_response, list)
+            self.assertEqual(json_response[0]['id'], self.question.id)
+            self.assertEqual(json_response[0]['text'], self.question.text)
+            self.assertEqual(json_response[0]['points'], self.question.points)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    
+            
