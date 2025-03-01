@@ -70,8 +70,9 @@ def terkep(request):
 
 def kijelentkezes(request):
     try:
+        user = request.user
         logout(request)
-        db_logger.info(f"{request.user} felhasználó kijelentkezett.")
+        db_logger.info(f"{user} felhasználó kijelentkezett.")
         messages.success(request, "Kijelentkezve. Viszlát!")
         return redirect('fooldal')
     except Exception as e:
@@ -110,7 +111,15 @@ def bejelentkezes(request):
 
 def fooldal(request):
     try:
-        return render(request,'pages/home.html')
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+            port = request.META.get('SERVER_PORT')
+            qr = (ip+":"+port)
+            qr_url = f"http://{ip}:{port}/"
+        return render(request,'pages/home.html', {'qr':qr, 'qr_url':qr_url})
     except Exception as e:
         db_logger.error("Hiba a fooldal betöltése során: "+str(e))
         return HttpResponse("Hiba az oldal betöltése közben.")
@@ -488,17 +497,18 @@ def serve_tile(request, z , x, y):
             tile_data = result[0]
             return HttpResponse(tile_data, content_type = 'image/png')
         else:
-            raise Http404("Tile not found")
+            #raise Http404("Tile not found")
+            return HttpResponse(status=404)
             
     except sqlite3.OperationalError as e:
-        pass
+        return HttpResponse(status=204)
 
     except sqlite3.IntegrityError as e:
-        pass
+        return HttpResponse(status=204)
     except sqlite3.DatabaseError as e:
-        pass
+        return HttpResponse(status=204)
     except Exception as e:
-        pass
+        return HttpResponse(status=204)
 
 
 def teszteredmenyek(request, quiz_id):

@@ -23,9 +23,18 @@
                 <a href="{% url 'teszt' %}" class="page-link-item">Teszt</a>
                 <a href="{% url 'sajatadatok' %}" class="page-link-item">Saját adatok</a>
                 <a href="{% url 'kijelentkezes' %}" class="page-link-item">Kilépés</a>
+
             {% else %}
                 <a href="{% url 'bejelentkezes' %}" class="page-link-item">Belépés</a>
             {% endif %}
+        </div>
+        <hr class="separator-line-item">
+        <div class="qr_code">
+            <div id="qrkod_design">
+              <h4>QR KÓD beolvasása:</h4>
+            </div>
+            {% load qr_code %}
+            {% qr_from_data qr_url size='M' %}
         </div>
         <hr class="separator-line-item">
         <h2>Betmutatkozás</h2>

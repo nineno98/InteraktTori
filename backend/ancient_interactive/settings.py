@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import logging
+
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,6 +48,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'bootstrap5',
     'roman_map',
+    'django_db_logger',
+    'qr_code',
 ]
 
 MIDDLEWARE = [
@@ -154,16 +161,17 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '%(levelname)s %(asctime)s %(module)s %(funcName)s %(process)d %(thread)d %(message)s'
         },
         'simple': {
-            'format': '%(levelname)s %(asctime)s %(message)s'
+            'format': '%(levelname)s %(asctime)s %(funcName)s %(message)s'
         },
     },
     'handlers': {
         'db_log': {
             'level': 'DEBUG',
-            'class': 'django_db_logger.db_log_handler.DatabaseLogHandler'
+            'class': 'django_db_logger.db_log_handler.DatabaseLogHandler',
+            'formatter': 'simple',
         },
     },
     'loggers': {
