@@ -22,6 +22,9 @@ import os
 from django.conf import settings
 from django.db.models import Count, Q, Sum, F
 from django.db.models.functions import Coalesce
+import logging
+
+db_logger = logging.getLogger('db')
 
 
 def sajatadatok(request):
@@ -29,6 +32,7 @@ def sajatadatok(request):
         return render(request, 'users/user_informations.html')
     except Exception as e:
         messages.error(request, "Hiba történt a saját adatok oldal elérése során.")
+        db_logger.error("Hiba: "+str(e))
         return redirect('fooldal')
 
 def jelszovaltas(request):
@@ -39,17 +43,20 @@ def jelszovaltas(request):
                 
                 form.save()
                 update_session_auth_hash(request, form.user)
+                db_logger.info(f"{request.user} sikeresen módosította a jelszavát.")
                 messages.success(request, "A jelszó sikeresen módosítva! ")
                 return redirect('sajatadatok')
             else:
                 for field, errors in form.errors.items():
                     for error in errors:
+                        db_logger.error(f"Hiba a {request.user} jelszóváltoztatása során: {error}")
                         messages.warning(request, f"{field}: {error}")
         else:
             form = PasswordChangeForm(request.user)
-            print(form.errors)
+            
         return render(request, 'users/change_password.html', {'form':form})
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba történt a jelszó változtatás során!")
         return redirect('sajatadatok')
 
@@ -57,16 +64,19 @@ def terkep(request):
     try:
         return render(request, 'pages/map.html')
     except Exception as e:
+        db_logger.error("Hiba a térkép oldal elérése során: "+str(e))
         messages.error(request, "Hiba történt a térkép oldal elérése során.")
         return redirect('fooldal')
 
 def kijelentkezes(request):
     try:
         logout(request)
+        db_logger.info(f"{request.user} felhasználó kijelentkezett.")
         messages.success(request, "Kijelentkezve. Viszlát!")
         return redirect('fooldal')
     except Exception as e:
-        messages.error(request, "Hiba történt a folyamat során."+str(e))
+        db_logger.error("Hiba: "+str(e))
+        messages.error(request, "Hiba történt a folyamat során.")
         return redirect('fooldal')
 
 
@@ -80,6 +90,7 @@ def bejelentkezes(request):
                 user = authenticate(request, username=username, password=password)
                 if user is not None:
                     login(request, user)
+                    db_logger.info(f"{request.user} felhasználó bejelentkezett.")
                     messages.success(request, "Sikeres bejelentkezés")
                     return redirect('fooldal')
             
@@ -93,14 +104,15 @@ def bejelentkezes(request):
         form = LoginForm()
         return render(request, 'pages/login.html', {'form':form })
     except Exception as e:
-        messages.error(request, "Hiba a bejelentkezés során."+str(e))
+        db_logger.error("Hiba: "+str(e))
+        messages.error(request, "Hiba a bejelentkezés során.")
         return redirect('fooldal')
 
 def fooldal(request):
     try:
         return render(request,'pages/home.html')
     except Exception as e:
-        
+        db_logger.error("Hiba a fooldal betöltése során: "+str(e))
         return HttpResponse("Hiba az oldal betöltése közben.")
 
 # Rest framework
@@ -113,6 +125,7 @@ def getTerritories(request):
         geojson_data = geojson.FeatureCollection(features=serializer.data)
         return JsonResponse(geojson_data)
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         response = {
             "status":"error",
             "message":"Hiba a kérés kiszolgálása során során."
@@ -127,6 +140,7 @@ def getHistories(request):
         geojson_data = geojson.FeatureCollection(features=serializer.data)
         return JsonResponse(geojson_data, safe=False)
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         response = {
             "status":"error",
             "message":"Hiba a kérés kiszolgálása során során."
@@ -140,6 +154,7 @@ def getAncientPlaces(request):
         geojson_data = geojson.FeatureCollection(features=serializer.data)
         return JsonResponse(geojson_data, status = 200)
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         response = {
             "status":"error",
             "message":"Hiba a kérés kiszolgálása során során."
@@ -156,13 +171,14 @@ class CustomDrawsAPIView(APIView):
             geojson_data = geojson.FeatureCollection(features=serializer.data)
             return JsonResponse(geojson_data)
         except Exception as e:
+            db_logger.error("Hiba: "+str(e))
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
     def post(self, request): 
         try:
-            print(request.data)
+            
             serializer = CustomDrawSerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
-                print("serializer valid")
+                #print("serializer valid")
                 new_draw = serializer.save()
                 
                 response = {
@@ -180,7 +196,8 @@ class CustomDrawsAPIView(APIView):
                 
                 return JsonResponse(response, status = 400)
         except Exception as e:
-            print("error" +str(e))
+            db_logger.error("Hiba: "+str(e))
+            #print("error" +str(e))
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
     def patch(self, request):
         try:
@@ -200,7 +217,7 @@ class CustomDrawsAPIView(APIView):
                 return JsonResponse(response, status=404)
             serializer = CustomDrawSerializer(custom_draw, data=request.data, partial = True, context={"request": request})          
             if serializer.is_valid(raise_exception=True):
-                print(f"Validált adatok: {serializer.validated_data}")
+                #print(f"Validált adatok: {serializer.validated_data}")
                 serializer.save()
                 response = {
                     "status":"success",
@@ -208,10 +225,11 @@ class CustomDrawsAPIView(APIView):
                 }
                 return JsonResponse(response, status= 200)
         except Exception as e:
+            db_logger.error("Hiba: "+str(e))
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
     def delete(self, request):
         #remowend_id = request.data.get('id')
-        print(request.data.get('id'))
+        #print(request.data.get('id'))
         try:
             remowend_id = request.data.get('id')
             obj = CustomDraw.objects.get(id=remowend_id)
@@ -221,13 +239,15 @@ class CustomDrawsAPIView(APIView):
                 "message":"Az elem törlése sikeresen megtörtént."
             }
             return JsonResponse(response, status=200)
-        except CustomDraw.DoesNotExist:
+        except CustomDraw.DoesNotExist as e:
+            db_logger.error("Hiba: Az elem törlése sikertelen. Az elem nem található."+str(e))
             response = {
                 "status":"error",
                 "message":"Az elem törlése sikertelen. Az elem nem található."
             }
             return JsonResponse(response, status=404)
         except Exception as e:
+            db_logger.error("Hiba: "+str(e))
             response = {
                 "status":"error",
                 "message":"Hiba a törlés során"
@@ -239,6 +259,7 @@ def teszt(request):
         all_quizs = Quiz.objects.all()
         return render(request,'quiz/test.html',{"quiz_list":all_quizs})
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a 'teszt' oldal betöltése során")
         return redirect('fooldal')
 
@@ -250,27 +271,32 @@ def uj_teszt_keszitese(request):
                 quiz = form.save(commit=False)
                 quiz.created_by = request.user
                 form.save()
+                db_logger.info(f"A '{quiz.title}' teszt létrehozása sikeres.")
                 messages.success(request, f"A '{quiz.title}' teszt létrehozása sikeres.")
                 return redirect('teszt_reszletei', quiz_id=quiz.id)
             else:
+                db_logger.error("Hiba történt, a teszt létrehozása sikertelen!")
                 messages.error(request, "Hiba történt, a teszt létrehozása sikertelen!")
         else:
             form = QuizForm()
             return render(request, 'quiz/create_test.html', {"form":form})
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a teszt létrehozása során.")
         return render(request, 'quiz/test.html', {"form": form})
 
 def teszt_torlese(request, quiz_id):
     try:
-    
         quiz = Quiz.objects.get(id = quiz_id)
         if not quiz:
+            db_logger.error("Hiba: nincs teszt")
             messages.error(request, "Hiba történt a folyamat során!")
         quiz.delete()
+        db_logger.info(f"A '{quiz.title}' teszt sikeresen törölve lett.")
         messages.success(request, f"A '{quiz.title}' teszt sikeresen törölve lett.")
         return redirect('teszt')
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba az teszt törlése során.")
         return redirect('teszt')
 
@@ -279,6 +305,7 @@ def teszt_reszletei(request, quiz_id):
     try:
         quiz = Quiz.objects.get(id = quiz_id)
         if not quiz:
+            db_logger.error("Hiba: nincs teszt")
             messages.error(request, "Hiba történt a folyamat során!")
         if request.method == "POST":
             form = QuestionTypeForm(request.POST)
@@ -293,7 +320,8 @@ def teszt_reszletei(request, quiz_id):
             "form": form
         })
     except Exception as e:
-        print(e)
+        db_logger.error("Hiba: "+str(e))
+        #print(e)
         messages.error(request, "Hiba az oldal betöltése során.")
         return redirect('teszt')
 
@@ -301,6 +329,7 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
     try:
         quiz = Quiz.objects.get(id = quiz_id)
         if not quiz:
+            db_logger.error("Hiba: nincs teszt")
             messages.error(request, "Hiba történt a folyamat során!")
         if question_type == "mc":
             AnswerFormSetClass = ValaszelemForm
@@ -321,6 +350,7 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
                 for answer in answers:
                     answer.question = question
                     answer.save()
+                db_logger.info(f"Kérdés sikeresen létrehozva: {question}")
                 messages.success(request, "A kérdés létrehozása sikeres")
                 return redirect("teszt_reszletei", quiz_id=quiz.id)
 
@@ -335,6 +365,7 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
             "question_type": question_type
         })
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a kérdés létrehozása során.")
         return redirect('teszt_reszletei', quiz_id=quiz_id)
 
@@ -347,17 +378,21 @@ def kerdes_kivalasztasa(request, quiz_id):
                 selected_question = Question.objects.get(id = question_id)
                 selected_question.quiz = quiz
                 selected_question.save()
+            db_logger.info("A kérdések sikeresen hozzáadva!")
             messages.success(request, "A kérdések sikeresen hozzáadva!")
             return redirect("teszt_reszletei", quiz_id=quiz.id)
         questions = Question.objects.filter(~Q(quiz = quiz_id))
         return render(request, 'quiz/select_questions.html', {"questions":questions})
-    except Question.DoesNotExist:
+    except Question.DoesNotExist as e:
+        db_logger.error("Hiba: A kérdés nem található"+str(e))
         messages.error(request, "Hiba: A kérdés nem található!")
         return redirect("teszt_reszletei", quiz_id=quiz.id)
-    except Quiz.DoesNotExist:
+    except Quiz.DoesNotExist as e:
+        db_logger.error("Hiba: a teszt nem található"+str(e))
         messages.error(request, "Hiba. A teszt nem található!")
         return redirect("teszt_reszletei", quiz_id=quiz.id)
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a kérdések hozzáadása során!")
         return redirect("teszt_reszletei", quiz_id=quiz.id)
 
@@ -366,10 +401,13 @@ def kerdes_torlese(request, quiz_id, question_id):
         question = Question.objects.get(id = question_id)
         if not question:
             messages.error(request, "Hiba történt a folyamat során!")
+            db_logger.error("Hiba: nincs kérdés")
         question.delete()
+        db_logger.info(f"A '{question}' kérdés törlése sikeresen megtörtént.")
         messages.success(request,"Kérdés törlése sikeresen megtörtént.")
         return redirect('teszt_reszletei', quiz_id=quiz_id)
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a teszt törlése során.")
         return redirect('teszt_reszletei', quiz_id=quiz_id)
 
@@ -377,7 +415,8 @@ def teszt_inditasa(request, quiz_id):
     try:
         quiz = Quiz.objects.get(id = quiz_id)
         if not quiz:
-            messages.error(request, "Hiba. A teszt nem található.")
+            db_logger.error("Hiba. Az indítani kívánt teszt nem található.")
+            messages.error(request, "Hiba. Az indítani kívánt teszt nem található.")
         if request.method == 'POST':
             score = 0
             user = request.user
@@ -417,6 +456,7 @@ def teszt_inditasa(request, quiz_id):
                     if is_correct:
                         score += question.points
             UserScore.objects.create(user=user, quiz=quiz, total_score=score)
+            db_logger.info(f"A {quiz} teszt mentése sikeres.")
             messages.success(request, "A teszt mentése sikeres.")
             total_points = quiz.questions.aggregate(Sum('points'))['points__sum'] or 0
             return render(request, 'quiz/test_result.html', {'quiz': quiz, 'score': score, 'total_points':total_points})
@@ -426,7 +466,8 @@ def teszt_inditasa(request, quiz_id):
         random.shuffle(questions)
         return render(request, 'quiz/run_test.html', {'quiz': quiz, 'questions': questions})
     except Exception as e:
-        print(e)
+        db_logger.error("Hiba: "+str(e))
+        #print(e)
         messages.error(request, "Hiba teszt során")
         return redirect('teszt')
 
@@ -435,7 +476,9 @@ def serve_tile(request, z , x, y):
     try:
         
         if not os.path.exists(MBTILES_PATH):
+            db_logger.error("Hiba: Adatbázis nem található")
             raise Http404("Adatbázis nem tálálható.")
+            
         y_tms = (2 ** int(z)) - int(y) - 1
         conn = sqlite3.connect(MBTILES_PATH)
         cursor = conn.execute("SELECT tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?", (int(z), int(x), y_tms))
@@ -464,7 +507,8 @@ def teszteredmenyek(request, quiz_id):
         return render(request, 'quiz/test_chart.html', {"quiz_id": quiz.id})
         
     except Exception as e:
-        print(str(e))
+        db_logger.error("Hiba: "+str(e))
+        #print(str(e))
         messages.error(request, "Hiba történt az oldal betöltése közben.")
         return redirect('teszt')
 
@@ -485,7 +529,8 @@ def getTestQuestions(request, quiz_id):
                 "total_answers":question.total_answers           
             })
         return JsonResponse(questions_data, safe=False)
-    except Question.DoesNotExist:
+    except Question.DoesNotExist as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba az adatok lekérése közben.")
         response = {
             "status":"error",
@@ -493,6 +538,7 @@ def getTestQuestions(request, quiz_id):
         }
         return JsonResponse(response, safe=False, status=404)
     except Exception as e:
+        db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba az adatok lekérése közben.")
         response = {
             "status":"error",

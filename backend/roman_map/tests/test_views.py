@@ -210,16 +210,14 @@ class TestViews(TestCase):
         self.assertEqual(self.customdraw.coordinates, '[0, 0]')
 
     def test_customDraws_post(self):
-        test_data = {
-            "value":1
-        }
-        data = '{"type": "Feature","geometry": {"type": "Point","coordinates": [10,40]},"properties": {"name": "ff","description": " ","created_by": "2"}'
-        data_ = '{"type": "Feature","geometry": {"type": "Point","coordinates": [10,40]},"properties": {"name": "ff","description": "","created_by": "2"}}'
+        test_data = {"value":1}
+        data = {"type": "Feature","geometry": {"type": "Point","coordinates": [10,40]},"properties": {"name": "ff","description": " ","created_by": "2"}}
+        data_ = "{'type': 'Feature','geometry': {'type': 'Point','coordinates': [10,40]},'properties': {'name': 'ff','description': '','created_by': '2'}}"
         #print(type(data))
         #print(json.dumps(data))
 
-        response = self.apiclient.post(self.customDraws_url, data=data_, content_type="application/json")
-        #print(response)
+        response = self.apiclient.post(self.customDraws_url, data=data, format="json")
+        print( response)
         
         
         
