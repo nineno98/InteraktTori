@@ -313,7 +313,9 @@ class HandleDraw {
     deletingBundle(){
         if(this.selectedFeatures && this.selectedFeatures.getLength() > 0){
             const feature = this.selectedFeatures.item(0);
-            console.log(feature);
+            console.log("feature:" +feature);
+            this.turnOffDaw();
+            
             this.deletePopup(feature);
         }
         else{
@@ -364,7 +366,10 @@ class HandleDraw {
 
         this.acceptDeleting = () => {
             const featureId = feature.get('id');
+            //console.log("feature id"+ featureId);
             const csrftoken = getCookie('csrftoken')
+            map.removeInteraction(this.select);
+            map.removeInteraction(this.modify);
             
             fetch('http://127.0.0.1:8000/api/custom-draws/',{
                 method: 'DELETE',
@@ -516,7 +521,7 @@ class HandleDraw {
         closeButton.addEventListener('click', this.closePopupHandler);
 
         this.saveFeatureHandler = () => {
-            console.log(feature.getGeometry().getCoordinates());
+            //console.log(feature.getGeometry().getCoordinates());
             //popupContainer.style.display = 'none';
             const name = document.getElementById('name').value;
             const description = document.getElementById('description').value;
@@ -539,6 +544,7 @@ class HandleDraw {
                     featureProjection: 'EPSG:3857'
                 });
                 const geojson = format.writeFeatureObject(feature);
+                console.log(JSON.stringify(geojson));
                 
                 fetch('http://127.0.0.1:8000/api/custom-draws/', {
                     method:'POST',
@@ -552,7 +558,7 @@ class HandleDraw {
                 }).then(response => {
                     if(response.ok){
                         this.infoPopup("Mentés sikeresen megtörtént!", "ok");
-                        //console.log("Mentés sikeresen megtörtént");
+                        console.log(response);
                         return response.json()
                         
                     }else{
@@ -562,10 +568,12 @@ class HandleDraw {
                         return Promise.reject("Sikertelen mentés");
                     }
                 }).then(data => {
-                    const id = data.id;
-                    feature.setProperties({id})
+                    const id = data.object_id;
+                    //console.log("mentett id "+data.object_id)
+                    feature.setProperties({"id":id})
 
                     this.turnOffDaw();
+                    this.drawingLayer.getSource().changed();
                     this.turnOnDraw();
                 }).catch(error => {
                     this.infoPopup("Hálózati hiba történt", "error");
@@ -1038,15 +1046,20 @@ class HandleDrawControl extends ol.control.Control{
 
 
         const deleteButtonFunction = () => {
+            
             deleteButton.style.background = "lightgrey";
             handleDraw.deletingBundle();
             deleteButton.style.background = "white";
+            
         };
         deleteButton.addEventListener('click', deleteButtonFunction);
 
         const enableSelectButtonFunction = () => {
             if(enableSelectButton.style.background === "white"){
                 enableSelectButton.style.background = "lightgrey";
+                enableDrawButton.style.background = 'white';
+                typeSelect.style.display = 'none';
+                undoButton.style.display = 'none';
             }else{
                 enableSelectButton.style.background = "white";
             }
@@ -1091,16 +1104,19 @@ class HandleDrawControl extends ol.control.Control{
             
             if(enableDrawButton.style.background === 'white'){
                 enableDrawButton.style.background = 'lightgrey';
+                enableSelectButton.style.background = 'white';
                 typeSelect.style.display = "block";
                 undoButton.style.display = "block";
+                handleDraw.enableDraw();
             }   
             else{
                 enableDrawButton.style.background = 'white';
                 typeSelect.style.display = "none";
                 undoButton.style.display = "none";
+                handleDraw.turnOffDaw();
             }
             
-            handleDraw.enableDraw();
+            //handleDraw.enableDraw();
         };
         enableDrawButton.addEventListener('click', enableDrawButtonFunction);
         

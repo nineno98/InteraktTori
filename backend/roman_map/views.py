@@ -157,23 +157,30 @@ class CustomDrawsAPIView(APIView):
             return JsonResponse(geojson_data)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
-    def post(self, request):
+    def post(self, request): 
         try:
+            print(request.data)
             serializer = CustomDrawSerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
+                print("serializer valid")
                 new_draw = serializer.save()
+                
                 response = {
                     "status":"success",
                     "object_id": new_draw.id
                 }
                 return JsonResponse(response, status = 200)
+            
+                
             else:
                 response = {
                     "status":"error",
                     "message":serializer.errors
                 }
+                
                 return JsonResponse(response, status = 400)
         except Exception as e:
+            print("error" +str(e))
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
     def patch(self, request):
         try:
@@ -204,6 +211,7 @@ class CustomDrawsAPIView(APIView):
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
     def delete(self, request):
         #remowend_id = request.data.get('id')
+        print(request.data.get('id'))
         try:
             remowend_id = request.data.get('id')
             obj = CustomDraw.objects.get(id=remowend_id)

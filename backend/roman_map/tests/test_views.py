@@ -8,6 +8,7 @@ import json
 import geojson
 from http import HTTPStatus
 from rest_framework.test import APIClient
+from rest_framework.test import APIRequestFactory
 
 
 class TestViews(TestCase):
@@ -109,6 +110,7 @@ class TestViews(TestCase):
 
         self.client = Client()
         self.apiclient = APIClient()
+        self.factory = APIRequestFactory()
 
         self.apiclient.login(username = "testuser", password = "testpass" )
 
@@ -204,10 +206,23 @@ class TestViews(TestCase):
         }
         response = self.apiclient.patch(self.customDraws_url, data=patch_data, format="json")
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        #print(response)
         self.customdraw.refresh_from_db()
-        self.assertEqual(self.customdraw.coordinates, '[0,0]')
-        #print(self.customdraw.coordinates)
+        self.assertEqual(self.customdraw.coordinates, '[0, 0]')
+
+    def test_customDraws_post(self):
+        test_data = {
+            "value":1
+        }
+        data = '{"type": "Feature","geometry": {"type": "Point","coordinates": [10,40]},"properties": {"name": "ff","description": " ","created_by": "2"}'
+        data_ = '{"type": "Feature","geometry": {"type": "Point","coordinates": [10,40]},"properties": {"name": "ff","description": "","created_by": "2"}}'
+        #print(type(data))
+        #print(json.dumps(data))
+
+        response = self.apiclient.post(self.customDraws_url, data=data_, content_type="application/json")
+        #print(response)
+        
+        
+        
 
 
     def test_getTestQuestions_get(self):
