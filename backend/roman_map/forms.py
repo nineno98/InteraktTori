@@ -8,6 +8,61 @@ import pandas as pd
 import re
 from django.forms import inlineformset_factory, modelform_factory
 
+class CustomUserXLSXImportForm(forms.Form):
+    file = forms.FileField(label="XLSX fájl feltöltése")
+    def clean_file(self):
+        super().clean()
+        try:
+            file = self.cleaned_data.get('file')
+            if not file.name.endswith(".xlsx"):
+                raise forms.ValidationError("Csak .xlsx kiterjesztésű fájl engedélyezett.")
+            df = pd.read_excel(file, engine='openpyxl')
+            required_columns = {"first_name", "last_name", "status", "password"}
+            if not required_columns.issubset(df.columns):
+                raise forms.ValidationError(f"A fájl nem tartalmazza az összes szükséges mezőket: {required_columns}")
+            for index, row in df.iterrows():
+                historie_type = str(row['status'])
+                if historie_type not in {'tanar', 'tanulo'}:
+                    raise forms.ValidationError("Érvénytelen típusformátum. a típusnak 'csata' vagy 'esemeny' kell lennie.")
+            self.cleaned_data["df"] = df
+        
+        except pd.errors.ParserError as e:
+            raise forms.ValidationError(f"clean_file: A táblázat szerkezete hibás. {e}")
+        except PermissionError as e:
+            raise forms.ValidationError(f"clean_file: A fájlt nem lehet megnyitni. {e}")
+        except ValueError as e:
+            raise forms.ValidationError(f"clean_file: A fájl formátuma nem megfelelő. {e}")
+        except FileNotFoundError as e:
+            raise forms.ValidationError(f"clean_file: A fájl nem található: {e}")
+        except Exception as e:
+            raise forms.ValidationError(f"clean_file: Hiba: {e}")  
+        return file
+    def save(self):
+        try:
+            df = self.cleaned_data.get("df")
+            for index, row in df.iterrows():
+                status = row["status"]
+                tanar = False
+                tanulo = False
+                if(status=="tanar"):
+                    tanar = True
+                    
+                else:
+                    tanulo = True
+                
+                user = CustomUser.objects.create(
+                    
+                    
+                    tanulo = tanulo,
+                    tanar = tanar,
+                    first_name = row["first_name"],
+                    last_name = row["last_name"]
+                )
+                user.set_password(row["password"])
+                user.username = f"{status}{user.id}"
+                user.save(update_fields=['password', 'username'])
+        except Exception as e:
+            print(e)
 
 
 class AncientPlacesJSONForm(forms.Form):

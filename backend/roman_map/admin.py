@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Territorie, Historie, CustomDraw, Answer, Question, Quiz, AncientPlaces
-from .forms import TerritoriesJSONForm, HistorieXLSXImportForm, AncientPlacesJSONForm
+from .forms import TerritoriesJSONForm, HistorieXLSXImportForm, AncientPlacesJSONForm, CustomUserXLSXImportForm
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import path
@@ -10,81 +10,8 @@ from django.urls import reverse
 from django import forms
 
 # Register your models here.
-
-@admin.register(AncientPlaces)
-class AncientPlacesAdmin(admin.ModelAdmin):
-    list_display = ('id', 'ancient_name', 'modern_name')
-    list_filter = ('id', 'ancient_name', 'modern_name')
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path('upload-geojson-ancient-places/', self.upload_file),
-        ]
-        return custom_urls + urls
-    def upload_file(self, request):
-        if request.method == 'POST':
-            if "places_geojson" in request.POST:
-                form = AncientPlacesJSONForm(request.POST, request.FILES)
-                if form.is_valid():
-                    try:
-                        form.save()
-                        self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
-                        return redirect(reverse('admin:roman_map_ancientplaces_changelist'))
-                    except Exception as e:
-                        self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
-                else:
-                    raise 
-                    self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
-                    print(form.errors)
-                    return redirect(reverse('admin:roman_map_ancientplaces_changelist'))
-            else:
-                self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
-        form = AncientPlacesJSONForm()
-        data = {'form': form}
-        return render(request, 'admin/roman_map/ancientplaces/import_form.html', data)
-
-                        
-
-
-@admin.register(Historie)
-class HistoriesAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'date', 'historie_type')
-    list_filter = ('id','name', 'date',)
-    
-
-    def get_urls(self):
-        urls =  super().get_urls()
-        custom_urls = [
-            path('upload-xlsx-file-from-admin/', self.upload_file),
-        ]
-        return custom_urls + urls
-    
-    def upload_file(self, request):
-        try:
-            if request.method == 'POST':
-                if "xlsx_file" in request.POST:
-                    form = HistorieXLSXImportForm(request.POST, request.FILES)
-                    if form.is_valid():
-                            form.save()
-                            self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
-                            return redirect(reverse('admin:roman_map_historie_changelist'))                       
-                    else:
-                        for field, errors in form.errors.items():
-                            for error in errors:
-                                self.message_user(request, f"Hiba a(z) {field} mezőben: {error}", level=messages.ERROR)
-                        self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
-                        return redirect(reverse('admin:roman_map_historie_changelist'))
-                else:
-                    self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
-            form = HistorieXLSXImportForm()
-            data = {'form':form}
-            return render(request, 'admin/roman_map/historie/import_form.html', data)
-        except Exception as e:
-            self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
-
-
-class CustomUserAdmin(UserAdmin):
+@admin.register(CustomUser)
+class CustomUserAdmin(admin.ModelAdmin):
     list_display = (
         'username', 'email', 'first_name', 'last_name', 'is_staff',
         'tanar', 'tanulo')
@@ -131,6 +58,108 @@ class CustomUserAdmin(UserAdmin):
         }),
     )
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('upload-xlsx-customuser/', self.upload_file),
+        ]
+        return custom_urls + urls
+    def upload_file(self, request):
+        try:
+            if request.method == 'POST':
+                if "customuser_xlsx_file" in request.POST:
+                    form = CustomUserXLSXImportForm(request.POST, request.FILES)
+                    if form.is_valid():
+                        form.save()
+                        self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+                        return redirect(reverse('admin:roman_map_customuser_changelist'))
+                    else:
+                        for field, errors in form.errors.items():
+                            for error in errors:
+                                self.message_user(request, f"Hiba a(z) {field} mezőben: {error}", level=messages.ERROR)
+                        self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
+                        return redirect(reverse('admin:roman_map_customuser_changelist'))
+                else:
+                    self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
+            form = CustomUserXLSXImportForm()
+            data = {'form':form}
+            return render(request, 'admin/roman_map/customuser/import_form.html', data)
+        except Exception as e:
+            self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
+
+@admin.register(AncientPlaces)
+class AncientPlacesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'ancient_name', 'modern_name')
+    list_filter = ('id', 'ancient_name', 'modern_name')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('upload-geojson-ancient-places/', self.upload_file),
+        ]
+        return custom_urls + urls
+    def upload_file(self, request):
+        try:
+            if request.method == 'POST':
+                if "places_geojson" in request.POST:
+                    form = AncientPlacesJSONForm(request.POST, request.FILES)
+                    if form.is_valid():                     
+                            form.save()
+                            self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+                            return redirect(reverse('admin:roman_map_ancientplaces_changelist'))
+                    else:
+                        for field, errors in form.errors.items():
+                            for error in errors:
+                                self.message_user(request, f"Hiba a(z) {field} mezőben: {error}", level=messages.ERROR)
+                        self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
+                        return redirect(reverse('admin:roman_map_ancientplaces_changelist'))
+                else:
+                    self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
+            form = AncientPlacesJSONForm()
+            data = {'form': form}
+            return render(request, 'admin/roman_map/ancientplaces/import_form.html', data)
+        except Exception as e:
+            self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
+                        
+
+
+@admin.register(Historie)
+class HistoriesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'date', 'historie_type')
+    list_filter = ('id','name', 'date',)
+    
+
+    def get_urls(self):
+        urls =  super().get_urls()
+        custom_urls = [
+            path('upload-xlsx-file-from-admin/', self.upload_file),
+        ]
+        return custom_urls + urls
+    
+    def upload_file(self, request):
+        try:
+            if request.method == 'POST':
+                if "xlsx_file" in request.POST:
+                    form = HistorieXLSXImportForm(request.POST, request.FILES)
+                    if form.is_valid():
+                            form.save()
+                            self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+                            return redirect(reverse('admin:roman_map_historie_changelist'))                       
+                    else:
+                        for field, errors in form.errors.items():
+                            for error in errors:
+                                self.message_user(request, f"Hiba a(z) {field} mezőben: {error}", level=messages.ERROR)
+                        self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
+                        return redirect(reverse('admin:roman_map_historie_changelist'))
+                else:
+                    self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
+            form = HistorieXLSXImportForm()
+            data = {'form':form}
+            return render(request, 'admin/roman_map/historie/import_form.html', data)
+        except Exception as e:
+            self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
+
+
 @admin.register(Territorie)
 class TerritorieAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'start_date', 'end_date', 'color')
@@ -170,7 +199,7 @@ class TerritorieAdmin(admin.ModelAdmin):
 
 
 #admin.site.register(Territorie, TerritorieAdmin)
-admin.site.register(CustomUser, CustomUserAdmin)
+#admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Quiz)
 admin.site.register(Question)
 admin.site.register(CustomDraw)

@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<h1>Importálás</h1>
+<div>
+    <form action="." method="post" enctype="multipart/form-data">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <input type="submit" value="Feltöltés" name="customuser_xlsx_file">
+    </form>
+</div>
+
+{% endblock %}
