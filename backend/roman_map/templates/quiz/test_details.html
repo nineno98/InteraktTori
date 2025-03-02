@@ -16,7 +16,7 @@
                     <tr>
                         <td>{{ question.text }}</td>
                         <td>({{ question.get_question_type_display }})</td>
-                        <td><a href="{% url "kerdes_torlese" quiz.id question.id %}" onclick="return confirmDelete(event, this.href);" class="btn btn-warning">Törlés</a></td>
+                        <td><a href="{% url "kerdes_torlese" quiz.id question.id %}" onclick="return confirmDelete(event, this.href, 'Kérdés');" class="btn btn-warning">Törlés</a></td>
                     </tr>    
                 
                 {% endfor %}

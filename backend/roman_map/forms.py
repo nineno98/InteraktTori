@@ -191,7 +191,8 @@ class HistorieXLSXImportForm(forms.Form):
                     date = row["time"]
                 )
         except Exception as e:
-            raise forms.ValidationError("Hiba a mentés során.")
+            
+            raise forms.ValidationError("Hiba a mentés során."+str(e))
             
                 
 class QuizForm(forms.ModelForm):

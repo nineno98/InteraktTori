@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.urls import path
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django import forms
 
 # Register your models here.
 
@@ -33,6 +34,7 @@ class AncientPlacesAdmin(admin.ModelAdmin):
                     except Exception as e:
                         self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
                 else:
+                    raise 
                     self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
                     print(form.errors)
                     return redirect(reverse('admin:roman_map_ancientplaces_changelist'))
@@ -59,30 +61,27 @@ class HistoriesAdmin(admin.ModelAdmin):
         return custom_urls + urls
     
     def upload_file(self, request):
-        print(request.method)
-        if request.method == 'POST':
-            print("post")
-            if "xlsx_file" in request.POST:
-                form = HistorieXLSXImportForm(request.POST, request.FILES)
-                if form.is_valid():
-                    try:
-                        print("errors:")
-                        print(form.errors)
-                        form.save()
-                        print(form.errors)
-                        self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+        try:
+            if request.method == 'POST':
+                if "xlsx_file" in request.POST:
+                    form = HistorieXLSXImportForm(request.POST, request.FILES)
+                    if form.is_valid():
+                            form.save()
+                            self.message_user(request, "Sikeres mentés", level=messages.SUCCESS)
+                            return redirect(reverse('admin:roman_map_historie_changelist'))                       
+                    else:
+                        for field, errors in form.errors.items():
+                            for error in errors:
+                                self.message_user(request, f"Hiba a(z) {field} mezőben: {error}", level=messages.ERROR)
+                        self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
                         return redirect(reverse('admin:roman_map_historie_changelist'))
-                    except Exception as e:
-                        self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
                 else:
-                    self.message_user(request, "A fájl validációja sikertelen!", level=messages.ERROR)
-                    return redirect(reverse('admin:roman_map_historie_changelist'))
-            else:
-                self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
-        form = HistorieXLSXImportForm()
-        data = {'form':form}
-        return render(request, 'admin/roman_map/historie/import_form.html', data)
-
+                    self.message_user(request, "Valami hiba történt.", level=messages.ERROR)
+            form = HistorieXLSXImportForm()
+            data = {'form':form}
+            return render(request, 'admin/roman_map/historie/import_form.html', data)
+        except Exception as e:
+            self.message_user(request, f"Hiba: {str(e)}", level=messages.ERROR)
 
 
 class CustomUserAdmin(UserAdmin):

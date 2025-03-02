@@ -37,7 +37,7 @@
                                         <td class="td description-td"><p>{{ quiz.description }}</p></td>
                                         <td><a href="{% url 'teszt_reszletei' quiz.id %}" class="btn btn-warning">Részletek</a></td>
                                         <td><a href="{% url 'teszt_inditasa' quiz.id %}" class="btn btn-success">Teszt indítása</a></td>
-                                        <td><a href="{% url 'teszt_torlese' quiz.id %}" onclick="return confirmDelete(event, this.href);" class="btn btn-danger">Törlés</a></td>
+                                        <td><a href="{% url 'teszt_torlese' quiz.id %}" onclick="return confirmDelete(event, this.href, 'Teszt');" class="btn btn-danger">Törlés</a></td>
                                         <td><a href="{% url 'teszteredmenyek' quiz.id %}" class="btn btn-info">Eredmények</a></td>
                                         
                                     </tr>     
@@ -62,8 +62,8 @@
     
     <div id="delete-popup" class="popup-overlay">
         <div class="popup-content">
-        <h3>Objektum törlése</h3>
-        <label for="">Biztosan törli az objektumot?</label>
+        <h3 id="delete-popup-title">Objektum törlése</h3>
+        <label for="" id="delete-popup-label">Biztosan törli?</label>
         <div class="popup-buttons">
             <button type="button" id="deleteFeatureButton" class="apply-button">Törlés</button>
             <button type="button" id="closeDeletingPopup">Mégse</button>

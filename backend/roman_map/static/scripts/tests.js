@@ -1,9 +1,12 @@
-function confirmDelete(event, url) {
+function confirmDelete(event, url, type) {
     event.preventDefault();
     const popupContainer = document.getElementById('delete-popup');
     const confirmButton = document.getElementById('deleteFeatureButton');
     const closeButton = document.getElementById('closeDeletingPopup');
-    popupContainer.style.display = 'block';
+    const header = document.getElementById('delete-popup-title');
+    
+    header.textContent = `${type} törlése`
+    popupContainer.style.display = 'flex';
     function closeDeleting () {
         popupContainer.style.display = 'none';
     }
