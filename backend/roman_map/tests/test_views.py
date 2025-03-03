@@ -7,7 +7,7 @@ from django.urls import reverse
 import json
 import geojson
 from http import HTTPStatus
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
 from rest_framework.test import APIRequestFactory
 
 
@@ -60,13 +60,7 @@ class TestViews(TestCase):
         )
 
         
-        self.customdraw = CustomDraw.objects.create(
-            name = "test_draw",
-            description = "test_description",
-            coordinates = "[27, 11]",
-            type = "point",
-            created_by = self.user
-        )
+        
 
         self.current_time = timezone.now()
 
@@ -191,34 +185,9 @@ class TestViews(TestCase):
             self.assertIsInstance(json_response["features"][0], geojson.Feature)
         self.assertEqual(response.status_code, HTTPStatus.OK)
     
-    def test_customDraws_get(self):
-        response = self.apiclient.get(self.customDraws_url)
-        if response.status_code == 200:
-            json_response = geojson.loads(response.content)
-            self.assertIsInstance(json_response, geojson.FeatureCollection)
-            self.assertIsInstance(json_response["features"][0], geojson.Feature)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_customDraws_patch(self):
-        patch_data = {
-            "id" : self.customdraw.id,
-            "coordinates" : [0,0]
-        }
-        response = self.apiclient.patch(self.customDraws_url, data=patch_data, format="json")
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.customdraw.refresh_from_db()
-        self.assertEqual(self.customdraw.coordinates, '[0, 0]')
-
-    def test_customDraws_post(self):
-        test_data = {"value":1}
-        data = {"type": "Feature","geometry": {"type": "Point","coordinates": [10,40]},"properties": {"name": "ff","description": " ","created_by": "2"}}
-        data_ = "{'type': 'Feature','geometry': {'type': 'Point','coordinates': [10,40]},'properties': {'name': 'ff','description': '','created_by': '2'}}"
-        #print(type(data))
-        #print(json.dumps(data))
-
-        response = self.apiclient.post(self.customDraws_url, data=data, format="json")
-        print( response)
-        
+    
+    
+    
         
         
 
@@ -232,6 +201,61 @@ class TestViews(TestCase):
             self.assertEqual(json_response[0]['text'], self.question.text)
             self.assertEqual(json_response[0]['points'], self.question.points)
         self.assertEqual(response.status_code, HTTPStatus.OK)
+
+class TestCustomDraws(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass',
+            tanulo = False,
+            tanar = True,
+            first_name = 'test_first_name',
+            last_name = "test_last_name"
+        )
+        self.customdraw = CustomDraw.objects.create(
+            name = "test_draw",
+            description = "test_description",
+            coordinates = "[27, 11]",
+            type = "point",
+            created_by = self.user
+        )
+        self.apiclient = APIClient()
+        self.customDraws_url = reverse('customDraws')
+        self.apiclient.login(username = "testuser", password = "testpass" )
+    
+    def test_customDraws_get(self):
+        
+        response = self.apiclient.get(self.customDraws_url)
+        if response.status_code == 200:
+            json_response = geojson.loads(response.content)
+            self.assertIsInstance(json_response, geojson.FeatureCollection)
+            self.assertIsInstance(json_response["features"][0], geojson.Feature)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_customDraws_patch(self):
+        
+        patch_data = {
+            "id" : self.customdraw.id,
+            "coordinates" : [0,0]
+        }
+        response = self.apiclient.patch(self.customDraws_url, data=patch_data, format="json")
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.customdraw.refresh_from_db()
+        self.assertEqual(self.customdraw.coordinates, '[0, 0]')
+
+    def test_customDraws_post(self):
+        data = {"type": "Feature","geometry": {"type": "Point","coordinates": [10,40]},"properties": {"name": "ff","description": " ","created_by": self.user.id}}
+        response = self.apiclient.post(self.customDraws_url, data=data, format="json")
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(CustomDraw.objects.count(), 2)
+
+    def test_customDraws_delete(self):
+        data = {"id":self.customdraw.id}
+        response = self.apiclient.delete(self.customDraws_url, data=data, format="json")
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(CustomDraw.objects.count(), 0)
+        
 
     
             

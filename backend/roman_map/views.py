@@ -195,14 +195,11 @@ class CustomDrawsAPIView(APIView):
                     "object_id": new_draw.id
                 }
                 return JsonResponse(response, status = 200)
-            
-                
             else:
                 response = {
                     "status":"error",
                     "message":serializer.errors
                 }
-                
                 return JsonResponse(response, status = 400)
         except Exception as e:
             db_logger.error("Hiba: "+str(e))
