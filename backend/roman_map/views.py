@@ -272,17 +272,21 @@ def teszt(request):
 def uj_teszt_keszitese(request):
     try:
         if request.method == 'POST':
+            
             form = QuizForm(request.POST)
             if form.is_valid():
                 quiz = form.save(commit=False)
                 quiz.created_by = request.user
+                
                 form.save()
+                
                 db_logger.info(f"A '{quiz.title}' teszt létrehozása sikeres.")
                 messages.success(request, f"A '{quiz.title}' teszt létrehozása sikeres.")
                 return redirect('teszt_reszletei', quiz_id=quiz.id)
             else:
                 db_logger.error("Hiba történt, a teszt létrehozása sikertelen!")
                 messages.error(request, "Hiba történt, a teszt létrehozása sikertelen!")
+                return redirect('teszt_reszletei', quiz_id=quiz.id)
         else:
             form = QuizForm()
             return render(request, 'quiz/create_test.html', {"form":form})
@@ -318,6 +322,9 @@ def teszt_reszletei(request, quiz_id):
             if form.is_valid():
                 question_type = form.cleaned_data["question_type"]
                 return redirect("kerdes_hozzadasa", quiz_id=quiz.id, question_type=question_type)
+            else:
+                db_logger.error("Hiba: a form feldolgozása során")
+                messages.error(request, "Hiba történt a folyamat során!")
         questions = quiz.questions.all()
         form = QuestionTypeForm()
         return render(request, "quiz/test_details.html", {
@@ -333,6 +340,7 @@ def teszt_reszletei(request, quiz_id):
 
 def kerdes_hozzadasa(request, quiz_id, question_type):
     try:
+        
         quiz = Quiz.objects.get(id = quiz_id)
         if not quiz:
             db_logger.error("Hiba: nincs teszt")
@@ -343,15 +351,17 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
             AnswerFormSetClass = IgazHamisForm
 
         if request.method == "POST":
+            
             question_form = QuestionForm(request.POST)
             formset = AnswerFormSetClass(request.POST)
 
             if question_form.is_valid() and formset.is_valid():
+                
                 question = question_form.save(commit=False)
                 question.quiz = quiz
                 question.question_type = question_type
                 question.save()
-
+                
                 answers = formset.save(commit=False)
                 for answer in answers:
                     answer.question = question
@@ -359,7 +369,8 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
                 db_logger.info(f"Kérdés sikeresen létrehozva: {question}")
                 messages.success(request, "A kérdés létrehozása sikeres")
                 return redirect("teszt_reszletei", quiz_id=quiz.id)
-
+            #print(question_form.errors)
+            #print(formset.errors)
         else:
             question_form = QuestionForm()
             formset = AnswerFormSetClass()
@@ -414,7 +425,7 @@ def kerdes_torlese(request, quiz_id, question_id):
         return redirect('teszt_reszletei', quiz_id=quiz_id)
     except Exception as e:
         db_logger.error("Hiba: "+str(e))
-        messages.error(request, "Hiba a teszt törlése során.")
+        messages.error(request, "Hiba a kérdés törlése során.")
         return redirect('teszt_reszletei', quiz_id=quiz_id)
 
 def teszt_inditasa(request, quiz_id):
@@ -424,10 +435,11 @@ def teszt_inditasa(request, quiz_id):
             db_logger.error("Hiba. Az indítani kívánt teszt nem található.")
             messages.error(request, "Hiba. Az indítani kívánt teszt nem található.")
         if request.method == 'POST':
+            
             score = 0
             user = request.user
             for question in quiz.questions.all():
-                user_answer = request.POST.get(f'question_{question.id}')
+                user_answer = request.POST[f'question_{question.id}']
 
                 if question.question_type == "tf":
                     correct_answer = question.answers.first().is_correct

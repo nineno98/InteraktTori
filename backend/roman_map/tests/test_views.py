@@ -9,6 +9,7 @@ import geojson
 from http import HTTPStatus
 from rest_framework.test import APIClient, APITestCase
 from rest_framework.test import APIRequestFactory
+from django.contrib.messages import get_messages
 
 
 class TestViews(TestCase):
@@ -107,7 +108,7 @@ class TestViews(TestCase):
         self.factory = APIRequestFactory()
 
         self.apiclient.login(username = "testuser", password = "testpass" )
-
+        self.client.login(username = "testuser", password = "testpass")
         self.fooldal_url = reverse('fooldal')
         self.bejelentkezes_url = reverse('bejelentkezes')
         self.terkep_url = reverse('terkep')
@@ -121,6 +122,7 @@ class TestViews(TestCase):
         self.customDraws_url = reverse('customDraws')
         self.getTestQuestions_url = reverse('getTestQuestions', kwargs={'quiz_id': 1})
 
+        self.teszt_url = reverse('teszt')
         self.uj_teszt_keszitese_url = reverse('uj_teszt_keszitese')
         self.teszt_reszletei_url = reverse('teszt_reszletei', args=['1'])
         self.kerdes_hozzadasa_url = reverse('kerdes_hozzadasa', args=['1', 'mc'])
@@ -184,13 +186,6 @@ class TestViews(TestCase):
             self.assertIsInstance(json_response, geojson.FeatureCollection)
             self.assertIsInstance(json_response["features"][0], geojson.Feature)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-    
-    
-    
-    
-        
-        
-
 
     def test_getTestQuestions_get(self):
         response = self.apiclient.get(self.getTestQuestions_url)
@@ -201,6 +196,166 @@ class TestViews(TestCase):
             self.assertEqual(json_response[0]['text'], self.question.text)
             self.assertEqual(json_response[0]['points'], self.question.points)
         self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_teszt_get(self):
+        response = self.client.get(self.teszt_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/test.html')
+
+    def test_uj_teszt_keszitese_get(self):
+        response = self.client.get(self.uj_teszt_keszitese_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/create_test.html')
+
+    def test_uj_teszt_keszitese_post_valid(self):
+        data = {
+            "title":"test_quiz2",
+            "description":"test_description2"
+        }
+        response = self.client.post(self.uj_teszt_keszitese_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Quiz.objects.count(), 2)
+
+    def test_uj_teszt_keszitese_post_invalid(self):
+        data = {
+            
+            "description":"test_description2"
+        }
+        response = self.client.post(self.uj_teszt_keszitese_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(Quiz.objects.count(), 1)
+
+    def test_teszt_reszletei_get(self):
+        response = self.client.get(self.teszt_reszletei_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/test_details.html')
+    
+    def test_teszt_reszletei_post_valid(self):
+        data = {
+            "question_type":"mc"
+        }
+        response = self.client.post(self.teszt_reszletei_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+    
+    def test_teszt_reszletei_post_invalid(self):
+        data = {
+            "question_type":"bad_type"
+        }
+        response = self.client.post(self.teszt_reszletei_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_kerdes_hozzadasa_get(self):
+        response = self.client.get(self.kerdes_hozzadasa_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/create_question.html')
+
+    def test_kerdes_hozzadasa_post_valid(self):
+        data = {
+            "text": "Mi Franciaország fővárosa?",
+            "points": "1",
+            "answers-TOTAL_FORMS": "4",
+            "answers-INITIAL_FORMS": "0",
+            "answers-MIN_NUM_FORMS": "0",
+            "answers-MAX_NUM_FORMS": "1000",
+            "answers-0-text": "Berlin",
+            "answers-0-id": "",
+            "answers-0-question": "",
+            "answers-1-text": "Párizs",
+            "answers-1-is_correct": "on",
+            "answers-1-id": "",
+            "answers-1-question": "",
+            "answers-2-text": "London",
+            "answers-2-id": "",
+            "answers-2-question": "",
+            "answers-3-text": "Róma",
+            "answers-3-id": "",
+            "answers-3-question": "",
+        }
+        response = self.client.post(self.kerdes_hozzadasa_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Question.objects.count(), 2)
+
+    def test_kerdes_hozzadasa_post_invalid(self):
+        data = {"text": "Mi Franciaország fővárosa?"}
+        response = self.client.post(self.kerdes_hozzadasa_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_teszt_torlese_post_valid(self):
+        quiz_number = Quiz.objects.count()
+        quiz_id = Quiz.objects.first().id
+        url = reverse("teszt_torlese", args=[quiz_id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Quiz.objects.count(), quiz_number - 1)
+        
+    
+    def test_teszt_torlese_post_invalid(self):
+        quiz_id = 0
+        url = reverse("teszt_torlese", args=[quiz_id])
+        response = self.client.get(url) 
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertIn(messages[0].message, "Hiba az teszt törlése során.")
+        
+    def test_kerdes_torlese_post_valid(self):
+        question_number = Question.objects.count()
+        question_id = Question.objects.first().id
+        quiz_id = Quiz.objects.first().id
+        url = reverse("kerdes_torlese", args=[quiz_id, question_id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Question.objects.count(), question_number - 1)
+
+    def test_kerdes_torlese_post_invalid(self):
+        question_id = 0
+        quiz_id = Quiz.objects.first().id
+        url = reverse("kerdes_torlese", args=[quiz_id, question_id])
+        response = self.client.get(url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertIn(messages[0].message, "Hiba a kérdés törlése során.")
+        
+
+    def test_teszt_inditasa_get(self):
+        response = self.client.get(self.teszt_inditasa_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/run_test.html')
+
+    def test_teszt_inditasa_post_valid(self):
+        data = {
+           f"question_{self.question.id}": [self.answer.id],
+        }
+        response = self.client.post(self.teszt_inditasa_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/test_result.html')
+
+    def test_teszt_inditasa_post_invalid(self):
+        data = {
+           f"question_0": "",
+        }
+        response = self.client.post(self.teszt_inditasa_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.url, "/test/")
+
+    def test_teszteredmenyek_get(self):
+        response = self.client.get(self.teszteredmenyek_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/test_chart.html')
+        
+    def test_serve_tile_get_found(self):
+        url = reverse('serve_tile', args=['4','7','6'])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.get('Content-Type'), "image/png")
+        
+    def test_serve_tile_get_not_found(self):
+        url = reverse('serve_tile', args=['1','1','1'])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.get('Content-Type'), "text/html; charset=utf-8")
+
+    def test_kerdes_kivalasztasa(self):
+        pass
 
 class TestCustomDraws(APITestCase):
     def setUp(self):
