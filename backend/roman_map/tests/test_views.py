@@ -10,6 +10,7 @@ from http import HTTPStatus
 from rest_framework.test import APIClient, APITestCase
 from rest_framework.test import APIRequestFactory
 from django.contrib.messages import get_messages
+from django.db.models import Count
 
 
 class TestViews(TestCase):
@@ -354,8 +355,40 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.assertEqual(response.get('Content-Type'), "text/html; charset=utf-8")
 
-    def test_kerdes_kivalasztasa(self):
-        pass
+    def test_kerdes_kivalasztasa_get(self):
+        response = self.client.get(self.kerdes_kivalasztasa_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, 'quiz/select_questions.html')
+
+    def test_kerdes_kivalasztasa_post_valid(self):
+        question_number = Quiz.objects.annotate(num_q=Count('questions')).get(id=1).num_q
+        new_question = Question.objects.create(
+            text = "test_text2",
+            question_type = "mc",
+            points = 1
+        )
+        data = {
+            'questions': [new_question.id]
+        }
+        response = self.client.post(self.kerdes_kivalasztasa_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Quiz.objects.annotate(num_q=Count('questions')).get(id=1).num_q, question_number + 1)
+        
+    def test_kerdes_kivalasztasa_post_invalid(self): 
+        question_number = Quiz.objects.annotate(num_q=Count('questions')).get(id=1).num_q
+        new_question = Question.objects.create(
+            text = "test_text2",
+            question_type = "mc",
+            points = 1
+        )
+        data = {
+            'questions': ''
+        }
+        response = self.client.post(self.kerdes_kivalasztasa_url, data=data)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertIn(messages[0].message, "Hiba a kérdések hozzáadása során!")
+    
 
 class TestCustomDraws(APITestCase):
     def setUp(self):
