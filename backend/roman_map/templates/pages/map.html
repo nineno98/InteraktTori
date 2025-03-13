@@ -13,6 +13,7 @@
 
     <meta name="user-id" content="{{ request.user.id }}">
     <link rel="stylesheet" href="{% static 'styles/map_style.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/popup_style.css' %}">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
   
     <title>Térkép</title>
@@ -44,7 +45,9 @@
             <option value="LineString">Vonal</option>
             <option value="Polygon">Terület</option>   
           </select>
-  
+
+        <!-- Popups -->  
+
         <div id="draw-popup" class="popup-overlay">
           <div class="popup-content">
               <h3>Objektum adatai</h3>
@@ -84,11 +87,6 @@
 
         </div>
 
-        <div id="places-popup" class="ol-popup">
-          <a href="#" id="places-popup-closer" class="ol-popup-closer">&#10060;</a>
-          <div id="places-popup-content"></div>
-        </div>
-
         <div id="info-popup" class="popup-overlay">
           <div class="popup-content">
             <div class="info-popup-inner-container">
@@ -99,9 +97,14 @@
               <button type="button" id="info-popup-accept-button" class="apply-button">Rendben</button>
             </div>
           </div>
-          
         </div>
-    
+
+        <!-- End of popups -->
+
+        <div id="places-popup" class="ol-popup">
+          <a href="#" id="places-popup-closer" class="ol-popup-closer">&#10060;</a>
+          <div id="places-popup-content"></div>
+        </div>
     <script type="module" src="{% static 'scripts/openlayers_map.js' %}"></script>
 </body>
 </html>
