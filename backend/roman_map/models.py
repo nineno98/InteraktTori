@@ -8,7 +8,6 @@ import os
 # Create your models here.
 
 class CustomUser(AbstractUser):
-
     tanulo = models.BooleanField(default=False)
     tanar = models.BooleanField(default=False)
 

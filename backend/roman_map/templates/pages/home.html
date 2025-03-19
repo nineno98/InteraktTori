@@ -7,14 +7,15 @@
     <title>Ancient Interactive - Home</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
     <link rel="stylesheet" href="{% static 'styles/home_style.css' %}">
+    
 </head>
 <body id="background">
-
+    <div class="page-pattern left-pattern"></div>
     <div class="content">
         <img src="{% static "images/logo_ai.png" %}" alt="" srcset="" id="logo-image">
-        <div class="page-pattern left-pattern"></div>
         
-        <h1>Kezdőlap</h1>
+        
+        <h2>InteraktTöri App</h2>
         <hr class="separator-line-item">
         {% include "pages/messages.html" %}
         <div id="page-links">
@@ -30,19 +31,15 @@
         </div>
         <hr class="separator-line-item">
         <div class="qr_code">
-            <div id="qrkod_design">
-              <h4>QR KÓD beolvasása:</h4>
-            </div>
+            
+            <h4>QR kód beolvasása:</h4>
             {% load qr_code %}
             {% qr_from_data qr_url size='M' %}
+            
+            
         </div>
-        <hr class="separator-line-item">
-        <h2>Betmutatkozás</h2>
-        <p>
-            Bemutatkozás...
-        </p>
-        <div class="page-pattern right-pattern"></div>
+        
     </div>
-    
+    <div class="page-pattern right-pattern"></div>
 </body>
 </html>

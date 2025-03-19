@@ -73,19 +73,26 @@ h3{
     margin-top: 15px;
     margin-bottom: 15px;
 }
-.disz-sav{
-    position: absolute;
+
+.page-pattern{
+    position: fixed;
     top: 0;
-    width: 50px;
+    width: 80px;
     height: 100%;
     background-image: url('../images/oldalszegely_arany.svg');
     background-repeat: repeat-y;
-    background-size: 50px;
-    z-index: 1;
+    background-size: 80px;
+    z-index: 1;   
 }
-.bal-disz-sav{
+.left-pattern{
     left: 5%;
 }
-.jobb-disz-sav{
+.right-pattern{
     right: 5%;
+}
+
+@media (max-width: 680px){
+    .page-pattern{
+        display: none;
+    }
 }

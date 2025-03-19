@@ -25,7 +25,12 @@
       <div id="head-container">
         
         <div class="head-link-items">
-          <a href="{% url 'fooldal' %}" class="btn btn-warning head-link-items">Főoldal</a>
+          <a href="{% url 'fooldal' %}" class="btn btn-warning head-link-items" id="panel-home-btn">
+            <span class="btn-text">Főoldal</span>
+          </a>
+          <button class="btn btn-warning head-link-items" id="panel-toggle-btn">
+            <span class="btn-text">Történet</span>
+          </button>
           <div class="slide-container">
             <input type="range" id="date-slider" min="-700" max="700" value="-700" class="slider">
           </div>
@@ -106,5 +111,6 @@
           <div id="places-popup-content"></div>
         </div>
     <script type="module" src="{% static 'scripts/openlayers_map.js' %}"></script>
+    <script type="module" src="{% static 'scripts/map_panel.js' %}"></script>
 </body>
 </html>
