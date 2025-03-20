@@ -255,6 +255,15 @@ class QuizForm(forms.ModelForm):
         model = Quiz
         fields = ('title', 'description')
 
+class ValaszelemForm(forms.ModelForm):
+    class Meta:
+        model = Answer
+        fields = ["text", "is_correct"]
+        labels = {
+            "text": "Válasz szövege",
+            "is_correct": "Helyes válasz",
+        }
+
 class IgazHamisForm(forms.ModelForm):
     TRUE_FALSE_CHOICES = [
         (True, "Igaz"),
@@ -263,16 +272,21 @@ class IgazHamisForm(forms.ModelForm):
 
     is_correct = forms.ChoiceField(
         choices=TRUE_FALSE_CHOICES,
-        widget=forms.RadioSelect
+        widget=forms.RadioSelect,
+        label="Igaz vagy hamis?",
+        required=True
     )
 
     class Meta:
         model = Answer
         fields = ["is_correct"]
+        labels = {
+            "is_correct": "Igaz vagy hamis?",
+        }
 
-QuestionForm = modelform_factory(Question, fields=["text", "points"])
-ValaszelemForm = inlineformset_factory(Question, Answer, fields=["text", "is_correct"], extra=4)
-IgazHamisForm = inlineformset_factory(Question, Answer, form=IgazHamisForm, fields=["is_correct"], extra=1)
+QuestionForm = modelform_factory(Question, fields=["text", "points"], labels={"text":"Kérdés", "points":"Elérhető pontszám"})
+ValaszelemForm = inlineformset_factory(Question, Answer, form=ValaszelemForm, fields=["text", "is_correct"], extra=4)
+IgazHamisForm = inlineformset_factory(Question, Answer,form=IgazHamisForm,fields=["is_correct"],extra=1,)
 class QuestionTypeForm(forms.Form):
     question_type = forms.ChoiceField(
         choices=Question.QUESTION_TYPES,
@@ -283,9 +297,9 @@ class QuestionTypeForm(forms.Form):
         
 
 AnswerFormSet = inlineformset_factory(
-    Question,  # A fő modell (kérdés)
-    Answer,  # A kapcsolt modell (válasz)
+    Question,
+    Answer,
     fields=['text', 'is_correct'],
-    extra=4,  # Alapból 4 válaszlehetőséget jelenítünk meg
-    can_delete=True  # Megadható, hogy egy választ törölhessünk
+    extra=4,
+    can_delete=True
 )

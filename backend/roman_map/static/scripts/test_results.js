@@ -30,7 +30,10 @@ function createChart(data, containerId, BubbleColor){
         const root = d3.hierarchy(formattedData).sum(d => d.value);
         const nodes = pack(root).leaves();
 
-        const svg = d3.select(containerId);
+        const svg = d3.select(containerId)
+            .attr("viewBox", `0 0 800 600`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .classed("svg-score-chart", true);;
 
         const bubbles = svg.selectAll(".bubble")
                 .data(nodes)

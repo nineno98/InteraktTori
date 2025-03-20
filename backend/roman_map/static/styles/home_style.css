@@ -95,7 +95,32 @@ body{
 .qr_code h4{
     color: #ecba04;
 }
-
+#sajat-adatok{
+    color: white;
+}
+#sajat-adatok-links{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 40%;
+    align-items: center;
+    margin: auto;
+}
+#jelszovaltas-form{
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+#jelszovaltas-form div {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+}
+.change-password-error{
+    color: red;
+}
 @media (max-width: 690px){
     .qr_code{
         flex-direction: column;
@@ -114,5 +139,8 @@ body{
     }
     .separator-line-item{
         width: 70%;
+    }
+    #jelszovaltas-form div{
+        width: 90%;
     }
 }

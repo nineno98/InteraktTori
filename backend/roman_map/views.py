@@ -37,10 +37,11 @@ def sajatadatok(request):
 
 def jelszovaltas(request):
     try:
+        print(request.method)
         if request.method == 'POST':
             form = PasswordChangeForm(request.user, request.POST)
             if form.is_valid():
-                
+                print("valid")
                 form.save()
                 update_session_auth_hash(request, form.user)
                 db_logger.info(f"{request.user} sikeresen módosította a jelszavát.")
@@ -53,7 +54,6 @@ def jelszovaltas(request):
                         messages.warning(request, f"{field}: {error}")
         else:
             form = PasswordChangeForm(request.user)
-            
         return render(request, 'users/change_password.html', {'form':form})
     except Exception as e:
         db_logger.error("Hiba: "+str(e))
@@ -340,7 +340,6 @@ def teszt_reszletei(request, quiz_id):
 
 def kerdes_hozzadasa(request, quiz_id, question_type):
     try:
-        
         quiz = Quiz.objects.get(id = quiz_id)
         if not quiz:
             db_logger.error("Hiba: nincs teszt")
@@ -349,19 +348,20 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
             AnswerFormSetClass = ValaszelemForm
         else:
             AnswerFormSetClass = IgazHamisForm
-
         if request.method == "POST":
-            
+            answers_number = request.POST.get("answers-TOTAL_FORMS")
+            for i in range(int(answers_number)):
+                answer = request.POST.get(f"answers-{i}-text")
+                if answer == "":
+                    messages.warning(request, "Nem adott meg minden válaszelemhez választ!")
+                    return redirect("teszt_reszletei", quiz_id=quiz.id)
             question_form = QuestionForm(request.POST)
             formset = AnswerFormSetClass(request.POST)
-
             if question_form.is_valid() and formset.is_valid():
-                
                 question = question_form.save(commit=False)
                 question.quiz = quiz
                 question.question_type = question_type
                 question.save()
-                
                 answers = formset.save(commit=False)
                 for answer in answers:
                     answer.question = question
@@ -369,12 +369,9 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
                 db_logger.info(f"Kérdés sikeresen létrehozva: {question}")
                 messages.success(request, "A kérdés létrehozása sikeres")
                 return redirect("teszt_reszletei", quiz_id=quiz.id)
-            #print(question_form.errors)
-            #print(formset.errors)
         else:
             question_form = QuestionForm()
             formset = AnswerFormSetClass()
-
         return render(request, "quiz/create_question.html", {
             "quiz": quiz,
             "question_form": question_form,
@@ -382,15 +379,20 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
             "question_type": question_type
         })
     except Exception as e:
+        print(e)
         db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a kérdés létrehozása során.")
         return redirect('teszt_reszletei', quiz_id=quiz_id)
 
 def kerdes_kivalasztasa(request, quiz_id):
     try:
+        quiz = Quiz.objects.get(id = quiz_id)
         if request.method == 'POST':
             selected_questions = request.POST.getlist('questions')
-            quiz = Quiz.objects.get(id = quiz_id)
+            
+            if len(selected_questions) == 0:
+                messages.warning(request, "Nem volt kiválasztva kérdés!")
+                return redirect("teszt_reszletei", quiz_id=quiz.id)
             for question_id in selected_questions:                
                 selected_question = Question.objects.get(id = question_id)
                 selected_question.quiz = quiz
@@ -399,7 +401,7 @@ def kerdes_kivalasztasa(request, quiz_id):
             messages.success(request, "A kérdések sikeresen hozzáadva!")
             return redirect("teszt_reszletei", quiz_id=quiz.id)
         questions = Question.objects.filter(~Q(quiz = quiz_id))
-        return render(request, 'quiz/select_questions.html', {"questions":questions})
+        return render(request, 'quiz/select_questions.html', {"questions":questions, "quiz":quiz})
     except Question.DoesNotExist as e:
         db_logger.error("Hiba: A kérdés nem található"+str(e))
         messages.error(request, "Hiba: A kérdés nem található!")
@@ -435,10 +437,13 @@ def teszt_inditasa(request, quiz_id):
             db_logger.error("Hiba. Az indítani kívánt teszt nem található.")
             messages.error(request, "Hiba. Az indítani kívánt teszt nem található.")
         if request.method == 'POST':
-            
             score = 0
             user = request.user
             for question in quiz.questions.all():
+                key = f"question_{question.id}"
+                if key not in request.POST:
+                    messages.error(request, f"Minden kérdésre válaszolnod kell! ({question.text})")
+                    return redirect("teszt_inditasa", quiz_id=quiz_id)
                 user_answer = request.POST[f'question_{question.id}']
 
                 if question.question_type == "tf":
@@ -485,7 +490,6 @@ def teszt_inditasa(request, quiz_id):
         return render(request, 'quiz/run_test.html', {'quiz': quiz, 'questions': questions})
     except Exception as e:
         db_logger.error("Hiba: "+str(e))
-        #print(e)
         messages.error(request, "Hiba teszt során")
         return redirect('teszt')
 

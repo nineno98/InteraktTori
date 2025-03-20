@@ -1,29 +1,37 @@
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} Saját adatok {% endblock title %}</title>
+    <link rel="stylesheet" href="{% static 'styles/home_style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
+    {% include "pages/messages.html" %}
+    <div class="page-pattern left-pattern"></div>
     {% block content %}
         <div class="content">
-        
-            <p>Saját adatok</p>
-            {{ user.first_name }}
-            {{ user.last_name }}
-            {{ user.username }}
-            {{ user.id }}
-            <p>Státusz</p>
-            {% if user.tanar %}
-                <p>Tanár</p>
-            {% else %}
-                <p>Tanuló</p>
-            {% endif %}
-
-            <a href="{% url 'jelszovaltas' %}">Jelszó megváltoztatása</a>
+            <div id="sajat-adatok">
+                <h3>Saját adatok</h3>
+                <p>Keresztnév: {{ user.first_name }}</p>
+                <p>Vezetéknév: {{ user.last_name }}</p>
+                <p>Felhasználónév: {{ user.username }}</p>
+                <p>Azonosító: {{ user.id }}</p>
+                
+                <p>Státusz: {% if user.tanar %} Tanár {% else %} Tanuló {% endif %}</p>
+            </div>
+            <div id="sajat-adatok-links">
+                <a href="{% url 'jelszovaltas' %}" class="btn btn-warning">Jelszó megváltoztatása</a>
+                <a href="{% url 'fooldal' %}" class="btn btn-warning">Vissza a főoldalra</a>
+            </div>
+            
         </div>
     {% endblock content %}
-    
+    <div class="page-pattern right-pattern"></div>
 </body>
 </html>

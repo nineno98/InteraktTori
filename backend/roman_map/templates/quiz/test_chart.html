@@ -2,16 +2,17 @@
 {% load static %}
 
 {% block content %}
-    <div class="content">
+    <div class="test-results-page-content">
         <script src="https://d3js.org/d3.v7.min.js"></script>
         <input id="quiz_id" value = "{{quiz_id}}" type=hidden>
         <h3 class="quiz-subpage-title">A teszt kérdéseinek eredményei</h3>
+        <div class="disz-csik"></div>
         <div id="chart-container">
             <h5>Legtöbb helyes választ kapó kérdések</h5>
-            <svg width="800" height="600" id="top-score"></svg>
+            <svg width="800" height="600" id="top-score" class="svg-score-chart"></svg>
             <div class="disz-csik"></div>
             <h5>Legtöbb helytelen választ kapó kérdések</h5>
-            <svg width="800" height="600" id="wrost-score"></svg>
+            <svg width="800" height="600" id="wrost-score" class="svg-score-chart"></svg>
         </div>
         <div class="disz-csik"></div>
 

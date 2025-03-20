@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-    <div class="content" id="create-test-content">
+    <div class="content">
         <form action="." method="post">
             <h3 class="page-title-h3">Új teszt létrehozása</h3>
             <div class="disz-csik"></div>
@@ -21,7 +21,12 @@
             </div>
             
             <div class="disz-csik"></div>
-            <button type="submit" class="btn btn-warning">Új teszt létrehozása</button>
+            <div id="test-home-buttons">
+                <button type="submit" class="btn btn-warning">Új teszt létrehozása</button>
+                <a href="{% url 'teszt' %}" class="btn btn-warning" id="panel-home-btn">
+                    <span class="btn-text">Vissza a tesztekhez</span>
+                </a>
+            </div>
         </form>
     </div>  
 {% endblock content %}

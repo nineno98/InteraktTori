@@ -1,13 +1,22 @@
 {% extends "quiz/test.html" %}
 {% block content %}
-<p>hello</p>
-<form action="" method="post">
-    {% csrf_token %}
-    {% for question in questions %}
+<div class="content-select-questions">
+    <h3>Kérdések hozzáadása a teszthez</h3>
+    <h5>Válassza ki a teszthez hozzáadni kívánt kérdéseket!</h5>
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for question in questions %}
+        <div class="select-question-container">
             <label for="{{question.id}}">{{question.text}}</label>
             <input type="checkbox" id="{{question.id}}" name="questions" value="{{question.id}}"><br>
-    {% endfor %}
-    <button type="submit">Hozzáadás a teszthez</button>
-</form>
-    
+        </div>
+            
+        {% endfor %}
+        <div class="select-question-button-container">
+            <button type="submit" class="btn btn-warning">Hozzáadás a teszthez</button>
+            <a href="{% url 'teszt_reszletei' quiz.id %}" class="btn btn-warning">Mégse</a>
+        </div>
+        
+    </form>
+</div>  
 {% endblock content %}
