@@ -213,6 +213,7 @@ svg {
     flex-direction: column;
     width: 40%;
     gap: 10px;
+    margin-top: 10px;
 }
 .page-pattern{
     position: fixed;
@@ -330,6 +331,7 @@ svg {
     #test-home-buttons{
         width: 60%;
         
+        
     }
     .form-container div{
         flex-direction: column;
@@ -348,6 +350,7 @@ svg {
     .content-create-question>form p{
         margin-left: 10px;
     }
+    
     
 }
 

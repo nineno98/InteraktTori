@@ -14,12 +14,15 @@
 </head>
 <body>
     <div class="page-pattern left-pattern"></div>
+    {% include "pages/messages.html" %}
     <div class="login-belepoablak">
         
         {% if not user.is_authenticated %}
             <form action="." method="post">
                 <div class="ancient-interactive-logo">
-                    <img src="{% static "images/logo_ai.png" %}" alt="" srcset="">
+                    <a href="{% url "fooldal" %}">
+                        <img src="{% static "images/logo_ai.png" %}" alt="" srcset="">
+                    </a>
                 </div>
                 <h3>InteraktTöri</h3>
                 <div class="disz-csik"></div>

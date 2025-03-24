@@ -18,7 +18,7 @@
     <div class="page-pattern left-pattern"></div>
         {% block content %}
             <div class="content">
-                <p>Tesztek főoldala</p>
+                <h3>Tesztek főoldala</h3>
                 
                     {% if quiz_list.count %}
                         <div class="table-responsive">
@@ -38,11 +38,12 @@
                                         <tr class="quiz-list" id="{{ quiz.id }}">
                                             <td class="td title-td"><p>{{ quiz.title }}</p></td>
                                             <td class="td description-td"><p>{{ quiz.description }}</p></td>
-                                            <td class="td"><a href="{% url 'teszt_reszletei' quiz.id %}" class="btn btn-warning">Részletek</a></td>
                                             <td class="td"><a href="{% url 'teszt_inditasa' quiz.id %}" class="btn btn-success">Teszt indítása</a></td>
-                                            <td class="td"><a href="{% url 'teszt_torlese' quiz.id %}" onclick="return confirmDelete(event, this.href, 'Teszt');" class="btn btn-danger">Törlés</a></td>
-                                            <td class="td"><a href="{% url 'teszteredmenyek' quiz.id %}" class="btn btn-info">Eredmények</a></td>
-                                            
+                                            {% if user.tanar %}
+                                                <td class="td"><a href="{% url 'teszt_reszletei' quiz.id %}" class="btn btn-warning">Részletek</a></td>                                            
+                                                <td class="td"><a href="{% url 'teszt_torlese' quiz.id %}" onclick="return confirmDelete(event, this.href, 'Teszt');" class="btn btn-danger">Törlés</a></td>
+                                                <td class="td"><a href="{% url 'teszteredmenyek' quiz.id %}" class="btn btn-info">Eredmények</a></td>
+                                            {% endif %}
                                         </tr>     
                                     {% endfor %}
                                 </tbody>
@@ -51,14 +52,15 @@
                         </div>
                     {% else %}
                         <div class="bg-warning text-dark" id="nincs-teszt">
-                            <p>Még nincs teszt. Hozz létre egyet!</p>
+                            <p>Még nincs teszt.</p>
+                            {% if user.tanar %}<p>A teszt hozzáadása gombra kattintva létrehozhat egyet!</p>{% endif %}
                         </div>
                         
                     {% endif %}
                 
                 
                 <div id="test-home-buttons">
-                    <a href="{% url 'uj_teszt_keszitese' %}" class="btn btn-warning hozzaadas-gomb">Teszt hozzáadása</a>
+                    {% if user.tanar %}<a href="{% url 'uj_teszt_keszitese' %}" class="btn btn-warning hozzaadas-gomb">Teszt hozzáadása</a>{% endif %}
                     <a href="{% url 'fooldal' %}" class="btn btn-warning" id="panel-home-btn">
                         <span class="btn-text">Vissza a főoldalra</span>
                     </a>

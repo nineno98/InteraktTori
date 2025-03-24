@@ -121,6 +121,9 @@ body{
 .change-password-error{
     color: red;
 }
+.logged-user-status-container{
+    color: white;
+}
 @media (max-width: 690px){
     .qr_code{
         flex-direction: column;
