@@ -109,23 +109,24 @@ async function initComponents() {
     console.log(calculatedData);
     const topQuestionsData = calculatedData
         .filter(d => d.scoreRatio > 0)
-        .sort((a, b) => a.scoreRatio - b.scoreRatio)
+        .sort((a, b) => b.scoreRatio - a.scoreRatio)
         .slice(0, 10);
     
     const worstQuestionsData = calculatedData
         .filter(d => d.scoreRatio > 0)
         .sort((a, b) => a.scoreRatio - b.scoreRatio)
         .slice(0, 10);
-    
+    console.log(topQuestionsData)
+    console.log(worstQuestionsData)
     const maxScoreRatio = Math.max(...worstQuestionsData.map(q => q.scoreRatio));
     const invertedWorstQuestions = worstQuestionsData.map(q => ({
         ...q,
-        inverted_score_ratio: maxScoreRatio - q.scoreRatio + 0.01
+        scoreRatio: maxScoreRatio - q.scoreRatio + 0.01
     }));
-
+    console.log(invertedWorstQuestions)
     //createDataTable(topQuestionsData);
     createChart(topQuestionsData, "#top-score",  "#90EE90");
-    createChart(worstQuestionsData, "#wrost-score",  "#FF4C4C");
+    createChart(invertedWorstQuestions, "#wrost-score",  "#FF4C4C");
 
     createDataTable(calculatedData);
 }

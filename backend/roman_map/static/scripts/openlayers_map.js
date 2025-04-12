@@ -1168,8 +1168,9 @@ const map = new ol.Map({
         hatter,
         territories.getLayer(),
         places.getLayer(),
-        drawing.getLayer(),
         histories.getLayer(),
+        drawing.getLayer(),
+        
         
     ],
     overlays: [overlay],
