@@ -90,7 +90,7 @@ class AncientPlacesJSONForm(forms.Form):
         except JsonSchemaValidationError as e:
             raise forms.ValidationError(f'Json validációs hiba: {e.message}')
         except Exception as e:
-            raise forms.ValidationError(str(e))
+            raise e
         return file
     
     def save(self):
@@ -124,7 +124,6 @@ class AncientPlacesJSONForm(forms.Form):
         
 class TerritoriesJSONForm(forms.Form):
     file = forms.FileField(required=True, label="Válasz egy geojson fájlt!")
-
     def clean_file(self):
         super().clean()   
         try:
@@ -148,7 +147,7 @@ class TerritoriesJSONForm(forms.Form):
         except JsonSchemaValidationError as e:
             raise forms.ValidationError(f'Json validációs hiba: {e.message}')
         except Exception as e:
-            raise forms.ValidationError(str(e))
+            raise e
         
         return file
     
@@ -194,29 +193,21 @@ class HistorieXLSXImportForm(forms.Form):
     def clean_file(self):
         super().clean()
         try:
-
             file = self.cleaned_data.get('file')
-
             if not file.name.endswith(".xlsx"):
                 raise forms.ValidationError("Csak .xlsx kiterjesztésű fájl engedélyezett.")
-            
             df = pd.read_excel(file, engine='openpyxl')
-                
             required_columns = {"name", "description", "coordinates", "time", "type"}
             if not required_columns.issubset(df.columns):
                 raise forms.ValidationError(f"A fájl nem tartalmazza az összes szükséges mezőket: {required_columns}")
-            
             for _, row in df.iterrows():
                 coordinates = str(row["coordinates"]).strip()
-                coordinate = coordinates.split(';')
-                
+                coordinate = coordinates.split(';')               
                 if not (coordinates.startswith("[") and coordinates.endswith("]")):
                     raise forms.ValidationError(f"Érvénytelen koordináta formátum: {coordinates}")
-                historie_type = str(row['type'])
-                
+                historie_type = str(row['type'])               
                 if historie_type not in {'csata', 'esemeny'}:
                     raise forms.ValidationError("Érvénytelen típusformátum. a típusnak 'csata' vagy 'esemeny' kell lennie.")
-
             self.cleaned_data["df"] = df
             self.cleaned_data['coordinate'] = coordinate
         except pd.errors.ParserError as e:

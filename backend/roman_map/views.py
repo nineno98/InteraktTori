@@ -37,11 +37,10 @@ def sajatadatok(request):
 
 def jelszovaltas(request):
     try:
-        print(request.method)
         if request.method == 'POST':
             form = PasswordChangeForm(request.user, request.POST)
             if form.is_valid():
-                print("valid")
+                
                 form.save()
                 update_session_auth_hash(request, form.user)
                 db_logger.info(f"{request.user} sikeresen módosította a jelszavát.")
@@ -379,7 +378,6 @@ def kerdes_hozzadasa(request, quiz_id, question_type):
             "question_type": question_type
         })
     except Exception as e:
-        print(e)
         db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a kérdés létrehozása során.")
         return redirect('teszt_reszletei', quiz_id=quiz_id)

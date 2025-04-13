@@ -156,8 +156,8 @@ class TestViews(TestCase):
 
     def test_jelszovaltas_get(self):
         response = self.client.get(self.jelszovaltas_url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, self.sajatadatok_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'users/change_password.html')
 
     def test_sajatadatok_get(self):
         response = self.client.get(self.sajatadatok_url)
@@ -279,7 +279,7 @@ class TestViews(TestCase):
     def test_kerdes_hozzadasa_post_invalid(self):
         data = {"text": "Mi Franciaország fővárosa?"}
         response = self.client.post(self.kerdes_hozzadasa_url, data=data)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_teszt_torlese_post_valid(self):
         quiz_number = Quiz.objects.count()
@@ -336,7 +336,7 @@ class TestViews(TestCase):
         }
         response = self.client.post(self.teszt_inditasa_url, data=data)
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(response.url, "/test/")
+        self.assertEqual(response.url, "/test/run-test/1/")
 
     def test_teszteredmenyek_get(self):
         response = self.client.get(self.teszteredmenyek_url)
