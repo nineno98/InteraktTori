@@ -29,7 +29,7 @@ class TerritoriesVectorLayer{
         });
 
         this.vectorSource.once('addfeature', (event) => {    
-            this.filterByDate({ target: { value: -700 } });
+            this.filterByDate({ target: { value: -760 } });
         });
 
         this.dateSlider = document.getElementById('date-slider');

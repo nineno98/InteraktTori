@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
 from roman_map.forms import CustomUserXLSXImportForm, AncientPlacesJSONForm, TerritoriesJSONForm, LoginForm, HistorieXLSXImportForm
+from roman_map.forms import QuizForm, ValaszelemForm
+from roman_map.models import Question
 import pandas as pd
 from io import BytesIO
 import json
@@ -170,8 +172,40 @@ class HistorieXLSXImportFormTest(TestCase):
 
     def test_invalid_xlsx_file(self):
         invalid_file = SimpleUploadedFile("test_file.txt", b"Not an excel file", content_type="text/plain")
-        
         form = HistorieXLSXImportForm(files={"file": invalid_file})
         self.assertFalse(form.is_valid())
         self.assertIn("file", form.errors)
         self.assertEqual(form.errors['file'], ["clean_file: Hiba: ['Csak .xlsx kiterjesztésű fájl engedélyezett.']"])
+
+class QuizFormTest(TestCase):
+    def test_quiz_form_valid_data(self):
+        form_data = {
+            'title': 'Teszt kvíz',
+            'description': 'Ez egy teszt kvíz leírása.'
+        }
+        form = QuizForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_quiz_form_missing_title(self):
+        form_data = {
+            'title': '',
+            'description': 'Ez egy teszt leírás.'
+        }
+        form = QuizForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('title', form.errors)
+
+    def test_quiz_form_missing_description(self):
+        form_data = {
+            'title': 'Teszt kvíz',
+            'description': ''
+        }
+        form = QuizForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('description', form.errors)
+
+    def test_quiz_form_empty_data(self):
+        form = QuizForm(data={})
+        self.assertFalse(form.is_valid())
+        self.assertIn('title', form.errors)
+        self.assertIn('description', form.errors)

@@ -58,8 +58,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'ancient_interactive.urls'
@@ -142,6 +144,10 @@ AUTH_USER_MODEL = 'roman_map.CustomUser'
 MEDIA_URL = "/media/"
 MEDIA_ROOT=os.path.join(BASE_DIR,"roman_map/media/images/")
 
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+LOGIN_URL = "/"
+
 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
@@ -152,9 +158,10 @@ MESSAGE_TAGS = {
         messages.ERROR: 'alert-danger',
 }
 
-# LGGING SETUP
 
 
+
+# LOGGING SETUP
 
 LOGGING = {
     'version': 1,
