@@ -23,6 +23,7 @@ from django.conf import settings
 from django.db.models import Count, Q, Sum, F
 from django.db.models.functions import Coalesce
 import logging
+from django.contrib.auth.decorators import login_not_required
 
 db_logger = logging.getLogger('db')
 
@@ -79,7 +80,7 @@ def kijelentkezes(request):
         messages.error(request, "Hiba történt a folyamat során.")
         return redirect('fooldal')
 
-
+@login_not_required
 def bejelentkezes(request):
     try:
         if request.method == 'POST':
@@ -107,7 +108,8 @@ def bejelentkezes(request):
         db_logger.error("Hiba: "+str(e))
         messages.error(request, "Hiba a bejelentkezés során.")
         return redirect('fooldal')
-
+    
+@login_not_required
 def fooldal(request):
     try:
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

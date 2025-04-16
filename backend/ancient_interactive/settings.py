@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'bootstrap5',
+    'django_bootstrap5',
     'roman_map',
     'django_db_logger',
     'qr_code',
@@ -144,10 +144,11 @@ AUTH_USER_MODEL = 'roman_map.CustomUser'
 MEDIA_URL = "/media/"
 MEDIA_ROOT=os.path.join(BASE_DIR,"roman_map/media/images/")
 
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
-LOGIN_URL = "/"
 
+LOGIN_URL = "/"
+LOGIN_EXEMPT_URLS = [
+    r'^$',
+]
 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
