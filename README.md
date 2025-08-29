@@ -6,6 +6,12 @@ a Római Birodalom területi változásait és az témához kapcsolódó, időbe
 Az alkalmazás tesztek oldalai pedig lehetővé teszik a témában megszerzett tudás ellenőrzését, gyakorlását.  
 Az alkalmazás az "Adatvizualizáció a történelemoktatásban" című szakdolgozatom keretében készült.
 
+## Az alkalmazás bemutatása képekben
+### Bejelentkezési oldal
+<p align="center">
+  <img src="https://github.com/nineno98/InteraktTori/blob/main/images/fooldal.PNG" width="800"/>
+</p>
+
 ## Az alklamazás telepítése és futtatása
 
 ### Windows környezetben
